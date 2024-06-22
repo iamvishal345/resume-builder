@@ -1,0 +1,70 @@
+/* :root {
+  --maxWidth-2xl: 42rem;
+  --maxWidth-3xl: 48rem;
+  --maxWidth-4xl: 56rem;
+  --maxWidth-wrapper: var(--maxWidth-4xl);
+  --spacing-px: "1px";
+  --spacing-0: 0;
+  --spacing-1: 0.25rem;
+  --spacing-2: 0.5rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --fontFamily-sans: "Poppins", sans-serif;
+  --font-body: var(--fontFamily-sans);
+  --font-heading: var(--fontFamily-sans);
+  --fontWeight-normal: 400;
+  --fontWeight-medium: 500;
+  --fontWeight-semibold: 600;
+  --fontWeight-bold: 700;
+  --fontWeight-black: 900;
+  --fontSize-root: 16px;
+  --lineHeight-none: 1;
+  --lineHeight-tight: 1.1;
+  --lineHeight-normal: 1.5;
+  --lineHeight-relaxed: 1.625;
+  --fontSize-0: 0.833em;
+  --fontSize-1: 1em;
+  --fontSize-2: 1.2em;
+  --fontSize-3: 1.44em;
+  --fontSize-4: 1.728em;
+  --fontSize-5: 2.074em;
+  --fontSize-6: 2.488em;
+
+  --color-primary: #005b99;
+  --color-bg: #ffffff;
+  --color-text: #2e353f;
+  --color-text-light: #4f5969;
+  --transition: all 0.25s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+body.dark-theme {
+  --color-bg: #0a192f;
+  --color-text: #d1d9ed;
+  --color-primary: #28b795;
+  --color-text-light: #a9bcda;
+} */
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+  background-color: #373e48;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 5px;
+  background-color: var(--color-bg);
+  border: 2px solid #373e48;
+}
+
+::-webkit-scrollbar-track {
+  border-radius: 3px;
+  background-color: transparent;
+}
+
+.w-100 {
+  width: 100%;
+}

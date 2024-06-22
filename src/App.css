@@ -1,0 +1,24 @@
+.with-label > label {
+  margin-bottom: 0.1em !important;
+}
+
+.drag-button {
+  cursor: grab !important;
+}
+
+.drag-button:active {
+  cursor: grabbing !important;
+}
+
+/* RTE */
+.quill,
+.ql-toolbar {
+  width: 100%;
+  border: 1px solid #eaeaea !important;
+  border-radius: 6px;
+}
+
+.ql-container {
+  border: none !important;
+  height: 360px !important;
+}

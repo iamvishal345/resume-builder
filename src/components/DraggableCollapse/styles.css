@@ -1,0 +1,67 @@
+.collapse-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+.collapse-group > :global(div + div) {
+  border-top: none;
+}
+
+.collapse {
+  border-top: 1px solid #eaeaea;
+  border-bottom: 1px solid #eaeaea;
+  font-size: calc(1 * 16px);
+  width: auto;
+  height: auto;
+  padding: calc(1.2 * 16px) 0 calc(1.2 * 16px) 0;
+  margin: 0 0 0 0;
+}
+
+.shadow {
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.12);
+  border: none;
+  border-radius: 6px;
+  padding: 16pt;
+}
+
+.title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #000;
+}
+
+.title h3 {
+  margin: 0;
+  font-size: 1.5em;
+}
+
+.subtitle {
+  color: #666;
+  margin: 0;
+}
+
+.subtitle > :global(*) {
+  margin: 0;
+}
+
+.content {
+  font-size: inherit;
+  line-height: 1.6em;
+  padding: calc(1.2 * 16px) 0 calc(1.2 * 16px) 0;
+}
+
+.content > :global(*:first-child) {
+  margin-top: 0;
+}
+
+.content > :global(*:last-child) {
+  margin-bottom: 0;
+}
+.collapse-icon {
+  transition: transform 200ms ease;
+  cursor: pointer;
+  &.active {
+    transform: rotateZ(-180deg);
+  }
+}
