@@ -1,0 +1,9 @@
+---
+import Layout from "../layouts/Layout.astro";
+import ResumesDashboard from "../components/resumes/Dashboard.jsx";
+import { SITE } from "@data/site";
+---
+
+<Layout title={`${SITE.name} - Offline Resume Builder | Your resumes`}>
+  <ResumesDashboard client:only="react" />
+</Layout>

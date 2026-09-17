@@ -1,0 +1,16 @@
+---
+import ThemeToggle from "../ThemeToggle.astro";
+import { SITE } from "@data/site";
+---
+
+<header class="site-nav">
+  <div class="container">
+    <a class="brand" href="/">{SITE.name}</a>
+    <nav aria-label="Primary">
+      <a href="/features">Features</a>
+      <a href="/about">About</a>
+      <ThemeToggle />
+      <a class="cta" href="/resumes">Start building</a>
+    </nav>
+  </div>
+</header>

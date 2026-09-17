@@ -1,0 +1,50 @@
+---
+import { SITE } from "@data/site";
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a class="brand" href="/">{SITE.name}</a>
+        <p>
+          A fast, free, and private way to build, check, and export a resume.
+          Your data never leaves your browser.
+        </p>
+      </div>
+      <div>
+        <h3>Product</h3>
+        <ul>
+          <li><a href="/features">Features</a></li>
+          <li><a href="/resumes">My resumes</a></li>
+          <li><a href="/editor">Editor</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Learn</h3>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/about#support">Support</a></li>
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h3>Start</h3>
+        <ul>
+          <li><a href="/resumes">Build a resume</a></li>
+          <li><a href="/features#export">Export PDF &amp; DOCX</a></li>
+          <li><a href="/features#ai">AI first draft</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© {year} {SITE.legalName} · Made with ❤️ · No trackers · No ads</span>
+      <nav aria-label="Footer">
+        <a href="/privacy">Privacy</a>
+        <a href="/contact">Contact</a>
+      </nav>
+    </div>
+  </div>
+</footer>

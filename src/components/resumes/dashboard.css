@@ -1,0 +1,21 @@
+/* Resume listing dashboard */
+.rdash-file {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-8);
+  height: var(--spacing-8);
+  border-radius: var(--radius-element);
+  background: var(--color-background-muted);
+  color: var(--color-accent);
+}
+
+.rdash-actions {
+  flex-wrap: wrap;
+}
+
+.letter-preview-scroll-dialog {
+  max-height: 64dvh;
+  overflow-y: auto;
+  width: 100%;
+}

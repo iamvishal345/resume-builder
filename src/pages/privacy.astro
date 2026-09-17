@@ -1,0 +1,60 @@
+---
+import MarketingLayout from "../layouts/MarketingLayout.astro";
+import { SITE } from "../data/site";
+---
+
+<MarketingLayout
+  title="Privacy"
+  description="Cavren's privacy policy: your data stays in your browser, nothing is tracked or uploaded."
+  ogType="article"
+  canonical={`${SITE.url}/privacy`}
+>
+  <section class="page">
+    <h1>Privacy</h1>
+    <p class="lede">
+      Short version: your resume data stays in your browser. We don't have an
+      account system, we don't run trackers, and exports are generated on your
+      device.
+    </p>
+
+    <div class="prose">
+      <h2>Where your data lives</h2>
+      <p>
+        Resumes you create are stored in your browser's local storage and sent
+        nowhere. Backing up and restoring a resume — including the drag-and-drop
+        restore flow — happens entirely client-side using files you provide.
+      </p>
+
+      <h2>What we collect</h2>
+      <ul>
+        <li>No account, no name, no email required to build or export.</li>
+        <li>No analytics or advertising trackers are embedded on the pages.</li>
+        <li>
+          Hosted fonts are served from your own deployment — we do not load
+          third-party font or tracking domains.
+        </li>
+      </ul>
+
+      <h2>Optional AI features</h2>
+      <p>
+        AI draft and job-match features are off by default. If you enable them,
+        you supply the provider and key; text you explicitly trigger (like a
+        job title or a pasted job description) goes to that provider directly.
+        Nothing AI-related happens without your action, and you can clear the
+        stored key at any time in AI settings.
+      </p>
+
+      <h2>Exports</h2>
+      <p>
+        PDF and DOCX builds run locally in your browser. We never receive or
+        store the files you generate or preview.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+        Questions about this policy? Reach us at{" "}
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+      </p>
+    </div>
+  </section>
+</MarketingLayout>

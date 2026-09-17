@@ -2,19 +2,22 @@
   box-sizing: border-box;
   display: inline-flex;
   align-items: center;
+  gap: var(--spacing-1);
 }
+
 .icon-box {
   box-sizing: border-box;
   color: var(--rating-icon-color);
   cursor: pointer;
+  display: inline-flex;
 }
+
 .icon-box :global(svg) {
-  width: 100%;
-  height: 100%;
   fill: transparent;
   transform: scale(1);
   transition: transform, color, fill 30ms linear;
 }
-.hovered svg {
-  fill: var(--rating-icon-color);
+
+.hovered :global(svg) {
+  fill: currentColor;
 }

@@ -1,49 +1,39 @@
 import React, { useMemo } from "react";
-import { useClasses, useTheme } from "@geist-ui/core";
-import { Star } from "@geist-ui/icons";
+import { Icon } from "@astryxdesign/core/Icon";
+import { Star } from "lucide-react";
 
 import "./styles.css";
 
-const getColor = (type, palette) => {
+const getColor = (type) => {
   const colors = {
-    default: palette.foreground,
-    success: palette.success,
-    warning: palette.warning,
-    error: palette.error,
+    default: "inherit",
+    success: "success",
+    warning: "warning",
+    error: "error",
   };
   return colors[type] || colors.default;
 };
 
 export const Rating = ({
-  type,
+  type = "default",
   className,
-  icon = <Star />,
+  icon = Star,
   count = 5,
   value,
   onValueChange,
   ...props
 }) => {
-  const theme = useTheme();
-  const color = useMemo(
-    () => getColor(type, theme.palette),
-    [type, theme.palette]
-  );
+  const color = useMemo(() => getColor(type), [type]);
 
   return (
-    <div
-      style={{ "--rating-icon-color": color }}
-      className={useClasses("rating", color, className)}
-      {...props}
-    >
+    <div className={`rating ${className || ""}`} {...props}>
       {[...Array(count)].map((_, index) => (
         <div
-          className={useClasses("icon-box", {
-            hovered: index + 1 <= value,
-          })}
+          className={`icon-box${index + 1 <= value ? " hovered" : ""}`}
           key={index}
           onClick={() => onValueChange(index + 1)}
         >
-          {icon}
+          <Icon icon={icon} color={color} size="md" />
         </div>
       ))}
     </div>

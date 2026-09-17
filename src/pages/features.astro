@@ -1,0 +1,189 @@
+---
+import MarketingLayout from "../layouts/MarketingLayout.astro";
+import FeatureIcon from "../components/marketing/FeatureIcon.astro";
+
+const steps = [
+  {
+    title: "Personal details",
+    description:
+      "Name, job title, contact info, and social links like GitHub or LinkedIn.",
+  },
+  {
+    title: "Work history",
+    description:
+      "Positions with companies, location, dates, and a rich-text summary of achievements — drag to reorder.",
+  },
+  {
+    title: "Education",
+    description:
+      "Degrees, schools, and field of study with the same clean editor.",
+  },
+  {
+    title: "Skills",
+    description:
+      "Name the skills recruiters care about and rate your proficiency visually.",
+  },
+  {
+    title: "Summary",
+    description:
+      "A headline summary that ties together your experience, skills, and goals.",
+  },
+  {
+    title: "Additional sections",
+    description:
+      "Languages, certifications, accomplishments, references, and more.",
+  },
+];
+
+const capabilities = [
+  {
+    id: "export",
+    icon: "download",
+    title: "Export PDF & DOCX",
+    description:
+      "Download a print-ready PDF or a Word document, generated from the exact same layout you preview — themes, fonts, and all.",
+  },
+  {
+    icon: "upload",
+    title: "Import anything",
+    description:
+      "Paste old text, or upload a PDF, .docx, or a Cavren backup file to keep your writing and rewrite the rest.",
+  },
+  {
+    id: "ai",
+    icon: "sparkles",
+    title: "AI first draft",
+    description:
+      "Start from a job title (with optional emphasis) and the AI drafts a summary, highlights, and skills you can edit freely.",
+  },
+  {
+    icon: "clipboard",
+    title: "Resume check & coherence",
+    description:
+      "A live score for completeness, plus automatic detection of overlapping dates, duplicated contacts, and skills you claim but never list.",
+  },
+  {
+    icon: "target",
+    title: "Job match",
+    description:
+      "Paste a job description and see missing keywords, tailoring suggestions, and a match score before you apply.",
+  },
+  {
+    icon: "roadmap",
+    title: "Templates, themes, fonts",
+    description:
+      "Multiple templates with accent palettes and typefaces — including serif, grotesk, and slab options for print.",
+  },
+  {
+    icon: "backup",
+    title: "Backup & restore",
+    description:
+      "Export any resume as a portable .r.json backup, then restore it later with a click or a drag-and-drop.",
+  },
+  {
+    icon: "lock",
+    title: "Private & local",
+    description:
+      "No account, no uploads, no tracking. Everything is stored in your browser, and exports are generated on your machine.",
+  },
+];
+---
+
+<MarketingLayout
+  title="Features"
+  description="Everything Cavren does: guided editing, live preview, PDF/DOCX export, import, AI drafting, resume checks, job matching, and full privacy."
+  ogTitle="Cavren features — an editor that checks, matches, and exports"
+>
+  <section class="hero">
+    <h1>An editor that checks, matches, and exports</h1>
+    <p>
+      Six guided steps keep a live preview beside your forms, and the tools
+      around them — export, import, AI, checks — turn that draft into a resume
+      you'd be proud to send.
+    </p>
+  </section>
+
+  <section class="container cards-pad">
+    <div class="section-title">
+      <h2>What you get</h2>
+      <p>
+        The capabilities that make a resume easy to write and hard to mess up.
+      </p>
+    </div>
+    <div class="grid">
+      {capabilities.map((cap) => (
+        <article class="card" id={cap.id}>
+          <span class="icon">
+            <FeatureIcon name={cap.icon} />
+          </span>
+          <h3>{cap.title}</h3>
+          <p>{cap.description}</p>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="container cards-pad">
+    <div class="section-title">
+      <h2>How the editor works</h2>
+      <p>
+        Six focused steps — nothing gets missed, everything stays in one place.
+      </p>
+    </div>
+    <div class="list">
+      {steps.map((step, index) => (
+        <article>
+          <span class="step-num">{String(index + 1).padStart(2, "0")}</span>
+          <div>
+            <h3>{step.title}</h3>
+            <p>{step.description}</p>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="container">
+      <h2>Try it — it's free and private</h2>
+      <p>No sign-up, no uploads. Just a faster way to a better resume.</p>
+      <a class="btn btn-primary" href="/resumes">Start building free</a>
+    </div>
+  </section>
+</MarketingLayout>
+
+<style>
+  .list {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .list article {
+    display: flex;
+    gap: var(--spacing-6);
+    padding: var(--spacing-5) 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .list article:last-child {
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .step-num {
+    font-weight: 700;
+    color: var(--color-accent);
+    font-size: 0.9rem;
+    line-height: 1.9;
+    flex-shrink: 0;
+  }
+
+  .list h3 {
+    margin: 0 0 4px;
+    font-size: 1.15rem;
+  }
+
+  .list p {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+</style>

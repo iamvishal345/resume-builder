@@ -4,25 +4,44 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "astryx": "node node_modules/@astryxdesign/cli/clients/cli/bin/astryx.mjs"
   },
   "dependencies": {
-    "@geist-ui/core": "^2.3.8",
-    "@geist-ui/icons": "^1.0.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-quill": "^2.0.0",
-    "react-router-dom": "^6.16.0",
+    "@astryxdesign/core": "^0.6.0",
+    "@astryxdesign/theme-matcha": "^0.6.0",
+    "@astryxdesign/theme-neutral": "^0.6.0",
+    "@fontsource/figtree": "^5.3.0",
+    "@fontsource/lora": "^5.3.0",
+    "@fontsource/playfair-display": "^5.3.0",
+    "@fontsource/roboto-slab": "^5.3.0",
+    "@fontsource/space-grotesk": "^5.3.0",
+    "@react-pdf/renderer": "^4.9.0",
+    "@stylexjs/stylex": "^0.19.0",
+    "@supabase/supabase-js": "^2.116.0",
+    "docx": "^9.7.1",
+    "fflate": "^0.8.3",
+    "lucide-react": "^1.45.0",
+    "pdfjs-dist": "^6.3.289",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "slate": "^0.126.2",
+    "slate-react": "^0.126.4",
     "sortablejs": "^1.15.2",
-    "zukeeper": "^1.0.2",
     "zustand": "^4.5.0"
   },
   "devDependencies": {
-    "@types/react": "^18.2.48",
-    "@types/react-dom": "^18.2.18",
-    "@vitejs/plugin-react-swc": "^3.5.0",
-    "vite": "^5.0.12"
+    "@astrojs/react": "^4.2.0",
+    "@astryxdesign/cli": "^0.6.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "astro": "^5.0.0"
+  },
+  "allowScripts": {
+    "@astryxdesign/cli@0.6.0": true,
+    "@astryxdesign/core@0.6.0": true
   }
 }

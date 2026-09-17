@@ -1,0 +1,201 @@
+---
+import MarketingLayout from "../layouts/MarketingLayout.astro";
+import { SITE } from "../data/site";
+
+const values = [
+  "Offline first",
+  "No ads",
+  "No trackers",
+  "No account",
+  "No paid exports",
+];
+---
+
+<MarketingLayout
+  title="About & Support"
+  description={`About and support for ${SITE.name} — Offline Resume Builder built by ${SITE.ownerName}. Offline-first, no ads, no trackers, and your data stays on your device.`}
+  ogType="article"
+>
+  <section class="page">
+    <h1>About &amp; Support</h1>
+    <p class="lede">
+      Hi, I'm {SITE.ownerName} — I built {SITE.name} to be the tool I
+      wanted: fast, free, and private. Everything runs in your browser, your
+      data stays on your device, and the exports are generated right on your
+      machine.
+    </p>
+
+    <div class="chips">
+      {values.map((v) => (
+        <span class="chip">{v}</span>
+      ))}
+    </div>
+
+    <div class="prose">
+      <h2>The short version</h2>
+      <p>
+        No account. No uploads. No tracking, no ads, no paywalls — and nothing
+        is "free until you export". Made with ❤️ and offered as-is, because I
+        think a resume tool should respect your time and your privacy.
+      </p>
+      <p>
+        Want to see exactly what that means? The{" "}
+        <a href="/privacy">privacy page</a> covers where every byte goes
+        (nowhere, unless you ask), and <a href="/features">features</a> shows
+        what it can do — including optional AI help, which only ever talks to
+        an AI provider you configure yourself.
+      </p>
+    </div>
+
+    <h2 class="section-title" id="support">Get support</h2>
+    <div class="grid support-grid">
+      <article class="card">
+        <h3>Questions &amp; feedback</h3>
+        <p>
+          Something is unclear, or you have an idea? Email me directly — I
+          read everything.
+        </p>
+        <a class="btn btn-secondary" href={`mailto:${SITE.email}`}>
+          {SITE.email}
+        </a>
+      </article>
+      <article class="card">
+        <h3>Bugs &amp; issues</h3>
+        <p>
+          When something breaks, include steps to reproduce and what you
+          expected. Since everything runs locally, I can't see your resumes.
+        </p>
+        <a class="btn btn-secondary" href={`mailto:${SITE.email}`}>
+          Report an issue
+        </a>
+      </article>
+    </div>
+
+    <div class="coffee">
+      <div class="coffee-copy">
+        <h2>Liked it? Buy me a coffee ☕</h2>
+        <p>
+          {SITE.name} - Offline Resume Builder is free forever — no ads, no paid exports, nothing
+          gated. If it saved you time, a coffee is a lovely (and optional) way
+          to say thanks.
+        </p>
+        <a
+          class="btn btn-primary"
+          href={SITE.bmcUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Buy me a coffee
+        </a>
+      </div>
+      <a
+        class="coffee-qr"
+        href={SITE.bmcUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Scan the QR code to buy me a coffee"
+      >
+        <img src={SITE.bmcQr} alt={`QR code to ${SITE.bmcUrl}`} width="200" height="200" />
+      </a>
+    </div>
+  </section>
+
+  <section class="cta-band">
+    <div class="container">
+      <h2>Give it a spin</h2>
+      <p>Free, local, and yours — your first resume is minutes away.</p>
+      <a class="btn btn-primary" href="/resumes">Start building free</a>
+    </div>
+  </section>
+</MarketingLayout>
+
+<style>
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-2);
+    margin: 0 0 var(--spacing-8);
+  }
+
+  .chip {
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: var(--spacing-1) var(--spacing-4);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    background: var(--color-background-surface);
+  }
+
+  .section-title {
+    text-align: left;
+    margin: var(--spacing-8) 0 var(--spacing-4);
+    font-size: clamp(1.6rem, 3vw, 2rem);
+    letter-spacing: -0.015em;
+  }
+
+  .support-grid {
+    margin-bottom: var(--spacing-8);
+  }
+
+  .support-grid .card {
+    gap: var(--spacing-3);
+  }
+
+  .support-grid .btn {
+    align-self: flex-start;
+  }
+
+  .coffee {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-container);
+    background: var(--color-background-card);
+    padding: var(--spacing-6);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-8);
+  }
+
+  .coffee-copy h2 {
+    margin: 0 0 var(--spacing-2);
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .coffee-copy p {
+    margin: 0 0 var(--spacing-5);
+    color: var(--color-text-secondary);
+    font-size: 0.98rem;
+    max-width: 34em;
+  }
+
+  .coffee-qr {
+    flex-shrink: 0;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-element);
+    background: var(--color-background-body);
+    padding: var(--spacing-2);
+    display: inline-grid;
+    place-items: center;
+    transition: opacity 150ms ease;
+  }
+
+  .coffee-qr:hover {
+    opacity: 0.9;
+  }
+
+  .coffee-qr img {
+    display: block;
+    width: 200px;
+    height: 200px;
+  }
+
+  @media (max-width: 720px) {
+    .coffee {
+      flex-direction: column-reverse;
+      align-items: center;
+      text-align: center;
+    }
+  }
+</style>

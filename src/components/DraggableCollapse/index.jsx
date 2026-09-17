@@ -1,8 +1,10 @@
 import React, { useEffect, useRef } from "react";
-import Expand from "@geist-ui/core/esm/shared/expand";
-import { useScale, useTheme } from "@geist-ui/core";
-import { ChevronDown } from "@geist-ui/icons";
 import Sortable from "sortablejs";
+import { Card } from "@astryxdesign/core/Card";
+import { IconButton } from "@astryxdesign/core/IconButton";
+import { HStack, VStack } from "@astryxdesign/core/Layout";
+import { Text } from "@astryxdesign/core/Text";
+import { ChevronDown, GripVertical, Trash2 } from "lucide-react";
 
 import "./styles.css";
 
@@ -11,21 +13,53 @@ export const Collapse = ({
   subtitle,
   visible,
   clickHandler,
+  onDelete,
   children,
 }) => {
   return (
-    <div className="collapse shadow">
-      <div className="title">
-        {title}
-        <ChevronDown
-          className={`collapse-icon ${visible ? "active" : ""}`}
-          role="button"
-          onClick={clickHandler}
-        />
-      </div>
-      {subtitle && <div className="subtitle">{subtitle}</div>}
-      <Expand isExpanded={visible}>{children}</Expand>
-    </div>
+    <Card padding={2} variant="default">
+      <VStack gap={2} width="100%">
+        <HStack align="center" gap={2} width="100%">
+          <IconButton
+            label="Drag"
+            tooltip="Drag to reorder"
+            variant="ghost"
+            className="drag-button"
+            icon={<GripVertical size={15} />}
+            onClick={(e) => e.stopPropagation()}
+          />
+          <VStack gap={0} align="start" width="100%" onClick={clickHandler}>
+            <Text type="inherit" size="md" weight="semibold" color="primary">
+              {title}
+            </Text>
+            {subtitle && (
+              <Text type="inherit" size="sm" color="secondary">
+                {subtitle}
+              </Text>
+            )}
+          </VStack>
+          <IconButton
+            label="Delete"
+            tooltip="Delete"
+            variant="ghost"
+            icon={<Trash2 size={16} />}
+            onClick={onDelete}
+          />
+          <IconButton
+            label={visible ? "Collapse" : "Expand"}
+            tooltip={visible ? "Collapse section" : "Expand section"}
+            variant="ghost"
+            icon={
+              <ChevronDown
+                className={`collapse-icon ${visible ? "active" : ""}`}
+              />
+            }
+            onClick={clickHandler}
+          />
+        </HStack>
+        {visible && <div className="collapse-content">{children}</div>}
+      </VStack>
+    </Card>
   );
 };
 
@@ -41,8 +75,8 @@ export const DraggableCollapse = ({ children, onDrag }) => {
     });
   }, []);
   return (
-    <div ref={containerRef} className="collapse-group">
+    <VStack ref={containerRef} gap={3} width="100%">
       {children}
-    </div>
+    </VStack>
   );
 };

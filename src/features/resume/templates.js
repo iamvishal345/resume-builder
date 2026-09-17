@@ -1,0 +1,120 @@
+export const RESUME_CATEGORIES = [
+  { id: "minimal", name: "Minimal" },
+  { id: "modern", name: "Modern" },
+  { id: "classic", name: "Classic" },
+  { id: "bold", name: "Bold" },
+  { id: "professional", name: "Professional" },
+];
+
+const T = (id, name, category, layout, palette, font) => ({
+  id,
+  name,
+  category,
+  layout,
+  palette,
+  font,
+});
+
+export const RESUME_TEMPLATES = [
+  // Minimal — clean, airy, light palettes
+  T("air", "Air", "minimal", "minimal", "slate", "sans"),
+  T("aspen", "Aspen", "minimal", "minimal", "emerald", "sans"),
+  T("birch", "Birch", "minimal", "minimal", "olive", "elegant"),
+  T("canvas", "Canvas", "minimal", "single", "rose", "sans"),
+  T("cloud", "Cloud", "minimal", "minimal", "gold", "sans"),
+  T("dove", "Dove", "minimal", "single", "navy", "serif"),
+  T("fog", "Fog", "minimal", "minimal", "slate", "elegant"),
+  T("linen", "Linen", "minimal", "single", "gold", "serif"),
+  T("mist", "Mist", "minimal", "minimal", "teal", "sans"),
+  T("ox", "Ox", "minimal", "minimal", "indigo", "slab"),
+  T("breeze", "Breeze", "minimal", "modern", "emerald", "elegant"),
+  T("oak", "Oak", "minimal", "clean", "olive", "sans"),
+  T("reed", "Reed", "minimal", "clean", "teal", "sans"),
+  T("fern", "Fern", "minimal", "phototop", "emerald", "elegant"),
+  T("meadow", "Meadow", "minimal", "phototop", "indigo", "sans"),
+
+  // Modern — bold bands, split panels, modern/timeline layouts, vibrant palettes
+  T("aurora", "Aurora", "modern", "modern", "indigo", "sans"),
+  T("beacon", "Beacon", "modern", "modern", "emerald", "grotesk"),
+  T("coda", "Coda", "modern", "timeline", "slate", "slab"),
+  T("drift", "Drift", "modern", "split", "teal", "sans"),
+  T("eclipse", "Eclipse", "modern", "modern", "burgundy", "grotesk"),
+  T("glow", "Glow", "modern", "split", "gold", "sans"),
+  T("pulse", "Pulse", "modern", "topband", "terracotta", "sans"),
+  T("surge", "Surge", "modern", "timeline", "indigo", "grotesk"),
+  T("vertex", "Vertex", "modern", "modern", "rose", "display"),
+  T("wave", "Wave", "modern", "split", "emerald", "sans"),
+  T("aero", "Aero", "modern", "modern", "emerald", "sans"),
+  T("nova", "Nova", "modern", "modern", "indigo", "grotesk"),
+  T("orbit", "Orbit", "modern", "timeline", "navy", "sans"),
+  T("signal", "Signal", "modern", "timeline", "teal", "grotesk"),
+  T("cobalt", "Cobalt", "modern", "modernsplit", "indigo", "grotesk"),
+  T("steel", "Steel", "modern", "modernsplit", "slate", "grotesk"),
+  T("plaza", "Plaza", "modern", "minimalcolumns", "teal", "sans"),
+  T("metro", "Metro", "modern", "darksidebar", "navy", "grotesk"),
+  T("onyx", "Onyx", "modern", "darksidebar", "slate", "slab"),
+  T("crimson", "Crimson", "modern", "accentleft", "burgundy", "slab"),
+
+  // Classic — traditional single/sidebar, conservative palettes + serif
+  T("ascot", "Ascot", "classic", "single", "navy", "serif"),
+  T("chateau", "Chateau", "classic", "sidebar", "burgundy", "serif"),
+  T("duke", "Duke", "classic", "single", "slate", "serif"),
+  T("empire", "Empire", "classic", "sidebar", "navy", "serif"),
+  T("regent", "Regent", "classic", "single", "gold", "serif"),
+  T("senator", "Senator", "classic", "sidebar", "slate", "elegant"),
+  T("sovereign", "Sovereign", "classic", "single", "navy", "elegant"),
+  T("sterling", "Sterling", "classic", "sidebar", "olive", "serif"),
+  T("victorian", "Victorian", "classic", "single", "burgundy", "serif"),
+  T("windsor", "Windsor", "classic", "sidebar", "gold", "serif"),
+  T("oriel", "Oriel", "classic", "timeline", "navy", "serif"),
+  T("ambassador", "Ambassador", "classic", "executive", "navy", "serif"),
+  T("governor", "Governor", "classic", "executive", "slate", "serif"),
+  T("manor", "Manor", "classic", "elegant", "burgundy", "serif"),
+  T("colonnade", "Colonnade", "classic", "elegant", "gold", "elegant"),
+  T("regency", "Regency", "classic", "sidebarheader", "burgundy", "elegant"),
+
+  // Bold — high-contrast bands, display type, saturated accents
+  T("amped", "Amped", "bold", "topband", "terracotta", "display"),
+  T("ballistic", "Ballistic", "bold", "topband", "rose", "slab"),
+  T("boldface", "Boldface", "bold", "split", "navy", "grotesk"),
+  T("cadence", "Cadence", "bold", "topband", "indigo", "display"),
+  T("chrome", "Chrome", "bold", "split", "slate", "grotesk"),
+  T("entropy", "Entropy", "bold", "topband", "gold", "display"),
+  T("overture", "Overture", "bold", "split", "burgundy", "slab"),
+  T("stance", "Stance", "bold", "topband", "teal", "grotesk"),
+  T("vector", "Vector", "bold", "split", "indigo", "sans"),
+  T("zenith", "Zenith", "bold", "topband", "emerald", "display"),
+  T("tempest", "Tempest", "bold", "timeline", "rose", "slab"),
+  T("behemoth", "Behemoth", "bold", "darksidebar", "terracotta", "display"),
+  T("marquee", "Marquee", "bold", "branded", "indigo", "grotesk"),
+  T("torch", "Torch", "bold", "branded", "rose", "display"),
+  T("reckoner", "Reckoner", "bold", "compact", "teal", "display"),
+  T("sentinel", "Sentinel", "bold", "sidebarheader", "navy", "slab"),
+
+  // Professional — recruiter-safe layouts, moderate palettes
+  T("atlas", "Atlas", "professional", "single", "slate", "sans"),
+  T("bailey", "Bailey", "professional", "single", "olive", "sans"),
+  T("carter", "Carter", "professional", "sidebar", "slate", "sans"),
+  T("dunn", "Dunn", "professional", "single", "navy", "sans"),
+  T("evans", "Evans", "professional", "sidebar", "teal", "sans"),
+  T("grant", "Grant", "professional", "single", "slate", "elegant"),
+  T("hayes", "Hayes", "professional", "sidebar", "indigo", "sans"),
+  T("kent", "Kent", "professional", "single", "olive", "slab"),
+  T("mason", "Mason", "professional", "sidebar", "slate", "elegant"),
+  T("nolan", "Nolan", "professional", "single", "indigo", "sans"),
+  T("ravine", "Ravine", "professional", "timeline", "slate", "sans"),
+  T("sable", "Sable", "professional", "modern", "olive", "sans"),
+  T("hunter", "Hunter", "professional", "compact", "navy", "sans"),
+  T("lynx", "Lynx", "professional", "timelinesplit", "terracotta", "sans"),
+  T("canyon", "Canyon", "professional", "timelinesplit", "teal", "sans"),
+  T("parker", "Parker", "professional", "minimalcolumns", "olive", "sans"),
+  T("smith", "Smith", "professional", "clean", "slate", "elegant"),
+  T("walden", "Walden", "professional", "phototop", "indigo", "sans"),
+  T("harper", "Harper", "professional", "accentleft", "rose", "sans"),
+];
+
+export const resolveTemplate = (id) =>
+  RESUME_TEMPLATES.find((t) => t.id === id) ?? RESUME_TEMPLATES[0];
+
+export const templatesByCategory = (categoryId) =>
+  RESUME_TEMPLATES.filter((t) => t.category === categoryId);
