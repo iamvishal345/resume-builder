@@ -15,7 +15,7 @@ const FullPagePreview = ({ children, onDownloadPdf, onDownloadDocx, onCustomize 
   return (
     <div className="preview-desk">
       <HStack justify="center" width="100%">
-        <HStack gap={1} align="center" padding={2} className="preview-toolbar">
+        <HStack gap={1} align="center" padding={2} className="preview-toolbar" wrap>
           <Button
             variant="secondary"
             size="sm"
@@ -40,25 +40,29 @@ const FullPagePreview = ({ children, onDownloadPdf, onDownloadDocx, onCustomize 
             label="Zoom in"
             onClick={() => setZoom((z) => clamp(z + STEP))}
           />
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Palette size={14} />}
-            label="Customize"
-            onClick={onCustomize}
-          />
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<FileDown size={14} />}
-            label="DOCX"
-            onClick={onDownloadDocx}
-          />
+          <span className="preview-toolbar-extra">
+            <HStack gap={1} align="center">
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<Palette size={14} />}
+                label="Customize"
+                onClick={onCustomize}
+              />
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={<FileDown size={14} />}
+                label="DOCX"
+                onClick={onDownloadDocx}
+              />
+            </HStack>
+          </span>
           <Button
             variant="primary"
             size="sm"
             icon={<Printer size={14} />}
-            label="Download PDF"
+            label="PDF"
             onClick={onDownloadPdf}
           />
         </HStack>

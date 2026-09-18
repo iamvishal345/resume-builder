@@ -1,0 +1,23 @@
+---
+import MarketingLayout from "../layouts/MarketingLayout.astro";
+import { SITE } from "../data/site";
+---
+
+<MarketingLayout
+  title="Offline"
+  description="Cavren is offline. Open a cached page or reconnect to continue."
+  noindex={true}
+>
+  <section class="page">
+    <h1>You're offline</h1>
+    <p class="lede">
+      Cavren works without a network once you've visited before. Open{" "}
+      <a href="/resumes">My resumes</a> from your install or history — editing and
+      exports stay on this device.
+    </p>
+    <p>
+      Features that need the internet (optional AI API, Google Drive backup) will
+      wait until you're back online.
+    </p>
+  </section>
+</MarketingLayout>

@@ -7,7 +7,7 @@ export const RESUME_PALETTES = [
   { id: "indigo", name: "Indigo", accent: "#4338CA", accentSoft: "#6C6FF2", accentInk: "#FFFFFF", ink: "#1A1840", muted: "#5A5B7A", rule: "#D9D8F0", surface: "#F0EFFB" },
   { id: "burgundy", name: "Burgundy", accent: "#7F1D1D", accentSoft: "#B34A4A", accentInk: "#FFFFFF", ink: "#2B1418", muted: "#65494E", rule: "#E3D3D6", surface: "#F7EEEF" },
   { id: "terracotta", name: "Terracotta", accent: "#9A3412", accentSoft: "#EA7A3D", accentInk: "#FFFFFF", ink: "#2A1A13", muted: "#665248", rule: "#E8DCD5", surface: "#F9F2EE" },
-  { id: "gold", name: "Gold", accent: "#92400E", accentSoft: "#D89B32", accentInk: "#2A1B08", ink: "#241C10", muted: "#655B4C", rule: "#E8DECB", surface: "#F8F3E9" },
+  { id: "gold", name: "Gold", accent: "#92400E", accentSoft: "#D89B32", accentInk: "#FFFFFF", ink: "#241C10", muted: "#655B4C", rule: "#E8DECB", surface: "#F8F3E9" },
   { id: "rose", name: "Rose", accent: "#9D174D", accentSoft: "#F15A9C", accentInk: "#FFFFFF", ink: "#2B1520", muted: "#674C56", rule: "#E7D3DC", surface: "#F8EEF3" },
 ];
 

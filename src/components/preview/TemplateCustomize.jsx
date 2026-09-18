@@ -8,8 +8,12 @@ import { RESUME_PALETTES } from "@features/resume/palettes";
 import { RESUME_FONTS } from "@features/resume/fonts";
 import {
   LAYOUT_OPTIONS,
+  HEADER_ALIGNS,
+  HEADER_STYLES,
+  SKILL_STYLES,
+  LANGUAGE_STYLES,
+  EXPERIENCE_STYLES,
   RESUME_DENSITIES,
-  RESUME_HEADER_STYLES,
 } from "@features/resume/style";
 import "./gallery.css";
 
@@ -64,6 +68,22 @@ const SectionTitle = ({ children }) => (
   </Text>
 );
 
+const ChipGroup = ({ label, options, value, onChange, valueKey }) => (
+  <div className="r-opt-group">
+    <span className="r-opt-group-label">{label}</span>
+    <div className="r-opt-row">
+      {options.map((opt) => (
+        <Chip
+          key={opt.id}
+          label={opt.name}
+          active={value === opt.id}
+          onClick={() => onChange({ [valueKey]: opt.id })}
+        />
+      ))}
+    </div>
+  </div>
+);
+
 const TemplateCustomize = ({ isOpen, onOpenChange, settings, onSelect }) => {
   const hasOverrides =
     settings &&
@@ -84,6 +104,9 @@ const TemplateCustomize = ({ isOpen, onOpenChange, settings, onSelect }) => {
       sectionSpacing: 16,
     });
 
+  const isSidebar =
+    settings?.layoutId === "sidebar" || settings?.layoutId === "sidebar-right";
+
   return (
     <Dialog
       isOpen={isOpen}
@@ -94,164 +117,195 @@ const TemplateCustomize = ({ isOpen, onOpenChange, settings, onSelect }) => {
     >
       <DialogHeader
         title="Layout & theme"
-        subtitle="Applies live to the resume preview — layout, header, density, colors and typography."
+        subtitle="Structure, header, skills, languages, experience — applied live to the preview."
         onOpenChange={onOpenChange}
       />
       <div className="r-gallery-scroll">
         <VStack gap={4} width="100%" padding={2}>
           <VStack gap={3} width="100%">
-            <SectionTitle>Layout</SectionTitle>
+            <SectionTitle>Structure</SectionTitle>
             <div className="r-opt-groups">
-              <div className="r-opt-group">
-                <span className="r-opt-group-label">Structure</span>
-                <div className="r-opt-row">
-                  {LAYOUT_OPTIONS.map((layout) => (
-                    <Chip
-                      key={layout.id}
-                      label={layout.name}
-                      active={settings?.layoutId === layout.id}
-                      onClick={() => onSelect({ layoutId: layout.id })}
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="r-opt-group">
-                <span className="r-opt-group-label">Header</span>
-                <div className="r-opt-row">
-                  {RESUME_HEADER_STYLES.map((h) => (
-                    <Chip
-                      key={h.id}
-                      label={h.name}
-                      active={settings?.headerStyle === h.id}
-                      onClick={() => onSelect({ headerStyle: h.id })}
-                    />
-                  ))}
-                </div>
-              </div>
-              <div className="r-opt-group">
-                <span className="r-opt-group-label">Density</span>
-                <div className="r-opt-row">
-                  {RESUME_DENSITIES.map((d) => (
-                    <Chip
-                      key={d.id}
-                      label={d.name}
-                      active={settings?.density === d.id}
-                      onClick={() => onSelect({ density: d.id })}
-                    />
-                  ))}
-                </div>
-              </div>
+              <ChipGroup
+                label="Layout"
+                options={LAYOUT_OPTIONS}
+                value={settings?.layoutId}
+                valueKey="layoutId"
+                onChange={onSelect}
+              />
+              {isSidebar ? (
+                <ChipGroup
+                  label="Sidebar tone"
+                  options={[
+                    { id: "light", name: "Light" },
+                    { id: "dark", name: "Dark" },
+                    { id: "accent", name: "Accent" },
+                  ]}
+                  value={settings?.sidebarTone || "light"}
+                  valueKey="sidebarTone"
+                  onChange={onSelect}
+                />
+              ) : null}
+              <ChipGroup
+                label="Header align"
+                options={HEADER_ALIGNS}
+                value={settings?.headerAlign || "left"}
+                valueKey="headerAlign"
+                onChange={onSelect}
+              />
+              <ChipGroup
+                label="Header style"
+                options={HEADER_STYLES}
+                value={settings?.headerStyle || "plain"}
+                valueKey="headerStyle"
+                onChange={onSelect}
+              />
+              <ChipGroup
+                label="Density"
+                options={RESUME_DENSITIES}
+                value={settings?.density || "normal"}
+                valueKey="density"
+                onChange={onSelect}
+              />
+              <ChipGroup
+                label="Photo"
+                options={[
+                  { id: "on", name: "Show if set" },
+                  { id: "off", name: "Hide (ATS)" },
+                ]}
+                value={settings?.showPhoto === false ? "off" : "on"}
+                valueKey="showPhoto"
+                onChange={(patch) =>
+                  onSelect({ showPhoto: patch.showPhoto !== "off" })
+                }
+              />
+              <ChipGroup
+                label="DOCX export"
+                options={[
+                  { id: "ats", name: "ATS single-column" },
+                  { id: "preview", name: "Match preview (best effort)" },
+                ]}
+                value={settings?.docxLayout || "ats"}
+                valueKey="docxLayout"
+                onChange={onSelect}
+              />
+            </div>
+          </VStack>
+
+          <VStack gap={3} width="100%">
+            <SectionTitle>Section styles</SectionTitle>
+            <div className="r-opt-groups">
+              <ChipGroup
+                label="Skills"
+                options={SKILL_STYLES}
+                value={settings?.skillStyle || "chips"}
+                valueKey="skillStyle"
+                onChange={onSelect}
+              />
+              <ChipGroup
+                label="Languages"
+                options={LANGUAGE_STYLES}
+                value={settings?.languageStyle || "dots"}
+                valueKey="languageStyle"
+                onChange={onSelect}
+              />
+              <ChipGroup
+                label="Experience"
+                options={EXPERIENCE_STYLES}
+                value={settings?.experienceStyle || "standard"}
+                valueKey="experienceStyle"
+                onChange={onSelect}
+              />
             </div>
           </VStack>
 
           <VStack gap={3} width="100%">
             <SectionTitle>Colors</SectionTitle>
-            <div className="r-chip-row">
+            <div className="r-palette-row">
               {RESUME_PALETTES.map((palette) => (
                 <button
-                  type="button"
                   key={palette.id}
+                  type="button"
                   className={
                     settings?.paletteId === palette.id
                       ? "r-palette-dot r-palette-dot-active"
                       : "r-palette-dot"
                   }
-                  title={palette.name}
-                  aria-label={`${palette.name} color theme`}
-                  onClick={() =>
-                    onSelect({
-                      paletteId: palette.id,
-                      primaryColor: "",
-                      bgColor: "",
-                      textColor: "",
-                    })
-                  }
                   style={{ background: palette.accent }}
-                >
-                  <span className="r-palette-ring" />
-                </button>
+                  title={palette.name}
+                  aria-label={palette.name}
+                  onClick={() => onSelect({ paletteId: palette.id })}
+                />
               ))}
             </div>
-            <div className="r-color-row">
+            <HStack gap={3} wrap width="100%">
               <ColorField
-                label="Primary accent"
-                value={
-                  settings?.primaryColor ||
-                  RESUME_PALETTES.find((p) => p.id === settings?.paletteId)
-                    ?.accent ||
-                  "#0f172a"
-                }
-                onChange={(c) => onSelect({ primaryColor: c })}
+                label="Accent"
+                value={settings?.primaryColor || "#0F172A"}
+                onChange={(v) => onSelect({ primaryColor: v })}
               />
               <ColorField
                 label="Background"
                 value={settings?.bgColor || "#ffffff"}
-                onChange={(c) => onSelect({ bgColor: c })}
+                onChange={(v) => onSelect({ bgColor: v })}
               />
               <ColorField
                 label="Text"
-                value={settings?.textColor || "#111827"}
-                onChange={(c) => onSelect({ textColor: c })}
+                value={settings?.textColor || "#0F172A"}
+                onChange={(v) => onSelect({ textColor: v })}
               />
-            </div>
+            </HStack>
           </VStack>
 
           <VStack gap={3} width="100%">
             <SectionTitle>Typography</SectionTitle>
             <Selector
               label="Font"
-              width={260}
-              value={settings?.fontId}
+              value={settings?.fontId || "sans"}
+              onChange={(v) => onSelect({ fontId: v })}
               options={RESUME_FONTS.map((f) => ({
                 value: f.id,
                 label: f.name,
               }))}
-              onChange={(value) => onSelect({ fontId: value })}
             />
-            <div className="r-range-grid">
-              <RangeField
-                label="Font size"
-                value={settings?.fontSize ?? 14}
-                min={11}
-                max={18}
-                step={1}
-                suffix="px"
-                onChange={(v) => onSelect({ fontSize: v })}
-              />
-              <RangeField
-                label="Line height"
-                value={settings?.lineHeight ?? 1.5}
-                min={1.15}
-                max={1.9}
-                step={0.05}
-                onChange={(v) => onSelect({ lineHeight: v })}
-              />
-              <RangeField
-                label="Section spacing"
-                value={settings?.sectionSpacing ?? 16}
-                min={8}
-                max={28}
-                step={1}
-                suffix="px"
-                onChange={(v) => onSelect({ sectionSpacing: v })}
-              />
-            </div>
+            <RangeField
+              label="Size"
+              value={settings?.fontSize ?? 14}
+              min={11}
+              max={18}
+              step={1}
+              suffix="px"
+              onChange={(v) => onSelect({ fontSize: v })}
+            />
+            <RangeField
+              label="Line height"
+              value={settings?.lineHeight ?? 1.5}
+              min={1.15}
+              max={1.9}
+              step={0.05}
+              suffix=""
+              onChange={(v) => onSelect({ lineHeight: v })}
+            />
+            <RangeField
+              label="Section spacing"
+              value={settings?.sectionSpacing ?? 16}
+              min={8}
+              max={28}
+              step={1}
+              suffix="px"
+              onChange={(v) => onSelect({ sectionSpacing: v })}
+            />
           </VStack>
 
-          {hasOverrides && (
-            <HStack gap={3} align="center" width="100%">
+          {hasOverrides ? (
+            <HStack justify="end" width="100%">
               <Button
-                size="sm"
                 variant="ghost"
-                label="Reset colors & spacing"
+                size="sm"
+                label="Reset color & type overrides"
                 onClick={resetCustomization}
               />
-              <Text type="inherit" size="sm" color="secondary">
-                Custom values override the template — picked palettes clear
-                them.
-              </Text>
             </HStack>
-          )}
+          ) : null}
         </VStack>
       </div>
     </Dialog>

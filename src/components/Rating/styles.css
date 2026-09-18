@@ -3,21 +3,46 @@
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
+  --rating-icon-color: var(--color-fg-muted, currentColor);
+}
+
+.rating[data-type="success"] {
+  --rating-icon-color: var(--color-success, #16a34a);
+}
+
+.rating[data-type="warning"] {
+  --rating-icon-color: var(--color-warning, #ca8a04);
+}
+
+.rating[data-type="error"] {
+  --rating-icon-color: var(--color-error, #dc2626);
 }
 
 .icon-box {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--rating-icon-color);
   cursor: pointer;
   display: inline-flex;
+  appearance: none;
 }
 
-.icon-box :global(svg) {
+.icon-box svg {
   fill: transparent;
   transform: scale(1);
-  transition: transform, color, fill 30ms linear;
+  transition:
+    transform 30ms linear,
+    color 30ms linear,
+    fill 30ms linear;
 }
 
-.hovered :global(svg) {
+.icon-box.hovered {
+  color: var(--rating-icon-color);
+}
+
+.icon-box.hovered svg {
   fill: currentColor;
 }

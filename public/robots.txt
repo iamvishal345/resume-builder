@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /editor
-Disallow: /resumes
-
-Sitemap: https://resume-builder.example.com/sitemap.xml

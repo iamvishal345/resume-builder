@@ -19,22 +19,33 @@ export const Rating = ({
   className,
   icon = Star,
   count = 5,
-  value,
+  value = 0,
   onValueChange,
   ...props
 }) => {
   const color = useMemo(() => getColor(type), [type]);
+  const level = Number(value) || 0;
 
   return (
-    <div className={`rating ${className || ""}`} {...props}>
-      {[...Array(count)].map((_, index) => (
-        <div
-          className={`icon-box${index + 1 <= value ? " hovered" : ""}`}
+    <div
+      className={`rating ${className || ""}`}
+      data-type={type}
+      role="slider"
+      aria-valuemin={0}
+      aria-valuemax={count}
+      aria-valuenow={level}
+      {...props}
+    >
+      {Array.from({ length: count }, (_, index) => (
+        <button
+          type="button"
+          className={`icon-box${index + 1 <= level ? " hovered" : ""}`}
           key={index}
-          onClick={() => onValueChange(index + 1)}
+          aria-label={`Level ${index + 1}`}
+          onClick={() => onValueChange?.(index + 1)}
         >
           <Icon icon={icon} color={color} size="md" />
-        </div>
+        </button>
       ))}
     </div>
   );

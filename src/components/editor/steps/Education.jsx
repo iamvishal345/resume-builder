@@ -132,7 +132,7 @@ const getEductionObj = () => ({
   educationSummary: "",
 });
 
-const EducationDetails = ({ onNext }) => {
+const EducationDetails = ({ onNext, onPrev, nextLabel }) => {
   const educationRef = useRef(null);
   const [cardVisible, setCardVisible] = useState();
   const education = useStore((state) => state.education);
@@ -154,12 +154,11 @@ const EducationDetails = ({ onNext }) => {
 
   const setFieldValue = (data, key) => {
     setEducation(
-      education.map((form) => {
-        if (form.key === key) {
-          form[data.target.name] = data.target.value;
-        }
-        return form;
-      })
+      education.map((form) =>
+        form.key === key
+          ? { ...form, [data.target.name]: data.target.value }
+          : form,
+      ),
     );
   };
 
@@ -184,6 +183,8 @@ const EducationDetails = ({ onNext }) => {
       title="Education"
       description="Add your most relevant education, including programs you're currently enrolled in."
       onNext={onNext}
+      onPrev={onPrev}
+      nextLabel={nextLabel}
     >
       <DraggableCollapse onDrag={handleItemsPosition}>
         {education.map((formObj) => (

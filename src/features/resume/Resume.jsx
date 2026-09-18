@@ -3,7 +3,10 @@ import { getPalette } from "./palettes";
 import { getFont } from "./fonts";
 import { RESUME_LAYOUTS, BuildSections } from "./layouts";
 import { resolveTemplate } from "./templates";
-import { buildResumeStyle, RESUME_STYLE_DEFAULTS } from "./style";
+import {
+  buildResumeStyle,
+  resolveLayoutSettings,
+} from "./style";
 import { effectiveOrder } from "./order";
 import { useResumeCanvas } from "./canvas";
 import "./resume.css";
@@ -20,19 +23,22 @@ export const Resume = ({
   const template = resolveTemplate(templateId);
   const palette = getPalette(paletteId ?? template.palette);
   const font = getFont(fontId ?? template.font);
-  const merged = { ...RESUME_STYLE_DEFAULTS, ...settings };
-  const layoutId = settings?.layoutId || template.layout;
+  const cfg = resolveLayoutSettings(settings, template);
+  const layoutId = cfg.layoutId || "single";
   const meta = RESUME_LAYOUTS[layoutId] ?? RESUME_LAYOUTS.single;
   const Layout = meta.render;
-  const vars = buildResumeStyle({ palette, font, settings: merged });
-  const cfg = {
-    headerStyle: merged.headerStyle,
-    density: merged.density,
-  };
+  const vars = buildResumeStyle({ palette, font, settings: cfg });
 
-  const sections = BuildSections({ data });
+  const sections = BuildSections({
+    data,
+    styles: {
+      skillStyle: cfg.skillStyle,
+      languageStyle: cfg.languageStyle,
+      experienceStyle: cfg.experienceStyle,
+    },
+  });
   const order = effectiveOrder(
-    settings?.sectionOrder,
+    settings?.sectionOrder ?? cfg.sectionOrder,
     sections.map((entry) => entry.id),
     data
   );

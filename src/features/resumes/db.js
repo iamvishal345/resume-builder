@@ -1,14 +1,14 @@
-// IndexedDB persistence for resume documents.
-// One document per resume: id + name + timestamps + the full content payload.
+// IndexedDB persistence for resume documents + version snapshots.
 import { defaultResumeData } from "@store";
 
 const DB_NAME = "resume-builder";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE = "resumes";
+const VERSION_STORE = "versions";
 
 let dbPromise = null;
 
-const openDb = () => {
+export const openDb = () => {
   if (dbPromise) return dbPromise;
   dbPromise = new Promise((resolve, reject) => {
     if (typeof window === "undefined" || !window.indexedDB) {
@@ -21,9 +21,14 @@ const openDb = () => {
       if (!db.objectStoreNames.contains(STORE)) {
         db.createObjectStore(STORE, { keyPath: "id" });
       }
+      if (!db.objectStoreNames.contains(VERSION_STORE)) {
+        const vs = db.createObjectStore(VERSION_STORE, { keyPath: "id" });
+        vs.createIndex("byResume", "resumeId", { unique: false });
+      }
     };
     request.onsuccess = () => resolve(request.result);
-    request.onerror = () => reject(request.error || new Error("Failed to open IndexedDB"));
+    request.onerror = () =>
+      reject(request.error || new Error("Failed to open IndexedDB"));
   });
   dbPromise = dbPromise.catch((error) => {
     dbPromise = null;
@@ -32,16 +37,17 @@ const openDb = () => {
   return dbPromise;
 };
 
-const requestResult = (request) =>
+export const requestResult = (request) =>
   new Promise((resolve, reject) => {
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
   });
 
 export const newResume = (name = "Untitled resume", data) => ({
-  id: typeof crypto !== "undefined" && crypto.randomUUID
-    ? crypto.randomUUID()
-    : `resume-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+  id:
+    typeof crypto !== "undefined" && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `resume-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
   name,
   createdAt: Date.now(),
   updatedAt: Date.now(),
@@ -73,6 +79,20 @@ export const deleteResume = async (id) => {
   await requestResult(tx.objectStore(STORE).delete(id));
 };
 
+export const clearAllResumes = async () => {
+  const all = await listResumes();
+  for (const doc of all) {
+    await deleteResume(doc.id);
+  }
+  // Wipe versions store
+  const db = await openDb();
+  if (db.objectStoreNames.contains(VERSION_STORE)) {
+    const tx = db.transaction(VERSION_STORE, "readwrite");
+    await requestResult(tx.objectStore(VERSION_STORE).clear());
+  }
+  return all.length;
+};
+
 // One-time migration: the old single resume lived in the zustand persist
 // `resume-data` localStorage blob. If IndexedDB is empty, promote it into a
 // document so the new listing page is the single source of truth.
@@ -83,9 +103,6 @@ export const migrateLegacyLocalStorage = async () => {
     const parsed = JSON.parse(raw);
     const state = parsed && parsed.state;
     if (!state || !state.resumeSettings) return null;
-    // The editor's own persistence cache ("resume-data") is written whenever the
-    // store is created, even when empty. Only migrate when the legacy blob has
-    // real content, otherwise an empty draft would silently become a resume.
     const hasContent =
       (state.personalDetails && Object.keys(state.personalDetails).length > 0) ||
       (state.socialLinks && state.socialLinks.length > 0) ||

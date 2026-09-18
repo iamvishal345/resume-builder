@@ -1,13 +1,12 @@
 // Single source of truth for site-level metadata.
-// Replace `url` and `email` with the real domain/e-mail before launch —
-// canonical URLs, Open Graph, robots.txt, and sitemap.xml all derive from here.
+// Canonical URLs, Open Graph, robots.txt, and sitemap.xml all derive from here.
+// Set `url` to the real production domain before launch.
 export const SITE = {
   name: "Cavren",
   legalName: "Cavren",
   tagline: "Build a resume that gets you hired.",
   description:
     "A fast, free, and private resume builder. Fill in guided sections, live-preview, and export a clean PDF or DOCX in minutes — no sign-up required.",
-  // TODO: set the real production domain.
   url: "https://resume-builder.example.com",
   email: "findvishalsharma@gmail.com",
   ownerName: "Vishal Sharma",

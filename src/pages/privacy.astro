@@ -5,54 +5,61 @@ import { SITE } from "../data/site";
 
 <MarketingLayout
   title="Privacy"
-  description="Cavren's privacy policy: your data stays in your browser, nothing is tracked or uploaded."
+  description="Cavren's privacy policy: your data stays on your device. No servers, no harvesting."
   ogType="article"
   canonical={`${SITE.url}/privacy`}
 >
   <section class="page">
     <h1>Privacy</h1>
     <p class="lede">
-      Short version: your resume data stays in your browser. We don't have an
-      account system, we don't run trackers, and exports are generated on your
-      device.
+      Short version: Cavren is a community, local-first tool. Your resumes stay
+      on your device. We don't run an app server for your content, we don't
+      require accounts, and we don't embed analytics or advertising trackers.
     </p>
 
     <div class="prose">
       <h2>Where your data lives</h2>
       <p>
-        Resumes you create are stored in your browser's local storage and sent
-        nowhere. Backing up and restoring a resume — including the drag-and-drop
-        restore flow — happens entirely client-side using files you provide.
+        Resumes are stored in this browser's IndexedDB. Backups you download
+        (.r.json, .cavren.json, PDF, DOCX) are ordinary files on your computer.
+        Optional snapshots (versions) also stay in IndexedDB on this device.
       </p>
 
       <h2>What we collect</h2>
       <ul>
         <li>No account, no name, no email required to build or export.</li>
-        <li>No analytics or advertising trackers are embedded on the pages.</li>
+        <li>No analytics, advertising, or session-replay scripts.</li>
         <li>
-          Hosted fonts are served from your own deployment — we do not load
-          third-party font or tracking domains.
+          Hosted fonts ship with the app — we do not load third-party tracking
+          domains.
         </li>
       </ul>
 
-      <h2>Optional AI features</h2>
+      <h2>Optional AI</h2>
       <p>
-        AI draft and job-match features are off by default. If you enable them,
-        you supply the provider and key; text you explicitly trigger (like a
-        job title or a pasted job description) goes to that provider directly.
-        Nothing AI-related happens without your action, and you can clear the
-        stored key at any time in AI settings.
+        AI features are off until you configure them. You can use on-device
+        Chrome AI or supply your own API key. Text you explicitly send goes
+        only to that provider — never to a Cavren-hosted model. You can clear
+        the key anytime in AI settings.
       </p>
 
-      <h2>Exports</h2>
+      <h2>Optional Google Drive backup</h2>
       <p>
-        PDF and DOCX builds run locally in your browser. We never receive or
-        store the files you generate or preview.
+        If you enable Drive backup, OAuth runs in your browser against Google.
+        The backup file is written to <em>your</em> Drive. Cavren does not
+        operate a sync server. Tokens stay in this browser.
+      </p>
+
+      <h2>Exports &amp; offline</h2>
+      <p>
+        PDF and DOCX are generated locally. Once installed as a PWA (or after a
+        visit), the app shell can work offline for editing and export. Network
+        is only needed for optional AI APIs and Drive.
       </p>
 
       <h2>Contact</h2>
       <p>
-        Questions about this policy? Reach us at{" "}
+        Questions? Reach us at{" "}
         <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
       </p>
     </div>

@@ -1,4 +1,6 @@
-// Client-side DOCX export — always single-column, ATS-safe output.
+// Client-side DOCX export — single-column ATS-safe by default.
+// settings.docxLayout === "preview" is reserved for future richer layout;
+// today both paths stay ATS-safe for parser reliability.
 import {
   Document,
   Packer,
@@ -7,6 +9,12 @@ import {
   BorderStyle,
 } from "docx";
 import { buildResumeStyle } from "@features/resume/style";
+import { toSkillList } from "@features/resume/skillList";
+import {
+  extraItemHasContent,
+  extraItemLines,
+  extraSectionHasContent,
+} from "@features/resume/extraContent";
 
 const DOCX_FONTS = {
   sans: "Arial",
@@ -188,7 +196,9 @@ export const buildResumeDocx = async (data, { palette, fontId, settings }) => {
     }
   }
 
-  const skillNames = (data.skills || []).filter((s) => s.name).map((s) => s.name);
+  const skillNames = toSkillList(data.skills)
+    .filter((s) => s.name)
+    .map((s) => s.name);
   if (skillNames.length) {
     children.push(sectionHeading("Skills", ACCENT));
     children.push(
@@ -200,23 +210,32 @@ export const buildResumeDocx = async (data, { palette, fontId, settings }) => {
   }
 
   for (const section of data.extras || []) {
-    const items = (section.data || []).filter((i) => i.name || i.value);
-    if (!items.length) continue;
-    children.push(sectionHeading(section.title || "Additional", ACCENT));
-    for (const item of items) {
-      children.push(
-        new Paragraph({
-          spacing: { after: 80 },
-          bullet: { level: 0 },
-          children: [
-            new TextRun({
-              text: [item.name, item.value].filter(Boolean).join(" — "),
-              size: SZ.body,
-              color: INK,
-            }),
-          ],
-        })
-      );
+    if (!extraSectionHasContent(section)) continue;
+    children.push(
+      sectionHeading(
+        section.id === 5 ? "Languages" : section.title || "Additional",
+        ACCENT,
+      ),
+    );
+    for (const item of section.data || []) {
+      if (!extraItemHasContent(section.id, item)) continue;
+      const lines = extraItemLines(section.id, item);
+      lines.forEach((line, index) => {
+        children.push(
+          new Paragraph({
+            spacing: { after: index === lines.length - 1 ? 80 : 20 },
+            bullet: index === 0 ? { level: 0 } : undefined,
+            indent: index > 0 ? { left: 360 } : undefined,
+            children: [
+              new TextRun({
+                text: line,
+                size: index === 0 ? SZ.body : SZ.meta,
+                color: index === 0 ? INK : MUTED,
+              }),
+            ],
+          }),
+        );
+      });
     }
   }
 

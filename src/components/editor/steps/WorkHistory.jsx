@@ -121,7 +121,7 @@ const getWorkHistoryObj = () => ({
   workSummary: "",
 });
 
-const WorkHistory = ({ onNext }) => {
+const WorkHistory = ({ onNext, onPrev, nextLabel }) => {
   const workHistoryRef = useRef(null);
   const [cardVisible, setCardVisible] = useState();
   const workHistory = useStore((state) => state.workHistory);
@@ -142,12 +142,11 @@ const WorkHistory = ({ onNext }) => {
   }, [workHistory]);
   const setFieldValue = (data, key) => {
     setWorkHistory(
-      workHistory.map((form) => {
-        if (form.key === key) {
-          form[data.target.name] = data.target.value;
-        }
-        return form;
-      })
+      workHistory.map((form) =>
+        form.key === key
+          ? { ...form, [data.target.name]: data.target.value }
+          : form,
+      ),
     );
   };
 
@@ -172,6 +171,8 @@ const WorkHistory = ({ onNext }) => {
       title="Professional Experience"
       description="Start with your most recent experience and work backward."
       onNext={onNext}
+      onPrev={onPrev}
+      nextLabel={nextLabel}
     >
       <DraggableCollapse onDrag={handleItemsPosition}>
         {workHistory.map((formObj) => (

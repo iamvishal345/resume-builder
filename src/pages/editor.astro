@@ -1,9 +1,8 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import Editor from "../components/Editor/Editor.jsx";
-import { SITE } from "@data/site";
+import Editor from "../components/editor/Editor.jsx";
 ---
 
-<Layout title={`${SITE.name} - Offline Resume Builder | Editor`}>
+<Layout title="Editor">
   <Editor client:only="react" />
 </Layout>

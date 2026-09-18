@@ -24,6 +24,7 @@
     "@supabase/supabase-js": "^2.116.0",
     "docx": "^9.7.1",
     "fflate": "^0.8.3",
+    "idb-keyval": "^6.3.0",
     "lucide-react": "^1.45.0",
     "pdfjs-dist": "^6.3.289",
     "react": "^19.3.0",
@@ -38,7 +39,9 @@
     "@astryxdesign/cli": "^0.6.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
-    "astro": "^5.0.0"
+    "@vite-pwa/astro": "^1.2.0",
+    "astro": "^5.0.0",
+    "terser": "^5.51.2"
   },
   "allowScripts": {
     "@astryxdesign/cli@0.6.0": true,

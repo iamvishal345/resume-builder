@@ -2,6 +2,7 @@
 @import "@astryxdesign/core/reset.css";
 @import "@astryxdesign/core/astryx.css";
 @import "@astryxdesign/theme-matcha/theme.css";
+@import "./app-shell.css";
 
 /* Brand typeface — Figtree everywhere (buttons inherit via font-family: inherit) */
 :root {
@@ -12,17 +13,70 @@
     "Figtree", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     Arial, sans-serif;
 
+  /* Compact type — Matcha ships a large 16px base; pull back toward 14px */
+  --font-size-sm: 0.75rem;
+  --font-size-base: 0.875rem;
+  --font-size-lg: 1.0625rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.8125rem;
+  --font-size-4xl: 2.1875rem;
+  --font-size-5xl: 2.625rem;
+  --text-label-size: var(--font-size-sm);
+  --text-body-size: var(--font-size-base);
+  --text-supporting-size: var(--font-size-sm);
+
+  /* Slimmer controls — Matcha defaults are 36/40/44 */
+  --size-element-sm: 28px;
+  --size-element-md: 32px;
+  --size-element-lg: 36px;
+
+  /* Slightly tighter spacing than Matcha's 1.5× scale */
+  --spacing-0-5: 2px;
+  --spacing-1: 4px;
+  --spacing-1-5: 6px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-7: 28px;
+  --spacing-8: 32px;
+  --spacing-9: 36px;
+  --spacing-10: 40px;
+  --spacing-11: 44px;
+  --spacing-12: 48px;
+
   /* Tighter corners — max 16px, tools stay crisp */
   --radius-container: 12px;
   --radius-element: 8px;
   --radius-inner: 5px;
   --radius-page: 16px;
+
+  accent-color: var(--color-accent);
+}
+
+html:not([data-theme="dark"]) {
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {
   background: var(--color-background-body);
   color: var(--color-text-primary);
   font-family: var(--font-family-body);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 28%, transparent);
+  color: var(--color-text-primary);
 }
 
 button,
@@ -35,7 +89,26 @@ textarea {
 button,
 [role="radio"],
 [role="tab"] {
-  font-weight: 700;
+  font-weight: 600;
+}
+
+/* Soften Matcha’s pill buttons — sharper, denser controls */
+.astryx-button,
+.astryx-icon-button {
+  --_button-radius: var(--radius-element);
+  border-radius: var(--radius-element);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.astryx-button {
+  padding-block: var(--spacing-1);
+  padding-inline: var(--spacing-3);
+  gap: var(--spacing-1-5);
+}
+
+.astryx-icon-button {
+  padding: var(--spacing-1);
 }
 
 /* ---- Matcha retuned: warm neutral neutrals + sage accent, both themes ---- */
@@ -54,6 +127,7 @@ html:not([data-theme="dark"]) {
   --color-background-surface: #ffffff;
   --color-background-card: #ffffff;
   --color-background-popover: #ffffff;
+  --color-background-panel: #f3f1eb;
   --color-background-inverted: #1e231f;
 
   --color-border: #e5e1d8;
@@ -78,44 +152,49 @@ html:not([data-theme="dark"]) {
   --color-shadow: rgba(23, 28, 23, 0.1);
 }
 
-/* Neutralize dark-mode so matcha's olive/green tint doesn't leak into surfaces or copy */
+/* Dark: charcoal with a quiet sage accent — less olive wash, clearer elevation */
 html[data-theme="dark"] {
-  --color-text-primary: #eceadd;
-  --color-text-secondary: #b7b9ac;
-  --color-text-disabled: #757a6c;
-  --color-text-accent: #bcd7b8;
+  --color-text-primary: #eef0ec;
+  --color-text-secondary: #9aa39c;
+  --color-text-disabled: #6b736d;
+  --color-text-accent: #b4d0b6;
 
-  --color-accent: #a7c9a4;
-  --color-accent-muted: rgba(167, 201, 164, 0.16);
-  --color-on-accent: #172018;
+  --color-accent: #8fbc95;
+  --color-accent-muted: rgba(143, 188, 149, 0.14);
+  --color-on-accent: #0c1410;
 
-  --color-background-body: #14160f;
-  --color-background-muted: #1b1e15;
-  --color-background-surface: #22251b;
-  --color-background-card: #22251b;
-  --color-background-popover: #2a2e22;
-  --color-background-inverted: #ebeadf;
+  --color-background-body: #0f1110;
+  --color-background-muted: #161916;
+  --color-background-surface: #1a1d1b;
+  --color-background-card: #1a1d1b;
+  --color-background-popover: #232825;
+  --color-background-panel: #161916;
+  --color-background-inverted: #e8ebe7;
 
-  --color-border: #333a2c;
-  --color-border-emphasized: #4a5141;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-emphasized: rgba(255, 255, 255, 0.16);
 
-  --color-icon-primary: #eceadd;
-  --color-icon-secondary: #b7b9ac;
-  --color-icon-disabled: #757a6c;
-  --color-icon-accent: #a7c9a4;
+  --color-icon-primary: #eef0ec;
+  --color-icon-secondary: #9aa39c;
+  --color-icon-disabled: #6b736d;
+  --color-icon-accent: #8fbc95;
 
-  --color-success: #65ad7f;
-  --color-success-muted: rgba(101, 173, 127, 0.18);
-  --color-warning: #dfa25c;
-  --color-warning-muted: rgba(223, 162, 92, 0.16);
-  --color-error: #e1796f;
-  --color-error-muted: rgba(225, 121, 111, 0.16);
+  --color-success: #6db88a;
+  --color-success-muted: rgba(109, 184, 138, 0.16);
+  --color-warning: #e0a86a;
+  --color-warning-muted: rgba(224, 168, 106, 0.14);
+  --color-error: #e08880;
+  --color-error-muted: rgba(224, 136, 128, 0.14);
 
-  --color-tint-hover: rgba(255, 255, 255, 0.05);
+  --color-tint-hover: rgba(255, 255, 255, 0.04);
   --color-overlay-hover: rgba(255, 255, 255, 0.06);
   --color-overlay-pressed: rgba(255, 255, 255, 0.1);
-  --color-overlay: rgba(0, 0, 0, 0.55);
-  --color-shadow: rgba(0, 0, 0, 0.4);
+  --color-overlay: rgba(0, 0, 0, 0.58);
+  --color-shadow: rgba(0, 0, 0, 0.5);
+
+  --shadow-low: 0 1px 2px rgba(0, 0, 0, 0.28), 0 4px 12px rgba(0, 0, 0, 0.22);
+  --shadow-med: 0 2px 4px rgba(0, 0, 0, 0.3), 0 8px 20px rgba(0, 0, 0, 0.28);
+  --shadow-high: 0 4px 8px rgba(0, 0, 0, 0.35), 0 16px 36px rgba(0, 0, 0, 0.35);
 }
 
 /* Native overlay scrollbars (macOS-style) — no pinned scrollbar */
@@ -136,8 +215,8 @@ html[data-theme="dark"] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: var(--size-element-sm);
+  height: var(--size-element-sm);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-element);
   background: var(--color-background-surface);
@@ -145,7 +224,8 @@ html[data-theme="dark"] {
   cursor: pointer;
   transition:
     color 150ms ease,
-    border-color 150ms ease;
+    border-color 150ms ease,
+    background 150ms ease;
 }
 
 .theme-toggle:hover {
@@ -363,6 +443,18 @@ html[data-theme="dark"] .theme-toggle .icon-dark {
   display: flex;
   border-radius: var(--radius-container);
   background: var(--color-background-muted);
+  /* Soft page-break hints (scaled A4) */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(297mm * 0.43 - 1px),
+    color-mix(in srgb, var(--color-border-emphasized) 55%, transparent)
+      calc(297mm * 0.43 - 1px),
+    color-mix(in srgb, var(--color-border-emphasized) 55%, transparent)
+      calc(297mm * 0.43)
+  );
+  background-size: 100% calc(297mm * 0.43);
+  background-repeat: repeat-y;
 }
 
 .preview-sheet-container {
@@ -378,15 +470,23 @@ html[data-theme="dark"] .theme-toggle .icon-dark {
   min-height: 100%;
   border-radius: var(--radius-element);
   box-shadow:
-    0 1px 2px rgba(23, 28, 23, 0.06),
-    0 8px 24px -8px rgba(23, 28, 23, 0.18);
+    0 1px 2px var(--color-shadow),
+    0 10px 28px -10px var(--color-shadow);
 }
 
 .preview-desk .r-paper {
   border-radius: var(--radius-element);
   box-shadow:
-    0 1px 2px rgba(23, 28, 23, 0.06),
-    0 8px 24px -8px rgba(23, 28, 23, 0.18);
+    0 1px 2px var(--color-shadow),
+    0 10px 28px -10px var(--color-shadow);
+}
+
+html[data-theme="dark"] .preview-sheet-wrap {
+  background: color-mix(in srgb, var(--color-background-muted) 88%, #000 12%);
+}
+
+html[data-theme="dark"] .astryx-card {
+  box-shadow: inset 0 0 0 1px var(--color-border);
 }
 
 /* Full-page preview desk */
@@ -420,21 +520,79 @@ html[data-theme="dark"] .theme-toggle .icon-dark {
   padding-right: var(--spacing-2);
 }
 
-/* Editor top bar breathing room */
-.editor-topbar {
-  padding: var(--spacing-2) var(--spacing-4);
+/* Command palette */
+.cmd-palette-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  background: var(--color-overlay);
 }
+
+.cmd-palette {
+  width: min(520px, 92vw);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-container);
+  background: var(--color-background-popover);
+  box-shadow: var(--shadow-high);
+  overflow: hidden;
+}
+
+.cmd-palette-input {
+  width: 100%;
+  padding: var(--spacing-3) var(--spacing-4);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: var(--font-size-base);
+  outline: none;
+}
+
+.cmd-palette-list {
+  max-height: 48vh;
+  overflow: auto;
+  padding: var(--spacing-1);
+}
+
+.cmd-palette-item {
+  display: block;
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-3);
+  border: none;
+  border-radius: var(--radius-inner);
+  background: transparent;
+  color: var(--color-text-primary);
+  text-align: left;
+  font: inherit;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.cmd-palette-item-active,
+.cmd-palette-item:hover {
+  background: var(--color-tint-hover);
+}
+
+.cmd-palette-hint {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.letter-align-center .letter-sender,
+.letter-align-center .letter-name {
+  text-align: center;
+}
+
+/* Editor top bar breathing room — padding lives in app-shell.css */
 
 /* Secondary actions row: grouped menus read as one quiet bar */
 .editor-actions {
   padding: var(--spacing-1) var(--spacing-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-element);
-  background: var(--color-background-panel);
-}
-
-/* Draft recovery banner */
-.recovery-banner {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-element);
   background: var(--color-background-panel);
@@ -454,7 +612,7 @@ html[data-theme="dark"] .theme-toggle .icon-dark {
   font-family: var(--font-display);
   font-size: 13.5px;
   line-height: 1.65;
-  color: #1f2937;
+  color: var(--color-text-primary);
 }
 
 .letter-sender {
@@ -468,18 +626,18 @@ html[data-theme="dark"] .theme-toggle .icon-dark {
 .letter-name {
   font-size: 19px;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text-primary);
 }
 
 .letter-contact {
-  color: #6b7280;
+  color: var(--color-text-secondary);
   font-size: 12px;
 }
 
 .letter-date,
 .letter-recipient {
   margin-top: var(--spacing-3);
-  color: #374151;
+  color: var(--color-text-secondary);
 }
 
 .letter-body p {
@@ -498,7 +656,7 @@ html[data-theme="dark"] .theme-toggle .icon-dark {
 
 .letter-sign {
   margin-top: var(--spacing-4);
-  color: #374151;
+  color: var(--color-text-secondary);
 }
 
 .letter-sign p {
@@ -506,7 +664,15 @@ html[data-theme="dark"] .theme-toggle .icon-dark {
 }
 
 .letter-sign-name {
-  color: #111827;
+  color: var(--color-text-primary);
+}
+
+.letter-align-center {
+  text-align: center;
+}
+
+.letter-align-center .letter-sender {
+  align-items: center;
 }
 
 @media print {
@@ -597,45 +763,5 @@ html[data-theme="dark"] .theme-toggle .icon-dark {
   }
   to {
     opacity: 1;
-  }
-}
-
-/* Print: only the cloned resume survives window.print() */
-@media print {
-  @page {
-    size: A4;
-    margin: 8mm;
-  }
-
-  /* Keep only the cloned resume visible */
-  body.printing > *:not(.print-sheet) {
-    display: none !important;
-  }
-
-  /* No theme bleed: always print on white with a light color scheme */
-  html,
-  body {
-    background: #ffffff !important;
-  }
-
-  html {
-    color-scheme: light;
-  }
-
-  .print-sheet {
-    display: block !important;
-    position: static !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    min-width: 0 !important;
-    max-width: 100% !important;
-    transform: none !important;
-    box-shadow: none !important;
-  }
-
-  .print-sheet .r-paper {
-    box-shadow: none !important;
-    border-radius: 0 !important;
   }
 }

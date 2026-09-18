@@ -15,6 +15,7 @@ export const CoverLetterSheet = ({
   socialLinks = [],
   coverLetter = { recipient: "", body: "" },
   letterRef,
+  align = "left",
 }) => {
   const name = [personalDetails.firstName, personalDetails.lastName]
     .filter(Boolean)
@@ -25,11 +26,14 @@ export const CoverLetterSheet = ({
     [personalDetails.city, personalDetails.state].filter(Boolean).join(", "),
   ].filter(Boolean);
   const social = (socialLinks || [])
-    .filter((l) => l.descriptionValue)
-    .map((l) => l.descriptionValue);
+    .map((l) => l.value || l.descriptionValue)
+    .filter(Boolean);
 
   return (
-    <div className="letter-paper" ref={letterRef}>
+    <div
+      className={`letter-paper letter-align-${align}`}
+      ref={letterRef}
+    >
       {name && (
         <div className="letter-sender">
           <span className="letter-name">{name}</span>

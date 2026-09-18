@@ -63,20 +63,52 @@ export const Collapse = ({
   );
 };
 
-export const DraggableCollapse = ({ children, onDrag }) => {
+/** Always-open sortable list (skills and similar flat rows). */
+export const DraggableList = ({ children, onDrag, gap = 2 }) => {
   const containerRef = useRef(null);
   useEffect(() => {
-    Sortable.create(containerRef.current, {
+    if (!containerRef.current) return undefined;
+    const sortable = Sortable.create(containerRef.current, {
       handle: ".drag-button",
       animation: 150,
       onUpdate: (e) => {
         onDrag(e.oldIndex, e.newIndex);
       },
     });
-  }, []);
+    return () => sortable.destroy();
+  }, [onDrag]);
   return (
-    <VStack ref={containerRef} gap={3} width="100%">
+    <div ref={containerRef} className="draggable-list" style={{ display: "flex", flexDirection: "column", gap: `var(--spacing-${gap})`, width: "100%" }}>
       {children}
-    </VStack>
+    </div>
+  );
+};
+
+export const DraggableCollapse = ({ children, onDrag }) => {
+  const containerRef = useRef(null);
+  useEffect(() => {
+    if (!containerRef.current) return undefined;
+    const sortable = Sortable.create(containerRef.current, {
+      handle: ".drag-button",
+      animation: 150,
+      onUpdate: (e) => {
+        onDrag(e.oldIndex, e.newIndex);
+      },
+    });
+    return () => sortable.destroy();
+  }, [onDrag]);
+  return (
+    <div
+      ref={containerRef}
+      className="draggable-collapse"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: "var(--spacing-3)",
+        width: "100%",
+      }}
+    >
+      {children}
+    </div>
   );
 };

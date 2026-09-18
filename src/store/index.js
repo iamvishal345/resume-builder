@@ -1,9 +1,9 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { toSkillList } from "@features/resume/skillList";
 
 const HISTORY_LIMIT = 60;
 const RECORD_DELAY = 550;
-const SAVED_AT_KEY = "resume-data-saved-at";
 
 // Content slices that participate in undo/redo snapshots.
 const CONTENT_KEYS = [
@@ -100,21 +100,21 @@ const withHistory = (config) => (set, get, api) => {
   return { ...base, undo, redo, clearHistory };
 };
 
-// Stamp the last-save time into a side channel so a fresh page load can show
-// a "draft recovered" banner. Kept outside the persisted state so saving time
-// itself never creates undo entries or loops.
-const stampSavedAt = () => {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(SAVED_AT_KEY, String(Date.now()));
-};
-
 export const DEFAULT_RESUME_SETTINGS = {
   templateId: "atlas",
   paletteId: "slate",
   fontId: "sans",
   layoutId: "single",
-  headerStyle: "normal",
+  headerAlign: "left",
+  headerStyle: "rule",
+  skillStyle: "chips",
+  languageStyle: "dots",
+  experienceStyle: "standard",
+  sidebarTone: "light",
   density: "normal",
+  showPhoto: true,
+  docxLayout: "ats",
+  letterTemplateId: "classic",
   primaryColor: "",
   bgColor: "",
   textColor: "",
@@ -175,15 +175,35 @@ export const useStore = create(
 
       // Work Experience
       workHistory: [],
-      setWorkHistory: (value) => set(() => ({ workHistory: value }), false),
+      setWorkHistory: (value) =>
+        set(
+          () => ({
+            workHistory:
+              typeof value === "function" ? value(get().workHistory) : value,
+          }),
+          false,
+        ),
 
       // Education
       education: [],
-      setEducation: (value) => set(() => ({ education: value }), false),
+      setEducation: (value) =>
+        set(
+          () => ({
+            education:
+              typeof value === "function" ? value(get().education) : value,
+          }),
+          false,
+        ),
 
       // Skills
       skills: [],
-      setSkills: (value) => set(() => ({ skills: value }), false),
+      setSkills: (value) =>
+        set(
+          () => ({
+            skills: typeof value === "function" ? value(get().skills) : value,
+          }),
+          false,
+        ),
 
       // Summary
       resumeSummary: "",
@@ -192,12 +212,22 @@ export const useStore = create(
       // Additional Sections
       additionalSections: [],
       setAdditionalSections: (value) =>
-        set(() => ({ additionalSections: value }), false),
+        set(
+          () => ({
+            additionalSections:
+              typeof value === "function"
+                ? value(get().additionalSections)
+                : value,
+          }),
+          false,
+        ),
       removeAdditionalSections: (value) =>
         set(() => ({
-          additionalSections: get().additionalSections.filter(
-            ({ key }) => key !== value.key
-          ),
+          additionalSections: get().additionalSections.filter((section) => {
+            if (value?.id != null) return section.id !== value.id;
+            if (value?.key != null) return section.key !== value.key;
+            return true;
+          }),
         })),
       // Resume Theme / Template
       resumeSettings: { ...DEFAULT_RESUME_SETTINGS },
@@ -205,10 +235,29 @@ export const useStore = create(
         set(() => ({ resumeSettings: { ...get().resumeSettings, ...patch } })),
 
       setAdditionalSectionData: (sectionId, data) => {
-        const sections = [...get().additionalSections];
-        const section = sections.find(({ id }) => sectionId === id);
-        section.data = data;
-        set(() => ({ additionalSections: sections }));
+        set(() => ({
+          additionalSections: get().additionalSections.map((section) =>
+            section.id === sectionId ? { ...section, data } : section,
+          ),
+        }));
+      },
+
+      setAdditionalSectionTitle: (sectionId, title) => {
+        set(() => ({
+          additionalSections: get().additionalSections.map((section) =>
+            section.id === sectionId
+              ? { ...section, title: String(title ?? "") }
+              : section,
+          ),
+        }));
+      },
+
+      patchAdditionalSection: (sectionId, patch) => {
+        set(() => ({
+          additionalSections: get().additionalSections.map((section) =>
+            section.id === sectionId ? { ...section, ...patch } : section,
+          ),
+        }));
       },
 
       // Cover letter (opt-in side feature — not part of the resume itself)
@@ -230,6 +279,20 @@ export const useStore = create(
             }
           }
         }
+        // Drop non-serializable fields that older builds stored on extras
+        // (component/icon functions) and normalize skill shape (rating → level).
+        if (Array.isArray(merged.additionalSections)) {
+          merged.additionalSections = merged.additionalSections.map(
+            ({ id, title, data: sectionData, key, showLevel }) => ({
+              id,
+              title,
+              key,
+              ...(showLevel !== undefined ? { showLevel } : {}),
+              data: Array.isArray(sectionData) ? sectionData : [],
+            }),
+          );
+        }
+        merged.skills = toSkillList(merged.skills);
         set(merged, false);
         if (typeof get().clearHistory === "function") {
           try {
@@ -255,40 +318,3 @@ export const useStore = create(
     }
   )
 );
-
-if (typeof window !== "undefined") {
-  window.store = useStore;
-}
-
-// Stamp saved-at on every persisted change (debounced to avoid per-keystroke writes).
-if (typeof window !== "undefined") {
-  let stampTimer = null;
-  let lastStamp = null;
-  useStore.subscribe((state) => {
-    if (state && state.resumeSettings) {
-      const now = Date.now();
-      if (lastStamp === null || now - lastStamp > 15000) {
-        lastStamp = now;
-        stampSavedAt();
-        return;
-      }
-      if (stampTimer) clearTimeout(stampTimer);
-      stampTimer = setTimeout(() => {
-        lastStamp = Date.now();
-        stampSavedAt();
-      }, 2000);
-    }
-  });
-}
-
-export const getLastSavedAt = () => {
-  if (typeof window === "undefined") return null;
-  const value = window.localStorage.getItem(SAVED_AT_KEY);
-  const ts = value ? Number(value) : 0;
-  return ts && ts > 0 ? ts : null;
-};
-
-export const clearSavedAt = () => {
-  if (typeof window === "undefined") return;
-  window.localStorage.removeItem(SAVED_AT_KEY);
-};

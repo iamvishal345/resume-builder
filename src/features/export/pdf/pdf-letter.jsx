@@ -1,7 +1,7 @@
 import React from "react";
 import { Document, Page, View, Text } from "@react-pdf/renderer";
 import { registerPdfFonts, PDF_FONTS } from "./fonts";
-import { htmlLines } from "./pdf-resume";
+import { htmlLines } from "./pdf-utils";
 import { SITE } from "@data/site";
 
 registerPdfFonts();
@@ -29,8 +29,8 @@ export const PdfLetter = ({
     [pd.city, pd.state].filter(Boolean).join(", "),
   ].filter(Boolean);
   const social = (socialLinks || [])
-    .filter((link) => link.descriptionValue)
-    .map((link) => link.descriptionValue);
+    .map((link) => link.value || link.descriptionValue)
+    .filter(Boolean);
   const contactLine = [...contact, ...social].join("  ·  ");
 
   const fontFamily = PDF_FONTS[fontId] || PDF_FONTS.sans;

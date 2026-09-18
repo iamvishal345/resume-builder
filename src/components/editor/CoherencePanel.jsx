@@ -1,16 +1,34 @@
-import React, { useMemo } from "react";
-import { Button } from "@astryxdesign/core/Button";
+import { useMemo } from "react";
 import { HStack, VStack } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
-import { AlertTriangle, Check, ShieldCheck } from "lucide-react";
+import { AlertTriangle, ShieldCheck } from "lucide-react";
 import { computeCoherenceIssues } from "@features/coherence/lint";
+import { CheckList } from "./CheckList";
 
 const CoherencePanel = ({ data, onJumpStep, bare = false }) => {
   const { issues } = useMemo(() => computeCoherenceIssues(data), [data]);
 
-  // cap the list so a noisy timeline doesn't overflow the drawer
   const visible = issues.slice(0, 12);
   const hidden = issues.length - visible.length;
+
+  const items = visible.map((issue) => ({
+    id: issue.id,
+    label: issue.label,
+    hint: issue.hint || null,
+    titleColor: issue.severity === "error" ? "accent" : "primary",
+    action: true,
+    step: issue.step,
+    icon: (
+      <AlertTriangle
+        size={16}
+        color={
+          issue.severity === "error"
+            ? "var(--color-error)"
+            : "var(--color-warning)"
+        }
+      />
+    ),
+  }));
 
   const body = (
     <VStack gap={3} width="100%">
@@ -34,72 +52,29 @@ const CoherencePanel = ({ data, onJumpStep, bare = false }) => {
         )}
       </HStack>
       {issues.length === 0 ? (
-        <HStack gap={2} align="center">
-          <Text type="inherit" size="sm" color="secondary">
-            Overlapping dates, duplicated contacts, and summary-vs-skills
-            mismatches are checked automatically.
-          </Text>
-        </HStack>
+        <Text type="inherit" size="sm" color="secondary">
+          Overlapping dates, duplicated contacts, and summary-vs-skills
+          mismatches are checked automatically.
+        </Text>
       ) : (
-        <VStack gap={1} width="100%">
-          {visible.map((id) => (
-            <HStack
-              key={id.id}
-              justify="between"
-              align="center"
-              gap={3}
-              width="100%"
-              padding={1}
-            >
-              <HStack gap={2} align="start">
-                <AlertTriangle
-                  size={16}
-                  color={
-                    id.severity === "error"
-                      ? "var(--color-error)"
-                      : "var(--color-warning)"
-                  }
-                />
-                <VStack gap={0}>
-                  <Text
-                    type="inherit"
-                    size="md"
-                    weight="medium"
-                    color={id.severity === "error" ? "accent" : "primary"}
-                  >
-                    {id.label}
-                  </Text>
-                  {id.hint ? (
-                    <Text type="inherit" size="sm" color="secondary">
-                      {id.hint}
-                    </Text>
-                  ) : null}
-                </VStack>
-              </HStack>
-              <Button
-                size="sm"
-                variant="ghost"
-                icon={<Check size={13} />}
-                label="Fix"
-                onClick={() => onJumpStep(id.step)}
-              />
-            </HStack>
-          ))}
-          {hidden > 0 ? (
-            <Text type="inherit" size="sm" color="secondary">
-              +{hidden} more — review your roles and dates.
-            </Text>
-          ) : null}
-        </VStack>
+        <CheckList
+          items={items}
+          onFix={(item) => onJumpStep(item.step)}
+          footer={
+            hidden > 0 ? (
+              <Text type="inherit" size="sm" color="secondary">
+                +{hidden} more — review your roles and dates.
+              </Text>
+            ) : null
+          }
+        />
       )}
     </VStack>
   );
 
   if (bare) return body;
 
-  return (
-    <div style={{ paddingTop: "var(--spacing-2)" }}>{body}</div>
-  );
+  return <div style={{ paddingTop: "var(--spacing-2)" }}>{body}</div>;
 };
 
 export default CoherencePanel;

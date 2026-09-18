@@ -1,214 +1,145 @@
-# Cavren — Competitive Research & Feature Plan
+# Cavren — features to add
 
-Research date: Sep 2026. Sources: product research + 2026 comparison reviews
-(Rezi, Teal, Kickresume, Resume.io, Zety, Enhancv, Jobscan, SEEN, ResumeUp,
-StylingCV, Resumly, Neuradesk, AlignCV, AI ResumeGuru, NeuraCV, RoleWorth).
+Community · offline PWA · local-first · no servers · desktop/tablet first  
+Updated: Sep 2026
 
----
-
-## 1. Competitive landscape
-
-| Tool                                  | Positioning           | Key differentiator                                                                      | Pricing (approx)                         |
-| ------------------------------------- | --------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Rezi                                  | ATS-first builder     | Real-time "Rezi Score", clean single-column export, AI bullet rewrite                   | Free (3 PDFs); Pro $29/mo; $149 lifetime |
-| Teal                                  | Job-search workspace  | Kanban tracker + resume builder + per-job tailoring + Chrome ext                        | Free tiers; Teal+ ~$13/7d–$29/mo         |
-| Kickresume                            | Breadth + value       | Largest template library, full-draft AI writer, **free tier with real downloads**, apps | Free; $19–29/mo; $124 lifetime           |
-| Resume.io                             | Polished conventional | Premium templates, guided flow, scoring (subscription trap)                             | ~$1 trial → $24.95/4wk                   |
-| Zety                                  | Writing guidance      | Best pre-written bullet ideas + career guides                                           | ~$1 trial → $23.70/4wk                   |
-| Enhancv                               | Design                | Most distinctive layouts, drag-and-drop canvas, JD tailoring                            | 7d free; ~$16.50–39/mo                   |
-| Jobscan                               | Diagnostics           | Keyword/ATS gap analysis of an existing resume                                          | Free; ~$29.98/qtr                        |
-| ResumeUp / NeuraCV / StylingCV / SEEN | AI-native newcomers   | Live ATS score in editor, import (PDF/DOCX/LinkedIn), JD tailoring                      | 20–50 free AI credits; Pro $29/mo        |
-| Resumly                               | Full editor           | Translates to 40+ langs w/ RTL, share links w/ view tracking, file-level ATS audit      | Freemium                                 |
-| Neuradesk                             | Coherence             | Cross-section contradiction linter, live ATS score                                      | Freemium                                 |
-
-### Category table-stakes in 2026
-
-- ATS-safe, single-column templates tested against Workday/Greenhouse/Lever/iCIMS/Taleo
-- Live WYSIWYG preview while you type
-- Real-time ATS/resume score inside the editor
-- Paste a job description → keyword gap analysis + tailoring
-- AI content: bullet strengthener, summary generator, full first draft
-- Import an existing resume (PDF/DOCX) or LinkedIn
-- PDF + DOCX export
-- One-click template switching that preserves content
-- Multi-language section headers
-- Cover letter with a matching design
-
-### Pricing climate (important for positioning)
-
-- Most incumbents run "free to build, pay to download" with ~$1–3 trials that
-  auto-renew at $20–25/4 weeks. Sources: **40,000+ FTC Consumer Sentinel
-  complaints**, ~71% auto-renew related; ApplyGlide test found the _only_
-  builders you can leave with an unrestricted PDF for <$10 were itself and
-  Enhancv's $24.99 one-time.
-- Competitors winning trust: Kickresume (free tier = real downloads), Rezi
-  (3 free PDFs), ApplyGlide (one-time price), Laddro (free to build, first PDF
-  free).
-- **Our opening: honest pricing + data stays in the browser, no account.**
-  This is genuinely differentiated and cheap to ship because our editor is
-  already a client-only React island with a local persisted store.
+Shipped baseline (do not rebuild): guided editor, templates/variants, live preview,
+PDF/DOCX export, ATS check, coherence lint, JD keyword match, optional local AI,
+cover letter, multi-resume IndexedDB library, import + `.r.json` backup/restore,
+static marketing.
 
 ---
 
-## 2. Target positioning
+## Principles (gate every feature)
 
-> A fast, **private, ATS-reliable** resume builder: guided steps, live preview,
-> free real exports, no account and no paywalled downloads. AI assists later,
-> monetized honestly.
-
-Fit with our stack:
-
-- Marketing (index/features) → static Astro, campaigns/SEO per feature.
-- Editor → single client-only React island (local, no SSR): ideal for exports
-  and browser privacy.
-- Future AI/import/share need server work: add Astro server routes / serverless
-  functions only when required (keys stay server-side).
+1. Works offline or degrades cleanly without network.
+2. Data stays on device unless the user exports or opts into Drive later.
+3. No Cavren backend, accounts-as-gate, or analytics SDKs.
+4. Desktop/tablet UX first; mobile usable, not primary.
 
 ---
 
-## 3. Feature plan by phase
+## Phase A — Trust & offline foundation (do first)
 
-### Phase 0 — Baseline (already shipped)
+### A1. Offline-capable PWA
+- Web app manifest + icons (installable)
+- Service worker: cache app shell + critical assets
+- Offline for: open library, edit, preview, PDF/DOCX from cached code
+- Clear “You’re offline” only when a *network* feature fails (AI / Drive)
+- Update prompt when a new version is available
 
-- 6-step guided wizard (src/components/editor/steps/\*)
-- Zustand + localStorage persistence, drag-reorder (sortablejs), rich text
-  (react-quill), skill ratings, theme JSON stub
-- Astro static marketing pages
+### A2. Data ownership center
+- Single place (dashboard or settings): export all, import/restore, clear all local data
+- Explain what lives in IndexedDB vs files the user downloads
+- Privacy page copy aligned with “no servers, no harvesting”
 
-### Phase 1 — Core product (differentiates vs "free tier" and fixes our gaps)
+### A3. Full backup pack
+- One-click download of **all** resumes + cover letters + settings as one archive/JSON pack
+- One-click restore with merge vs replace choice
+- Keep existing per-resume `.r.json`; pack is the “move to a new computer” path
 
-**P1.1 Live resume preview (biggest gap)**
-
-- The "Preview" `Grid` cell in `Editor.jsx` is a placeholder.
-- Build `src/components/preview/ResumePreview.jsx` that renders real resume
-  from the store (personal details → work → education → skills → summary →
-  additional sections) using the active theme.
-- WYSIWYG: updates on every keystroke; mobile/desktop toggle.
-
-**P1.2 Theme/template system**
-
-- Promote `First.json` (accent/text color) into a real theme model:
-  `id`, `name`, single-column ATS-safe layout, typography, accent color,
-  optional photo/initials block.
-- One-click switching on the editor; **content is preserved across switches**.
-- Shipping 3–5 ATS-safe designs in P1 (Modern, Minimal, Classic, Tech).
-
-**P1.3 Client-side export (free, no watermark)**
-
-- PDF: print-to-PDF via a printer-optimized preview (keeps us dependency-light),
-  or `pdfmake`/`jsPDF` for precise control.
-- DOCX: `docx` npm package or `html-to-docx` (match bullet formatting).
-- ATS-safe by construction: single column, standard section headings, no
-  tables/textboxes for layout.
-- Add `.r` resume export (JSON) shareable via drag-and-drop.
-
-**P1.4 Honest pricing surface**
-
-- Free tier: build, preview, unlimited PDF exports, limited themes.
-- Paid later: advanced templates, AI credits, DOCX, unlimited resumes.
-
-### Phase 2 — ATS & AI parity (the 2026 table stakes)
-
-**P2.1 Completeness + ATS readiness score (no server needed)**
-
-- Rule-based checks: contact present, sections complete, no empty
-  placeholders, dates present, summary length, action-verb bullets.
-- Real-time score panel beside the editor (client-side, mirrors Rezi/Neuradesk).
-
-**P2.2 JD keyword gap analysis**
-
-- Paste a JD → tokenize → highlight which keywords appear/missing across the
-  resume; suggestion list of missing terms. Pure client-side in P2.
-
-**P2.3 AI content assists (serverless route)**
-
-- Endpoints (Astro server endpoint or Netlify/Cloudflare function) wrapping an
-  LLM; **keys never in the client bundle**.
-- Features: bullet strengthener (verb-led, metric-aware), summary generator,
-  tailoring a copy to a JD, "start from job title" first draft.
-- UX rule (per RoleWorth lesson): every generated claim is editable + clearly
-  flagged as AI, user must review before export. Optionally a local "proof"
-  note field per bullet.
-
-**P2.4 Import**
-
-- Parse a pasted text / uploaded PDF or DOCX / LinkedIn "Save to PDF" export
-  into the store model. Open-source parse (or an LLM via server route) filling
-  personal details, work, education, skills.
-
-**P2.5 Cover letter**
-
-- Same editor flow + matching theme template; PDF export; consistency with
-  resume branding.
-
-**P2.6 Share links**
-
-- Static, view-only public page rendered from a public URL (id-based);
-  autosaved resume is fetchable. Track views later.
-
-### Phase 3 — Differentiators
-
-**P3.1 Multi-version & per-job tailoring**
-
-- Duplicate a resume into versions; name + attach a JD note per version;
-  side-by-side diff of versions (Resumly-style).
-
-**P3.2 Application tracker (optional Teal-like)**
-
-- Kanban of applications; each item stores a resume version link, JD, status,
-  notes; export CSV. Keep optional — big scope, defer unless user demand.
-
-**P3.3 Coherence linter (Neuradesk-style)**
-
-- Client-side checks: overlapping date ranges, title vs experience mismatch,
-  skills claimed in summary but missing from skills list, contact details in
-  multiple places.
-
-**P3.4 Multilingual + RTL**
-
-- i18n section headers (EN default; then ES, HIN, etc.); RTL layout support;
-  language-aware font in exports.
-
-**P3.5 Reliability**
-
-- Autosave to IndexedDB, undo/redo history, draft recovery banner.
-
-**P3.6 Resume → personal website**
-
-- Generate a static personal-page from the same data (fits Astro static
-  model naturally: one data JSON → one .astro page).
-
-### Phase 4 — Optional (market-expanding)
-
-- Photo block w/ EXIF-aware rotation + disable for ATS-strict markets.
-- Interview prep: role-specific Q&A from JD.
-- Job match score: score a resume against a JD link.
-- Analytics on share links (views, referrer).
-- Mobile companions (web app / PWA first — cheap).
+### A4. Demo seed control
+- Demo templates opt-in or one-time, not re-flooded every dashboard load
+- “Reset demos” / “Remove demos” actions
 
 ---
 
-## 4. Prioritization rationale
+## Phase B — Local power features
 
-1. **Preview + templates + export (P1)** are non-negotiable: they close our
-   three biggest gaps vs the entire category and make the product "finished."
-2. **Honest free tier (P1.4)** is a cheap, credible wedge the incumbents
-   squandered via trial traps — and it works with our existing no-account,
-   browser-local architecture.
-3. **ATS score + keyword gap (P2)** are client-side, dependency-light, and
-   match 2026 buying criteria ("will it pass + what do I pay").
-4. **AI (P2.3)** is expected by reviewers/users but crowded; ship it after the
-   product works because it requires server infra + guardrails.
-5. **Tracker/i18n/website (P3)** are scope-heavy differentiators — only invest
-   once P1–P2 are proven.
+### B1. Versions / snapshots
+- Named snapshots before import, tailor, or big edits
+- Diff summary (optional, light) + restore one click
+- All stored in IndexedDB with the resume
 
-## 5. Suggested build order (small batches)
+### B2. Deeper JD tailor (client-only)
+- Paste JD → propose changes to summary **and** multiple roles/skills
+- Accept / reject per bullet (not only first role)
+- Uses Chrome AI or user’s API key; fully skippable offline
 
-1. ResumePreview rendering the store + theme model
-2. 3–5 ATS-safe themes + hot-switch (content preserved)
-3. PDF/DOCX export + convert export
-4. Free-tier gating + pricing copy on marketing pages
-5. ATS completeness score + JD keyword panel
-6. AI endpoint(s) + review-flagged generation
-7. Import (paste/text first, PDF later)
-8. Share links + cover letter
+### B3. Print & page fit
+- Soft page-break hints in preview
+- “Fit to one page” density/spacing adjust (user-triggered)
+- Avoid surprise cut-offs on PDF
+
+### B4. Interview packet (local)
+- From one JD: resume variant + cover letter + optional talking-point notes
+- Pack export as files on disk (PDF/JSON) — no share tracking
+
+### B5. Achievement prompts
+- Gentle nudges on bullets missing metrics (% / $ / #)
+- Optional AI rewrite that preserves facts; user confirms
+
+---
+
+## Phase C — Desktop craft
+
+### C1. Keyboard-first editor
+- Step jump shortcuts, command palette (export, check, match, theme)
+- Focus traps / drawer a11y pass
+
+### C2. Photo (optional, template-aware)
+- Local image only (IndexedDB / object URL); never uploaded
+- Hide on ATS-safe layouts; show on creative ones
+
+### C3. Cover letter parity
+- Letter templates matching resume themes
+- Cover letter DOCX export
+
+### C4. DOCX layout option
+- Keep flat ATS DOCX as default
+- Optional “match preview layout” for multi-column where feasible
+
+### C5. Responsive polish
+- Tablet split editor/preview as primary layout
+- Mobile: single-column, preview on demand — not a redesign of desktop
+
+---
+
+## Phase D — Optional client-side Drive (later)
+
+### D1. Google Drive backup / restore
+- Browser OAuth (user’s Google account)
+- Write/read a Cavren backup file in **their** Drive
+- Explicit consent; works only online; core app still offline without it
+- **No** Cavren server, token storage only in the browser
+
+Out of scope for D: Cavren-hosted sync, multi-user collaboration, view-tracking share links.
+
+---
+
+## Explicitly out of scope (for now)
+
+- Monetization, paywalled PDF, trials, ads
+- Cavren accounts / server database as source of truth
+- Analytics, pixel trackers, session replay
+- Job board / CRM / recruiter marketplace
+- Mobile-native apps
+- AI proxy that sends resume text to Cavren-owned infra
+
+---
+
+## Suggested build order
+
+| Order | Item | Status |
+|------:|------|--------|
+| 1 | A1 PWA offline | Done |
+| 2 | A2–A3 Data ownership + full backup | Done |
+| 3 | A4 Demo seed control | Done |
+| 4 | B1 Versions | Done |
+| 5 | B2 Deeper tailor | Done |
+| 6 | B3 Page fit | Done |
+| 7 | B4–B5 Interview packet + metrics prompts | Done |
+| 8 | C1–C5 Craft (keyboard, photo, letter, DOCX option, responsive) | Done — desktop/tablet shell + mobile FAB |
+| 9 | D1 Drive backup/restore | Done (client OAuth; needs your client ID) |
+
+Polish remaining: richer multi-column DOCX, Drive UX hardening, photo in PDF export.
+
+
+---
+
+## Done definition (per feature)
+
+- Works with network disabled (except Drive/AI that need the network)
+- No new third-party data collection
+- Desktop/tablet usable without horizontal doom-scrolling in the editor
+- Documented in privacy/features copy if it changes the data story

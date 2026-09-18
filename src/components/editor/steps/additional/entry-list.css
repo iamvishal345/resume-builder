@@ -1,0 +1,71 @@
+/* Flat multi-field entry rows (volunteer, certifications) — no nested muted cards */
+
+.entry-list {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-element);
+  background: var(--color-background-surface);
+  overflow: hidden;
+}
+
+.entry-list-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3);
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.entry-list-item:last-child {
+  border-bottom: none;
+}
+
+.entry-list-item-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-2);
+  width: 100%;
+}
+
+.entry-list-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-3);
+  width: 100%;
+}
+
+.entry-list-fields-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.entry-list-fields-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.entry-list-span-full {
+  grid-column: 1 / -1;
+}
+
+.entry-list-check {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  min-height: var(--spacing-10);
+  padding-top: var(--spacing-5);
+}
+
+@media (max-width: 720px) {
+  .entry-list-fields,
+  .entry-list-fields-2,
+  .entry-list-fields-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .entry-list-check {
+    padding-top: 0;
+  }
+}

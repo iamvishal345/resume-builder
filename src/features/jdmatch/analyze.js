@@ -1,3 +1,5 @@
+import { toSkillList } from "@features/resume/skillList";
+
 // JD keyword gap analysis — pure client-side.
 // Extracts candidate keywords (1–3 word terms) from a job description and
 // reports which already appear on the resume text vs which are missing.
@@ -59,13 +61,15 @@ export const resumeTextOf = (data) => {
   const parts = [
     pd.firstName, pd.lastName, pd.designation, pd.email, pd.city, pd.state,
     pd.country, pd.address, pd.pinCode, pd.contactNumber,
-    ...(data.socialLinks || []).map((l) => l.descriptionValue).filter(Boolean),
+    ...(data.socialLinks || []).flatMap((l) =>
+      [l.value, l.descriptionValue].filter(Boolean),
+    ),
     (data.summary || ""),
     ...(data.experience || []).flatMap((e) => [
       e.positionTitle, e.companyName, e.workSummary,
     ]),
     ...(data.education || []).flatMap((e) => [e.degree, e.schoolName]),
-    ...(data.skills || []).map((s) => s.name),
+    ...toSkillList(data.skills).map((s) => s.name),
     ...(data.extras || []).flatMap((s) =>
       (s.data || []).map((i) => i.name || i.value)
     ),

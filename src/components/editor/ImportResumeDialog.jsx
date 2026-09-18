@@ -6,13 +6,30 @@ import { HStack, VStack } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { Upload, FileUp, FileText, CheckCircle2 } from "lucide-react";
-import { defaultResumeData, useStore } from "@store";
+import { defaultResumeData, useStore, resumeDataOf } from "@store";
 import { parseResumeText } from "@features/import/parse";
+import { toSkillList } from "@features/resume/skillList";
 import {
   extractTextFromFile,
   isJsonBackupFile,
 } from "@features/import/extract";
 import { parseResumeBackup } from "@features/resumes/backup";
+import { saveVersion } from "@features/resumes/versions";
+
+const snapshotBeforeImport = async () => {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("resume");
+    if (!id) return;
+    await saveVersion(
+      id,
+      resumeDataOf(useStore.getState()),
+      `Before import · ${new Date().toLocaleString()}`,
+    );
+  } catch {
+    /* ignore */
+  }
+};
 
 const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
   const [text, setText] = useState("");
@@ -48,25 +65,27 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
     onOpenChange(false);
   };
 
-  const apply = () => {
+  const apply = async () => {
+    await snapshotBeforeImport();
     replacePersonalDetails({ ...parsed.pd });
     setResumeSummary(parsed.summary);
     if (parsed.experience.length) setWorkHistory(parsed.experience);
     if (parsed.education.length) setEducation(parsed.education);
-    if (parsed.skills.length) setSkills(parsed.skills);
+    if (parsed.skills.length) setSkills(toSkillList(parsed.skills));
     if (parsed.extras.length) setAdditionalSections(parsed.extras);
     reset();
   };
 
   const restoreJsonBackup = (file) => {
     const reader = new FileReader();
-    reader.onload = () => {
+    reader.onload = async () => {
       try {
         const result = parseResumeBackup(String(reader.result));
         if (!result.ok) {
           setFileStatus({ type: "error", message: result.error });
           return;
         }
+        await snapshotBeforeImport();
         const merged = { ...defaultResumeData(), ...result.doc.data };
         applyResumeData(merged);
         reset();

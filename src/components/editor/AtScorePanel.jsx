@@ -1,10 +1,10 @@
-import React, { useMemo } from "react";
-import { Button } from "@astryxdesign/core/Button";
+import { useMemo } from "react";
 import { Card } from "@astryxdesign/core/Card";
 import { HStack, VStack } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
-import { Check, X, CheckCircle2 } from "lucide-react";
+import { CheckCircle2, X } from "lucide-react";
 import { computeResumeScore } from "@features/ats/score";
+import { CheckList } from "./CheckList";
 
 const ScoreToken = ({ score }) => {
   const color = score >= 90 ? "success" : score >= 70 ? "warning" : "error";
@@ -21,8 +21,22 @@ const ScoreToken = ({ score }) => {
 const AtScorePanel = ({ data, onJumpStep, bare = false }) => {
   const { score, checks, passed, total } = useMemo(
     () => computeResumeScore(data),
-    [data]
+    [data],
   );
+
+  const items = checks.map((check) => ({
+    id: check.id,
+    label: check.label,
+    hint: !check.ok ? check.hint : null,
+    titleColor: check.ok ? "primary" : "secondary",
+    action: !check.ok,
+    step: check.step,
+    icon: check.ok ? (
+      <CheckCircle2 size={16} color="var(--color-success)" />
+    ) : (
+      <X size={16} color="var(--color-error)" />
+    ),
+  }));
 
   const body = (
     <VStack gap={3} width="100%">
@@ -37,57 +51,28 @@ const AtScorePanel = ({ data, onJumpStep, bare = false }) => {
         </VStack>
         <ScoreToken score={score} />
       </HStack>
-      <VStack gap={1} width="100%">
-          {checks.map((check) => (
-            <HStack
-              key={check.id}
-              justify="between"
-              align="center"
-              gap={3}
-              width="100%"
-              padding={1}
-            >
-              <HStack gap={2} align="start">
-                {check.ok ? (
-                  <CheckCircle2 size={16} color="var(--color-success)" />
-                ) : (
-                  <X size={16} color="var(--color-error)" />
-                )}
-                <VStack gap={0}>
-                  <Text
-                    type="inherit"
-                    size="md"
-                    weight="medium"
-                    color={check.ok ? "primary" : "secondary"}
-                  >
-                    {check.label}
-                  </Text>
-                  {!check.ok && check.hint ? (
-                    <Text type="inherit" size="sm" color="secondary">
-                      {check.hint}
-                    </Text>
-                  ) : null}
-                </VStack>
-              </HStack>
-              {!check.ok ? (
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  icon={<Check size={13} />}
-                  label="Fix"
-                  onClick={() => onJumpStep(check.step)}
-                />
-              ) : null}
-            </HStack>
-          ))}
-        </VStack>
-      </VStack>
+      {passed === 0 ? (
+        <Text type="inherit" size="sm" color="secondary">
+          Add your skills, experience and education — the score updates live as
+          you type.
+        </Text>
+      ) : null}
+      <CheckList
+        items={items}
+        onFix={(item) => onJumpStep(item.step)}
+      />
+    </VStack>
   );
 
   if (bare) return body;
 
-  return <Card padding={4} variant="default">{body}</Card>;
+  return (
+    <Card padding={4} variant="default">
+      {body}
+    </Card>
+  );
 };
 
 export default AtScorePanel;
+
 export { ScoreToken };

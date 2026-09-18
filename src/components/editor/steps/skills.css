@@ -1,0 +1,76 @@
+/* Flat skills editor — rows with hairline dividers, not cards */
+
+.skill-list {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-element);
+  background: var(--color-background-surface);
+  overflow: hidden;
+}
+
+.skill-list-head,
+.skill-row {
+  display: grid;
+  grid-template-columns: var(--spacing-8) minmax(0, 1fr) auto var(--spacing-8);
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-1-5) var(--spacing-2);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.skill-list-head {
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-background-muted);
+  padding-block: var(--spacing-2);
+}
+
+.skill-list-head-level {
+  justify-self: center;
+  min-width: 7rem;
+  text-align: center;
+}
+
+.skill-row {
+  border-bottom: 1px solid var(--color-border);
+  background: transparent;
+}
+
+.skill-row:last-child {
+  border-bottom: none;
+}
+
+.skill-row-rating {
+  justify-self: center;
+  min-width: 7rem;
+  display: flex;
+  justify-content: center;
+}
+
+.skill-list .draggable-list {
+  gap: 0;
+}
+
+.skill-list-no-level .skill-list-head,
+.skill-list-no-level .skill-row,
+.skill-row-no-level {
+  grid-template-columns: var(--spacing-8) minmax(0, 1fr) var(--spacing-8);
+}
+
+@media (max-width: 640px) {
+  .skill-list-head,
+  .skill-row {
+    grid-template-columns: var(--spacing-8) minmax(0, 1fr) var(--spacing-8);
+    grid-template-rows: auto auto;
+  }
+
+  .skill-list-head-level {
+    display: none;
+  }
+
+  .skill-row-rating {
+    grid-column: 2;
+    justify-self: start;
+    min-width: 0;
+  }
+}

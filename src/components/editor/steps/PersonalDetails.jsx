@@ -76,7 +76,7 @@ const formStructure = [
   },
 ];
 
-function PersonalDetails({ onNext }) {
+function PersonalDetails({ onNext, onPrev, nextLabel }) {
   const personalDetails = useStore((state) => state.personalDetails);
   const socialLinks = useStore((state) => state.socialLinks);
   const setPersonalDetails = useStore((state) => state.setPersonalDetails);
@@ -100,15 +100,12 @@ function PersonalDetails({ onNext }) {
   const handleSocialLinksValueChange = (value, field, link) => {
     setSocialLinks(
       socialLinks.map((item) => {
-        if (item.descriptionKey === link.descriptionKey) {
-          if (field === "description") {
-            item.descriptionValue = value;
-          } else {
-            item.value = value;
-          }
+        if (item.descriptionKey !== link.descriptionKey) return item;
+        if (field === "description") {
+          return { ...item, descriptionValue: value };
         }
-        return item;
-      })
+        return { ...item, value };
+      }),
     );
   };
 
@@ -122,7 +119,57 @@ function PersonalDetails({ onNext }) {
         </>
       }
       onNext={onNext}
+      onPrev={onPrev}
+      nextLabel={nextLabel}
     >
+      <HStack gap={2} align="center" wrap>
+        {personalDetails.photoDataUrl ? (
+          <img
+            src={personalDetails.photoDataUrl}
+            alt=""
+            width={48}
+            height={48}
+            style={{
+              borderRadius: "50%",
+              objectFit: "cover",
+              border: "1px solid var(--color-border)",
+            }}
+          />
+        ) : null}
+        <Button
+          variant="secondary"
+          size="sm"
+          label={personalDetails.photoDataUrl ? "Change photo" : "Add photo"}
+          onClick={() => {
+            const input = document.createElement("input");
+            input.type = "file";
+            input.accept = "image/jpeg,image/png,image/webp";
+            input.onchange = () => {
+              const file = input.files?.[0];
+              if (!file || file.size > 800_000) {
+                window.alert("Use a JPG/PNG under 800KB (stored only on this device).");
+                return;
+              }
+              const reader = new FileReader();
+              reader.onload = () =>
+                setPersonalDetails("photoDataUrl", String(reader.result));
+              reader.readAsDataURL(file);
+            };
+            input.click();
+          }}
+        />
+        {personalDetails.photoDataUrl ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            label="Remove photo"
+            onClick={() => setPersonalDetails("photoDataUrl", "")}
+          />
+        ) : null}
+        <Text type="inherit" size="sm" color="secondary">
+          Optional · stays in this browser · hide on ATS layouts via theme
+        </Text>
+      </HStack>
       <HStack gap={2} align="center" wrap>
         <Button
           variant="secondary"

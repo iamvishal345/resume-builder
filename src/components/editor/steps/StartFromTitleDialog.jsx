@@ -98,15 +98,20 @@ const StartFromTitleDialog = ({ isOpen, onOpenChange }) => {
           setSkills(
             parsed.skills
               .slice(0, 12)
-              .map((name) => ({ name: String(name).slice(0, 40), rating: 1 })),
+              .map((name) => ({
+                key: crypto.randomUUID(),
+                name: String(name).slice(0, 40),
+                level: 1,
+              })),
           );
         } else {
           setSkills(
             skills
               .concat(
                 parsed.skills.slice(0, 6).map((name) => ({
+                  key: crypto.randomUUID(),
                   name: String(name).slice(0, 40),
-                  rating: 1,
+                  level: 1,
                 })),
               )
               .slice(0, 18),

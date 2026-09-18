@@ -265,9 +265,14 @@ export const parseResumeText = (text) => {
       const ratingMatch = name.match(/(\d{1,2})\s*\/\s*10|\b(\d{1,3})\s*%|(●+|[○●]\s*[○●]*)$/);
       if (ratingMatch) {
         const rate = ratingMatch[1] ? Math.max(1, Math.min(5, Math.round(Number(ratingMatch[1]) / 2))) : 6 - (ratingMatch[3] ? ratingMatch[3].length : 3);
-        skills.push({ name: name.replace(/(\d{1,2}\s*\/\s*10|\b\d{1,3}\s*%|●+\s*[○●]*)/g, "").trim(), rating: Math.max(1, Math.min(5, rate)) });
+        skills.push({
+          name: name
+            .replace(/(\d{1,2}\s*\/\s*10|\b\d{1,3}\s*%|●+\s*[○●]*)/g, "")
+            .trim(),
+          level: Math.max(1, Math.min(5, rate)),
+        });
       } else {
-        skills.push({ name, rating: 1 });
+        skills.push({ name, level: 1 });
       }
     }
   }

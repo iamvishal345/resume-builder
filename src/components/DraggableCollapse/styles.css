@@ -12,3 +12,7 @@
 .collapse-icon.active {
   transform: rotateZ(-180deg);
 }
+
+.draggable-list {
+  width: 100%;
+}

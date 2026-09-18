@@ -2,6 +2,22 @@
 
 Project-specific guidance for AI coding agents.
 
+## Product principles (Cavren)
+
+Community resume builder — **not** monetization-first.
+
+| Principle | Rule |
+|-----------|------|
+| Local-first | Resumes live in the browser (IndexedDB). No Cavren servers for app data. |
+| Privacy | No analytics/harvesting SDKs. No accounts required. |
+| Offline PWA | Installable; core edit/preview/export works offline once cached. |
+| Devices | Optimize for **desktop & tablet**; mobile is secondary. |
+| Data ownership | Import / export / full backup & restore are first-class. |
+| Future sync | Optional **client-side** Google Drive backup/restore only — still no Cavren backend. |
+| AI | On-device (Chrome AI) or user's own API key; never a Cavren-hosted proxy. |
+
+Feature backlog: see `FEATURE_PLAN.md`. Prefer offline-capable, client-only work.
+
 <!-- ASTRYX:START -->
 Astryx v0.6.0 · 163 components
 CLI: run every command as `npx astryx <cmd>` (shown below as `astryx ...`).

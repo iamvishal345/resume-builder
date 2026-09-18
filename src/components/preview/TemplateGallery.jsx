@@ -9,31 +9,28 @@ import {
   RESUME_CATEGORIES,
   RESUME_TEMPLATES,
   resolveTemplate,
+  settingsFromTemplate,
   templatesByCategory,
 } from "@features/resume/templates";
 import "./gallery.css";
 
-const Swatch = ({ templateId, active, settings, onSelect }) => {
+const Swatch = ({ templateId, active, onSelect }) => {
   const template = resolveTemplate(templateId);
+  const preset = settingsFromTemplate(template);
   return (
     <button
       type="button"
       className={active ? "r-swatch r-swatch-active" : "r-swatch"}
-      onClick={() =>
-        onSelect({
-          templateId,
-          paletteId: template.palette,
-          fontId: template.font,
-          layoutId: template.layout,
-        })
-      }
+      onClick={() => onSelect(preset)}
     >
       <span className="r-swatch-frame">
         <span className="r-swatch-canvas">
           <Resume
             data={SAMPLE_RESUME}
             templateId={templateId}
-            settings={{ ...settings, layoutId: template.layout }}
+            paletteId={preset.paletteId}
+            fontId={preset.fontId}
+            settings={preset}
           />
         </span>
       </span>
@@ -44,7 +41,9 @@ const Swatch = ({ templateId, active, settings, onSelect }) => {
 
 const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
   const activeTemplate = resolveTemplate(settings?.templateId);
-  const [category, setCategory] = useState(activeTemplate.category);
+  const [category, setCategory] = useState(
+    activeTemplate.category || RESUME_CATEGORIES[0].id,
+  );
   const templates = templatesByCategory(category);
 
   return (
@@ -57,7 +56,7 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
     >
       <DialogHeader
         title="Choose a template"
-        subtitle="Content is preserved — switch anytime. Tweak layout, colors and typography from the preview pane."
+        subtitle="Zety-style layouts — sidebar, single column, split, and multiple skill styles. Content is preserved."
         onOpenChange={onOpenChange}
       />
       <div className="r-gallery-scroll">
@@ -80,14 +79,13 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
                 key={t.id}
                 templateId={t.id}
                 active={t.id === settings?.templateId}
-                settings={settings}
                 onSelect={onSelect}
               />
             ))}
           </div>
 
           <Text type="inherit" size="sm" color="secondary">
-            {RESUME_TEMPLATES.length} templates · ATS-safe options included
+            {RESUME_TEMPLATES.length} templates · tweak any layout in Customize
           </Text>
         </VStack>
       </div>

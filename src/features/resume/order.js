@@ -1,3 +1,6 @@
+import { toSkillList } from "@features/resume/skillList";
+import { extraSectionHasContent } from "@features/resume/extraContent";
+
 // Canonical resume sections and ordering helpers.
 // Section ids: "summary" | "experience" | "education" | "skills" | `extra:<n>`
 // where <n> is the numeric id of an additional section (e.g. Languages = 5).
@@ -38,15 +41,17 @@ export const availableSections = (data) => {
   if (data.summary) out.push({ id: "summary", title: "Summary" });
   if (data.experience?.length) out.push({ id: "experience", title: "Experience" });
   if (data.education?.length) out.push({ id: "education", title: "Education" });
-  if (data.skills?.some((s) => s.name)) out.push({ id: "skills", title: "Skills" });
+  const skillEntries = toSkillList(data.skills);
+  if (skillEntries.some((s) => s.name)) out.push({ id: "skills", title: "Skills" });
   for (const section of data.extras || []) {
-    const items = section?.data || [];
+    if (!extraSectionHasContent(section)) continue;
     const id = `extra:${section.id}`;
-    if (section.id === 5 && items.some((item) => item.name)) {
-      out.push({ id, title: "Languages" });
-    } else if (section.title) {
-      out.push({ id, title: section.title });
-    }
+    out.push({
+      id,
+      title:
+        (section.title && String(section.title).trim()) ||
+        (section.id === 5 ? "Languages" : "Additional"),
+    });
   }
   return out;
 };

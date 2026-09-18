@@ -1,30 +1,44 @@
 import React from "react";
+import { Button } from "@astryxdesign/core/Button";
+import { VStack } from "@astryxdesign/core/Layout";
+import { Text } from "@astryxdesign/core/Text";
+
 class ErrorBoundary extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      hasError: false,
-    };
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError() {
     return { hasError: true };
   }
-  componentDidCatch(error, info) {
-    console.log(error);
-    console.log(info);
+
+  componentDidCatch(error) {
+    if (typeof console !== "undefined" && console.error) {
+      console.error(error);
+    }
   }
+
   render() {
-    return this.state.hasError ? (
-      <div className="errorImageOverlay">
-        <div className="errorImageContainer"></div>
-        <h2 className="errorImageText">Uh Oh! Seems this Page is Broken</h2>
-        <p className="errorImageSubText">
-          Please Check Your Internet Connection or <a href="/">Click here</a>
-        </p>
-      </div>
-    ) : (
-      this.props.children
+    if (!this.state.hasError) return this.props.children;
+
+    return (
+      <VStack gap={3} align="center" padding={6} width="100%">
+        <Text type="inherit" size="2xl" weight="semibold" color="primary">
+          Something went wrong
+        </Text>
+        <Text type="inherit" size="md" color="secondary">
+          Reload the page or go back to your resumes. Your drafts are saved in
+          this browser.
+        </Text>
+        <Button
+          variant="primary"
+          label="My resumes"
+          onClick={() => {
+            window.location.href = "/resumes";
+          }}
+        />
+      </VStack>
     );
   }
 }

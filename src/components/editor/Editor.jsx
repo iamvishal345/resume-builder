@@ -5,34 +5,12 @@ import {
   VStack,
   HStack,
 } from "@astryxdesign/core/Layout";
-import { Grid } from "@astryxdesign/core/Grid";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
-import { Text } from "@astryxdesign/core/Text";
-import { IconButton } from "@astryxdesign/core/IconButton";
 import { Divider } from "@astryxdesign/core/Divider";
-import {
-  SegmentedControl,
-  SegmentedControlItem,
-} from "@astryxdesign/core/SegmentedControl";
-import {
-  Moon,
-  Sun,
-  LayoutTemplate,
-  Download,
-  Check,
-  ClipboardCheck,
-  Target,
-  Sparkles,
-  Palette,
-  Undo2,
-  Redo2,
-  FileDown,
-  Upload,
-  LayoutDashboard,
-} from "lucide-react";
+import { LayoutTemplate, Palette } from "lucide-react";
+import { Text } from "@astryxdesign/core/Text";
 import ErrorBoundary from "@routes/ErrorBoundary";
-import AuthBar from "../auth/AuthBar";
 import AiSettingsDialog from "../ai/AiSettingsDialog";
 import ResumePreview from "../preview/ResumePreview";
 import FullPagePreview from "../preview/FullPagePreview";
@@ -44,16 +22,23 @@ import JobMatchDrawer from "./JobMatchDrawer";
 import AtScorePanel from "./AtScorePanel";
 import CoherencePanel from "./CoherencePanel";
 import SideDrawer from "./SideDrawer";
+import Stepper, { STEPS } from "./Stepper";
+import EditorTopbar from "./EditorTopbar";
+import CommandPalette from "./CommandPalette";
+import VersionsPanel from "./VersionsPanel";
 import { computeResumeScore } from "@features/ats/score";
+import { findWeakBullets, metricsHint } from "@features/ats/metrics";
+import { nextFitPreset } from "@features/resume/pageFit";
 import { buildResumeDocx, downloadDocx } from "@features/export/docx";
 import { getPalette } from "@features/resume/palettes";
+import { resumeViewModel } from "@features/resume/viewModel";
 import {
   useStore,
-  clearSavedAt,
   resumeDataOf,
   defaultResumeData,
 } from "@store";
 import { getResume, putResume, newResume } from "@features/resumes/db";
+import { saveVersion } from "@features/resumes/versions";
 import { downloadResumePdf } from "@features/export/pdf";
 import PersonalDetails from "./steps/PersonalDetails";
 import WorkHistory from "./steps/WorkHistory";
@@ -61,15 +46,6 @@ import Education from "./steps/Education";
 import Skills from "./steps/Skills";
 import Summary from "./steps/Summary";
 import AdditionalSections from "./steps/AdditionalSections";
-
-const STEPS = [
-  { id: "personal-details", label: "Details" },
-  { id: "summary", label: "Summary" },
-  { id: "work-history", label: "Experience" },
-  { id: "education", label: "Education" },
-  { id: "skills", label: "Skills" },
-  { id: "additional-sections", label: "Extras" },
-];
 
 const STEP_COMPONENTS = {
   "personal-details": PersonalDetails,
@@ -87,32 +63,6 @@ const SECTION_STEP_FOR_ID = {
   education: "education",
   skills: "skills",
 };
-
-const Stepper = ({ stepIndex, onJump }) => (
-  <HStack
-    gap={1}
-    justify="start"
-    width="100%"
-    className="editor-stepper"
-    role="tablist"
-    aria-label="Resume sections"
-  >
-    {STEPS.map((step, index) => {
-      const done = index < stepIndex;
-      const active = index === stepIndex;
-      return (
-        <Button
-          key={step.id}
-          variant={active ? "primary" : done ? "secondary" : "ghost"}
-          size="sm"
-          label={step.label}
-          icon={done ? <Check size={13} /> : null}
-          onClick={() => onJump(index)}
-        />
-      );
-    })}
-  </HStack>
-);
 
 const useAutosaveLabel = () => {
   const [label, setLabel] = useState("Saved in this browser");
@@ -149,20 +99,7 @@ const EditorPage = () => {
   const [resumeId, setResumeId] = useState(null);
   const createdAtRef = useRef(null);
   const docName = useRef("Untitled resume");
-  const renameLocked = useRef(false);
   const baselineName = useRef("");
-  const applyResumeData = useStore((state) => state.applyResumeData);
-
-  // The document title the user sees and can edit. Once the user has
-  // explicitly renamed the resume we stop auto-deriving the title from the
-  // person's name during autosave and keep whatever they typed.
-  const [docTitle, setDocTitle] = useState("Untitled resume");
-  const updateDocTitle = (next) => {
-    const value = (next || "").trim();
-    docName.current = value || "Untitled resume";
-    renameLocked.current = true;
-    setDocTitle(docName.current);
-  };
 
   // Load/create the resume this URL points at (IndexedDB in newer builds;
   // a legacy bare /editor URL falls back to the persisted local draft).
@@ -189,7 +126,6 @@ const EditorPage = () => {
             .filter(Boolean)
             .join(" ");
           setResumeId(doc.id);
-          clearSavedAt();
         } catch {
           window.location.replace("/resumes");
         }
@@ -201,7 +137,10 @@ const EditorPage = () => {
       window.history.replaceState(null, "", nextUrl);
       await putResume(doc);
       if (cancelled) return;
+      if (apply) apply(doc.data);
       createdAtRef.current = doc.createdAt;
+      docName.current = doc.name || "Untitled resume";
+      baselineName.current = "";
       setResumeId(doc.id);
     })();
     return () => {
@@ -262,8 +201,14 @@ const EditorPage = () => {
   }, [stepIndex]);
 
   useEffect(() => {
-    if (mode !== "editor") return undefined;
     const onKey = (event) => {
+      const mod = event.metaKey || event.ctrlKey;
+      if (mod && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setPaletteOpen(true);
+        return;
+      }
+      if (mode !== "editor") return;
       const target = event.target;
       const typing =
         target &&
@@ -271,7 +216,6 @@ const EditorPage = () => {
           target.tagName === "TEXTAREA" ||
           target.isContentEditable);
       if (typing) return;
-      const mod = event.metaKey || event.ctrlKey;
       if (mod && event.key.toLowerCase() === "z") {
         event.preventDefault();
         if (event.shiftKey) redo();
@@ -285,11 +229,16 @@ const EditorPage = () => {
       }
       if (event.key === "ArrowRight" || event.key === "PageDown") goNext();
       if (event.key === "ArrowLeft" || event.key === "PageUp") goPrev();
+      if (mod && event.key >= "1" && event.key <= "6") {
+        event.preventDefault();
+        goToStep(Number(event.key) - 1);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [mode]);
 
+  const isLastStep = stepIndex === STEPS.length - 1;
   const ActiveStep = STEP_COMPONENTS[STEPS[stepIndex].id];
 
   const [theme, setTheme] = useState(() =>
@@ -307,6 +256,10 @@ const EditorPage = () => {
   const [templateGalleryOpen, setTemplateGalleryOpen] = useState(false);
   const [customizeOpen, setCustomizeOpen] = useState(false);
   const [aiSettingsOpen, setAiSettingsOpen] = useState(false);
+  const [versionsOpen, setVersionsOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [exportError, setExportError] = useState("");
+  const [fitNote, setFitNote] = useState("");
 
   const personalDetails = useStore((state) => state.personalDetails);
   const socialLinks = useStore((state) => state.socialLinks);
@@ -316,16 +269,39 @@ const EditorPage = () => {
   const skills = useStore((state) => state.skills);
   const additionalSections = useStore((state) => state.additionalSections);
 
+  const resumeData = useMemo(
+    () =>
+      resumeViewModel({
+        personalDetails,
+        socialLinks,
+        resumeSummary,
+        workHistory,
+        education,
+        skills,
+        additionalSections,
+      }),
+    [
+      personalDetails,
+      socialLinks,
+      resumeSummary,
+      workHistory,
+      education,
+      skills,
+      additionalSections,
+    ],
+  );
+
   const ats = useMemo(
     () =>
       computeResumeScore({
-        pd: personalDetails,
-        experience: workHistory,
-        education,
-        skills,
-        summary: resumeSummary,
+        pd: resumeData.pd,
+        experience: resumeData.experience,
+        education: resumeData.education,
+        skills: resumeData.skills,
+        summary: resumeData.summary,
+        extras: resumeData.extras,
       }),
-    [personalDetails, workHistory, education, skills, resumeSummary],
+    [resumeData],
   );
 
   const toggleTheme = () => {
@@ -340,212 +316,179 @@ const EditorPage = () => {
   };
 
   const handleDownloadPdf = async () => {
+    setExportError("");
     try {
       await downloadResumePdf({
-        data: {
-          pd: personalDetails,
-          socialLinks,
-          summary: resumeSummary,
-          experience: workHistory,
-          education,
-          skills,
-          extras: additionalSections,
-        },
+        data: resumeData,
         templateId: resumeSettings.templateId,
         paletteId: resumeSettings.paletteId,
         fontId: resumeSettings.fontId,
         settings: resumeSettings,
       });
     } catch (error) {
-      console.error("PDF export failed", error);
+      setExportError(
+        error?.message || "PDF export failed. Try again in a moment.",
+      );
     }
   };
 
   const handleDownloadDocx = async () => {
+    setExportError("");
     try {
       const palette = getPalette(resumeSettings.paletteId);
       const fontId = resumeSettings.fontId ?? "sans";
-      const blob = await buildResumeDocx(
-        {
-          pd: personalDetails,
-          socialLinks,
-          summary: resumeSummary,
-          experience: workHistory,
-          education,
-          skills,
-          extras: additionalSections,
-        },
-        { palette, fontId, settings: resumeSettings },
-      );
+      const blob = await buildResumeDocx(resumeData, {
+        palette,
+        fontId,
+        settings: resumeSettings,
+      });
       const name =
-        [personalDetails.firstName, personalDetails.lastName]
+        [resumeData.pd?.firstName, resumeData.pd?.lastName]
           .filter(Boolean)
           .join(" ") || "resume";
       await downloadDocx(blob, name);
     } catch (error) {
-      console.error("DOCX export failed", error);
+      setExportError(
+        error?.message || "DOCX export failed. Try again in a moment.",
+      );
     }
   };
+
+  const handleFitPage = () => {
+    const next = nextFitPreset(resumeSettings);
+    setResumeSettings(next);
+    setFitNote(
+      `Density set to ${next.fontSize}px / ${next.lineHeight} line height. Click again to tighten further, or Customize to reset.`,
+    );
+  };
+
+  const commandActions = useMemo(
+    () => [
+      ...STEPS.map((step, i) => ({
+        id: `step-${step.id}`,
+        label: `Go to ${step.label || step.title || step.id}`,
+        hint: `⌘${i + 1}`,
+        keywords: step.id,
+        run: () => {
+          setMode("editor");
+          goToStep(i);
+        },
+      })),
+      {
+        id: "preview",
+        label: "Preview mode",
+        run: () => setMode("preview"),
+      },
+      {
+        id: "letter",
+        label: "Cover letter",
+        run: () => setMode("letter"),
+      },
+      {
+        id: "check",
+        label: "Resume check",
+        run: () => setResumeCheckOpen(true),
+      },
+      {
+        id: "match",
+        label: "Job match",
+        run: () => setJobMatchOpen(true),
+      },
+      {
+        id: "import",
+        label: "Import resume",
+        run: () => setImportOpen(true),
+      },
+      {
+        id: "templates",
+        label: "Templates",
+        run: () => setTemplateGalleryOpen(true),
+      },
+      {
+        id: "customize",
+        label: "Customize theme",
+        run: () => setCustomizeOpen(true),
+      },
+      {
+        id: "versions",
+        label: "Versions / snapshots",
+        run: () => setVersionsOpen(true),
+      },
+      {
+        id: "fit",
+        label: "Fit to one page",
+        run: handleFitPage,
+      },
+      {
+        id: "pdf",
+        label: "Download PDF",
+        run: handleDownloadPdf,
+      },
+      {
+        id: "docx",
+        label: "Download DOCX",
+        run: handleDownloadDocx,
+      },
+      {
+        id: "snapshot",
+        label: "Save snapshot now",
+        run: async () => {
+          if (!resumeId) return;
+          await saveVersion(resumeId, resumeDataOf(useStore.getState()));
+          setVersionsOpen(true);
+        },
+      },
+      {
+        id: "library",
+        label: "My resumes",
+        run: () => {
+          window.location.href = "/resumes";
+        },
+      },
+    ],
+    [resumeId, resumeSettings],
+  );
 
   return (
     <ErrorBoundary>
       <Layout
         height="auto"
         padding={3}
-        contentWidth={1320}
+        contentWidth={1400}
+        className="editor-page-layout"
         header={
-          <VStack gap={2} width="100%" className="editor-topbar">
-            <HStack justify="between" align="center" gap={3} width="100%" wrap>
-              <SegmentedControl
-                value={mode}
-                onChange={setMode}
-                label="Editor view"
-                size="sm"
-              >
-                <SegmentedControlItem value="editor" label="Edit" />
-                <SegmentedControlItem value="preview" label="Preview" />
-                <SegmentedControlItem value="letter" label="Letter" />
-              </SegmentedControl>
-              <HStack gap={2} align="center" wrap>
-                <IconButton
-                  label="AI preferences"
-                  tooltip="AI preferences"
-                  variant="ghost"
-                  icon={<Sparkles size={16} />}
-                  onClick={() => setAiSettingsOpen(true)}
-                />
-                <IconButton
-                  label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-                  tooltip={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-                  variant="ghost"
-                  icon={
-                    theme === "dark" ? <Sun size={16} /> : <Moon size={16} />
-                  }
-                  onClick={toggleTheme}
-                />
-                <AuthBar />
-              </HStack>
-            </HStack>
-            <HStack
-              justify="between"
-              align="center"
-              gap={3}
-              width="100%"
-              wrap
-              className="editor-actions"
-            >
-              <HStack gap={2} align="center" wrap>
-                <Text
-                  type="inherit"
-                  size="sm"
-                  weight="medium"
-                  color={
-                    autosaveLabel === "Saved in this browser"
-                      ? "secondary"
-                      : "accent"
-                  }
-                >
-                  {autosaveLabel}
-                </Text>
-                <Divider
-                  orientation="vertical"
-                  style={{ height: "var(--spacing-5)" }}
-                />
-                <HStack gap={0} align="center">
-                  <IconButton
-                    label="Undo (Ctrl+Z)"
-                    tooltip="Undo (Ctrl+Z)"
-                    variant="ghost"
-                    icon={<Undo2 size={16} />}
-                    disabled={!canUndo}
-                    onClick={undo}
-                  />
-                  <IconButton
-                    label="Redo (Ctrl+Shift+Z)"
-                    tooltip="Redo (Ctrl+Shift+Z)"
-                    variant="ghost"
-                    icon={<Redo2 size={16} />}
-                    disabled={!canRedo}
-                    onClick={redo}
-                  />
-                  <Divider
-                    orientation="vertical"
-                    style={{ height: "var(--spacing-5)" }}
-                  />
-                  <IconButton
-                    label="My resumes"
-                    tooltip="All my resumes"
-                    variant="ghost"
-                    icon={<LayoutDashboard size={16} />}
-                    onClick={() => {
-                      window.location.href = "/resumes";
-                    }}
-                  />
-                </HStack>
-              </HStack>
-              <HStack gap={2} align="center" wrap>
-                <HStack gap={1} align="center">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    icon={<Upload size={14} />}
-                    label="Import"
-                    onClick={() => setImportOpen(true)}
-                  />
-                </HStack>
-                <Divider
-                  orientation="vertical"
-                  style={{ height: "var(--spacing-5)" }}
-                />
-                <HStack gap={1} align="center">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    icon={<ClipboardCheck size={14} />}
-                    label={`Resume check · ${ats.score}/100`}
-                    onClick={() => setResumeCheckOpen(true)}
-                  />
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    icon={<Target size={14} />}
-                    label="Job match"
-                    onClick={() => setJobMatchOpen(true)}
-                  />
-                </HStack>
-                <Divider
-                  orientation="vertical"
-                  style={{ height: "var(--spacing-5)" }}
-                />
-                <HStack gap={1} align="center">
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    icon={<FileDown size={14} />}
-                    label="DOCX"
-                    onClick={handleDownloadDocx}
-                  />
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    icon={<Download size={14} />}
-                    label="Download PDF"
-                    onClick={handleDownloadPdf}
-                  />
-                </HStack>
-              </HStack>
-            </HStack>
-          </VStack>
+          <EditorTopbar
+            mode={mode}
+            onModeChange={setMode}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+            onAiSettings={() => setAiSettingsOpen(true)}
+            autosaveLabel={autosaveLabel}
+            canUndo={canUndo}
+            canRedo={canRedo}
+            onUndo={undo}
+            onRedo={redo}
+            onImport={() => setImportOpen(true)}
+            atsScore={ats.score}
+            onResumeCheck={() => setResumeCheckOpen(true)}
+            onJobMatch={() => setJobMatchOpen(true)}
+            onDownloadDocx={handleDownloadDocx}
+            onDownloadPdf={handleDownloadPdf}
+            onVersions={() => setVersionsOpen(true)}
+            onFitPage={handleFitPage}
+            onCommandPalette={() => setPaletteOpen(true)}
+            exportError={exportError || fitNote}
+          />
         }
         content={
-          <LayoutContent isScrollable={false} padding={4}>
+          <LayoutContent isScrollable={false} padding={4} className="editor-layout-content">
             {mode === "letter" ? (
-              <CoverLetterEditor onBack={() => setMode("editor")} />
+              <CoverLetterEditor />
             ) : mode === "editor" ? (
-              <VStack gap={3} width="100%">
-                <HStack justify="between" align="center" width="100%">
+              <div className="editor-shell">
+                <div className="editor-tools-row">
                   <Stepper stepIndex={stepIndex} onJump={goToStep} />
-                  <HStack gap={2}>
+                  <HStack gap={2} wrap>
                     <Button
                       variant="secondary"
                       size="sm"
@@ -561,12 +504,18 @@ const EditorPage = () => {
                       onClick={() => setTemplateGalleryOpen(true)}
                     />
                   </HStack>
-                </HStack>
-                <Grid columns={{ minWidth: 460, max: 2 }} gap={4} align="start">
-                  <div className="editor-step-col">
-                    <ActiveStep onNext={goNext} onPrev={goPrev} />
+                </div>
+                <div className="editor-workspace">
+                  <div className="editor-form-pane">
+                    <ActiveStep
+                      onNext={
+                        isLastStep ? () => setMode("preview") : goNext
+                      }
+                      onPrev={stepIndex > 0 ? goPrev : undefined}
+                      nextLabel={isLastStep ? "Finish" : "Next"}
+                    />
                   </div>
-                  <VStack gap={3} width="100%">
+                  <aside className="editor-preview-pane" aria-label="Live resume preview">
                     <Card padding={0} variant="transparent">
                       <div className="preview-sheet-wrap">
                         <div className="preview-sheet-container">
@@ -577,9 +526,16 @@ const EditorPage = () => {
                         </div>
                       </div>
                     </Card>
-                  </VStack>
-                </Grid>
-              </VStack>
+                  </aside>
+                </div>
+                <button
+                  type="button"
+                  className="editor-mobile-preview-fab"
+                  onClick={() => setMode("preview")}
+                >
+                  Preview resume
+                </button>
+              </div>
             ) : (
               <FullPagePreview
                 onDownloadPdf={handleDownloadPdf}
@@ -603,11 +559,12 @@ const EditorPage = () => {
         <AtScorePanel
           bare
           data={{
-            pd: personalDetails,
-            experience: workHistory,
-            education,
-            skills,
-            summary: resumeSummary,
+            pd: resumeData.pd,
+            experience: resumeData.experience,
+            education: resumeData.education,
+            skills: resumeData.skills,
+            summary: resumeData.summary,
+            extras: resumeData.extras,
           }}
           onJumpStep={(index) => {
             setMode("editor");
@@ -622,12 +579,12 @@ const EditorPage = () => {
         <CoherencePanel
           bare
           data={{
-            pd: personalDetails,
-            socialLinks,
-            summary: resumeSummary,
-            experience: workHistory,
-            education,
-            skills,
+            pd: resumeData.pd,
+            socialLinks: resumeData.socialLinks,
+            summary: resumeData.summary,
+            experience: resumeData.experience,
+            education: resumeData.education,
+            skills: resumeData.skills,
           }}
           onJumpStep={(index) => {
             setMode("editor");
@@ -635,19 +592,36 @@ const EditorPage = () => {
             goToStep(index);
           }}
         />
+        {findWeakBullets(workHistory).length > 0 ? (
+          <>
+            <Divider
+              orientation="horizontal"
+              style={{ margin: "var(--spacing-3) 0" }}
+            />
+            <VStack gap={2} width="100%">
+              <Text type="inherit" size="sm" weight="semibold" color="primary">
+                Achievement prompts
+              </Text>
+              <Text type="inherit" size="sm" color="secondary">
+                {metricsHint}
+              </Text>
+              {findWeakBullets(workHistory)
+                .slice(0, 3)
+                .map((row) => (
+                  <Text key={row.index} type="inherit" size="sm" color="secondary">
+                    {row.role}
+                    {row.company ? ` · ${row.company}` : ""}: {row.weak.length}{" "}
+                    bullet(s) without numbers
+                  </Text>
+                ))}
+            </VStack>
+          </>
+        ) : null}
       </SideDrawer>
       <JobMatchDrawer
         isOpen={jobMatchOpen}
         onOpenChange={setJobMatchOpen}
-        data={{
-          pd: personalDetails,
-          socialLinks,
-          summary: resumeSummary,
-          experience: workHistory,
-          education,
-          skills,
-          extras: additionalSections,
-        }}
+        data={resumeData}
       />
       <ImportResumeDialog isOpen={importOpen} onOpenChange={setImportOpen} />
       <TemplateGallery
@@ -666,18 +640,18 @@ const EditorPage = () => {
         isOpen={aiSettingsOpen}
         onOpenChange={setAiSettingsOpen}
       />
+      <VersionsPanel
+        open={versionsOpen}
+        onOpenChange={setVersionsOpen}
+        resumeId={resumeId}
+      />
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        actions={commandActions}
+      />
     </ErrorBoundary>
   );
 };
 
 export default EditorPage;
-
-export const EditorPageError = () => {
-  return (
-    <VStack gap={2} align="center" padding={4}>
-      <Text type="large" color="accent">
-        Something went wrong
-      </Text>
-    </VStack>
-  );
-};

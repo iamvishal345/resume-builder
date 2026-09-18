@@ -42,12 +42,19 @@ const JobMatchDrawer = ({ isOpen, onOpenChange, data }) => {
   };
 
   const addMissingToSkills = () => {
-    const existing = new Set(skills.map((s) => s.name.toLowerCase()));
+    const list = Array.isArray(skills) ? skills : [];
+    const existing = new Set(
+      list.map((s) => (s.name || "").toLowerCase()).filter(Boolean),
+    );
     const additions = analysis.missing
       .filter((k) => !existing.has(k.term.toLowerCase()))
       .slice(0, 12)
-      .map((k) => ({ name: k.term, rating: 1 }));
-    if (additions.length) setSkills([...skills, ...additions]);
+      .map((k) => ({
+        key: crypto.randomUUID(),
+        name: k.term,
+        level: 1,
+      }));
+    if (additions.length) setSkills([...list, ...additions]);
   };
 
   return (

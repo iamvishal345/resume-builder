@@ -4,7 +4,7 @@ import { StepCard } from "./StepLayout";
 import { useStore } from "@store";
 import RichTextEditor from "../../ui/RichTextEditor";
 
-function Summary({ onNext }) {
+function Summary({ onNext, onPrev, nextLabel }) {
   const resumeSummary = useStore((state) => state.resumeSummary);
   const setResumeSummary = useStore((state) => state.setResumeSummary);
   const personalDetails = useStore((state) => state.personalDetails);
@@ -13,6 +13,8 @@ function Summary({ onNext }) {
       title="Write About Yourself"
       description="Summarize your work experience, education and skills here."
       onNext={onNext}
+      onPrev={onPrev}
+      nextLabel={nextLabel}
     >
       <VStack gap={3} width="100%">
         <RichTextEditor

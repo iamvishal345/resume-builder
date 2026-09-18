@@ -19,3 +19,8 @@
   overflow-y: auto;
   width: 100%;
 }
+
+/* List items: allow end actions to wrap under label on narrow tablets */
+.rdash-shell .astryx-list-item {
+  align-items: flex-start;
+}
