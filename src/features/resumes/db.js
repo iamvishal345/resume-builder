@@ -94,37 +94,102 @@ export const clearAllResumes = async () => {
 };
 
 // One-time migration: the old single resume lived in the zustand persist
-// `resume-data` localStorage blob. If IndexedDB is empty, promote it into a
-// document so the new listing page is the single source of truth.
-export const migrateLegacyLocalStorage = async () => {
+// `resume-data` localStorage blob. Promote it into IndexedDB only when the
+// library is empty. Zustand still writes that key as a live editor cache, so
+// we must never re-run after the first successful attempt (or when docs exist).
+const LEGACY_MIGRATION_FLAG = "cavren-legacy-migrated";
+
+let legacyMigrationInflight = null;
+
+const markLegacyMigrated = () => {
   try {
-    const raw = window.localStorage.getItem("resume-data");
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    const state = parsed && parsed.state;
-    if (!state || !state.resumeSettings) return null;
-    const hasContent =
-      (state.personalDetails && Object.keys(state.personalDetails).length > 0) ||
-      (state.socialLinks && state.socialLinks.length > 0) ||
-      (state.workHistory && state.workHistory.length > 0) ||
-      (state.education && state.education.length > 0) ||
-      (state.skills && state.skills.length > 0) ||
-      (typeof state.resumeSummary === "string" && state.resumeSummary.length > 0) ||
-      (state.additionalSections && state.additionalSections.length > 0) ||
-      Boolean(state.coverLetter && (state.coverLetter.recipient || state.coverLetter.body)) ||
-      !isDefaultSettings(state.resumeSettings);
-    if (!hasContent) return null;
-    const pd = state.personalDetails || {};
-    const name =
-      [pd.firstName, pd.lastName].filter(Boolean).join(" ") || "My resume";
-    const doc = newResume(name, state);
-    await putResume(doc);
-    window.localStorage.removeItem("resume-data");
-    window.localStorage.removeItem("resume-data-saved-at");
-    return doc;
+    window.localStorage.setItem(LEGACY_MIGRATION_FLAG, "1");
+  } catch {
+    /* private mode */
+  }
+};
+
+export const clearLegacyMigrationFlag = () => {
+  try {
+    window.localStorage.removeItem(LEGACY_MIGRATION_FLAG);
+  } catch {
+    /* private mode */
+  }
+};
+
+export const migrateLegacyLocalStorage = async () => {
+  if (typeof window === "undefined") return null;
+  try {
+    if (window.localStorage.getItem(LEGACY_MIGRATION_FLAG) === "1") {
+      return null;
+    }
   } catch {
     return null;
   }
+
+  if (legacyMigrationInflight) return legacyMigrationInflight;
+
+  legacyMigrationInflight = (async () => {
+    try {
+      // Re-check after claiming the in-flight slot.
+      if (window.localStorage.getItem(LEGACY_MIGRATION_FLAG) === "1") {
+        return null;
+      }
+
+      const existing = await listResumes();
+      if (existing.length > 0) {
+        markLegacyMigrated();
+        return null;
+      }
+
+      const raw = window.localStorage.getItem("resume-data");
+      if (!raw) {
+        markLegacyMigrated();
+        return null;
+      }
+      const parsed = JSON.parse(raw);
+      const state = parsed && parsed.state;
+      if (!state || !state.resumeSettings) {
+        markLegacyMigrated();
+        return null;
+      }
+      const hasContent =
+        (state.personalDetails &&
+          Object.keys(state.personalDetails).length > 0) ||
+        (state.socialLinks && state.socialLinks.length > 0) ||
+        (state.workHistory && state.workHistory.length > 0) ||
+        (state.education && state.education.length > 0) ||
+        (state.skills && state.skills.length > 0) ||
+        (typeof state.resumeSummary === "string" &&
+          state.resumeSummary.length > 0) ||
+        (state.additionalSections && state.additionalSections.length > 0) ||
+        Boolean(
+          state.coverLetter &&
+            (state.coverLetter.recipient || state.coverLetter.body),
+        ) ||
+        !isDefaultSettings(state.resumeSettings);
+      if (!hasContent) {
+        markLegacyMigrated();
+        return null;
+      }
+
+      // Claim before put so overlapping callers cannot mint duplicates.
+      markLegacyMigrated();
+
+      const pd = state.personalDetails || {};
+      const name =
+        [pd.firstName, pd.lastName].filter(Boolean).join(" ") || "My resume";
+      const doc = newResume(name, state);
+      await putResume(doc);
+      return doc;
+    } catch {
+      return null;
+    } finally {
+      legacyMigrationInflight = null;
+    }
+  })();
+
+  return legacyMigrationInflight;
 };
 
 const isDefaultSettings = (settings) => {

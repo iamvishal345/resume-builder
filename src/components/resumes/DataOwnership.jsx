@@ -18,6 +18,7 @@ import {
   clearAllResumes,
   newResume,
   putResume,
+  clearLegacyMigrationFlag,
 } from "@features/resumes/db";
 import {
   exportBackupPack,
@@ -115,6 +116,13 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
         return;
       }
       const n = await clearAllResumes();
+      clearLegacyMigrationFlag();
+      try {
+        window.localStorage.removeItem("resume-data");
+        window.localStorage.removeItem("resume-data-saved-at");
+      } catch {
+        /* private mode */
+      }
       setDemoMode("off");
       setDemoModeState("off");
       setMessage(`Cleared ${n} resume(s) from this device.`);

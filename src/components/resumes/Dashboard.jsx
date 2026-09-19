@@ -31,6 +31,7 @@ import {
 } from "@features/resumes/db";
 import {
   seedDemoResumes,
+  ensureDemoResumes,
 } from "@features/resumes/seedDemo";
 import { getDemoMode, setDemoMode } from "@features/resumes/prefs";
 import {
@@ -70,7 +71,7 @@ const ResumesDashboard = () => {
       await migrateLegacyLocalStorage();
       const mode = getDemoMode();
       if (mode === "on") {
-        await seedDemoResumes();
+        await ensureDemoResumes();
       } else if (mode === "once") {
         await seedDemoResumes();
         setDemoMode("off");

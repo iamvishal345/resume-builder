@@ -178,8 +178,9 @@ const variantDocs = () => {
 export const buildDemoResumeDocs = () => [...templateDocs(), ...variantDocs()];
 
 /**
- * Upsert every demo resume into IndexedDB on page load. Stable ids mean
- * reloads refresh content instead of duplicating.
+ * Upsert every demo resume into IndexedDB. Stable ids mean reloads refresh
+ * content instead of duplicating. Prefer `ensureDemoResumes` on dashboard
+ * load so user edits aren't wiped every visit.
  */
 export const seedDemoResumes = async () => {
   const docs = buildDemoResumeDocs();
@@ -187,6 +188,13 @@ export const seedDemoResumes = async () => {
     await putResume(doc);
   }
   return docs.length;
+};
+
+/** Seed demos only when none are present (idempotent dashboard load). */
+export const ensureDemoResumes = async () => {
+  const all = await listResumes();
+  if (all.some((doc) => isDemoResumeId(doc.id))) return 0;
+  return seedDemoResumes();
 };
 
 export const isDemoResumeId = (id) =>

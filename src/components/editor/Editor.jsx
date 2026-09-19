@@ -38,7 +38,7 @@ import {
   resumeDataOf,
   defaultResumeData,
 } from "@store";
-import { getResume, putResume, newResume } from "@features/resumes/db";
+import { getResume, putResume, newResume, listResumes } from "@features/resumes/db";
 import { saveVersion } from "@features/resumes/versions";
 import { downloadResumePdf } from "@features/export/pdf";
 import PersonalDetails from "./steps/PersonalDetails";
@@ -102,8 +102,8 @@ const EditorPage = () => {
   const docName = useRef("Untitled resume");
   const baselineName = useRef("");
 
-  // Load/create the resume this URL points at (IndexedDB in newer builds;
-  // a legacy bare /editor URL falls back to the persisted local draft).
+  // Load the resume this URL points at. Bare /editor opens the most recent
+  // library doc (or mints one only when the library is empty).
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
@@ -111,38 +111,51 @@ const EditorPage = () => {
     const apply = useStore.getState().applyResumeData;
     let cancelled = false;
     (async () => {
+      const openDoc = (doc) => {
+        if (cancelled || !doc) return;
+        if (apply) apply(doc.data);
+        createdAtRef.current = doc.createdAt || Date.now();
+        docName.current = doc.name || "Untitled resume";
+        const pd = doc.data?.personalDetails || {};
+        baselineName.current = [pd.firstName, pd.lastName]
+          .filter(Boolean)
+          .join(" ");
+        setResumeId(doc.id);
+      };
+
       if (id) {
         try {
           const doc = await getResume(id);
+          if (cancelled) return;
           if (!doc) {
             window.location.replace("/resumes");
             return;
           }
-          if (cancelled) return;
-          if (apply) apply(doc.data);
-          createdAtRef.current = doc.createdAt || Date.now();
-          docName.current = doc.name || "Untitled resume";
-          const pd = doc.data?.personalDetails || {};
-          baselineName.current = [pd.firstName, pd.lastName]
-            .filter(Boolean)
-            .join(" ");
-          setResumeId(doc.id);
+          openDoc(doc);
         } catch {
-          window.location.replace("/resumes");
+          if (!cancelled) window.location.replace("/resumes");
         }
         return;
       }
-      // Bare /editor visit: mint a fresh document so nothing gets lost.
-      const doc = newResume("Untitled resume", defaultResumeData());
-      const nextUrl = `/editor?resume=${doc.id}`;
-      window.history.replaceState(null, "", nextUrl);
-      await putResume(doc);
-      if (cancelled) return;
-      if (apply) apply(doc.data);
-      createdAtRef.current = doc.createdAt;
-      docName.current = doc.name || "Untitled resume";
-      baselineName.current = "";
-      setResumeId(doc.id);
+
+      try {
+        const docs = await listResumes();
+        if (cancelled) return;
+        if (docs.length > 0) {
+          const doc = docs[0];
+          window.history.replaceState(null, "", `/editor?resume=${doc.id}`);
+          openDoc(doc);
+          return;
+        }
+        const doc = newResume("Untitled resume", defaultResumeData());
+        if (cancelled) return;
+        window.history.replaceState(null, "", `/editor?resume=${doc.id}`);
+        await putResume(doc);
+        if (cancelled) return;
+        openDoc(doc);
+      } catch {
+        if (!cancelled) window.location.replace("/resumes");
+      }
     })();
     return () => {
       cancelled = true;
