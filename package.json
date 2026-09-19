@@ -46,5 +46,6 @@
   "allowScripts": {
     "@astryxdesign/cli@0.6.0": true,
     "@astryxdesign/core@0.6.0": true
-  }
+  },
+  "packageManager": "pnpm@12.4.2"
 }
