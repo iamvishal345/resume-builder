@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { SITE } from "../data/site";
+import PwaUpdateToast from "../components/PwaUpdateToast.jsx";
 
 interface Props {
   title?: string;
@@ -99,8 +100,6 @@ const fullTitle = `${title} · ${SITE.name}`;
   </head>
   <body>
     <slot />
-    <script>
-      import "../pwa.ts";
-    </script>
+    <PwaUpdateToast client:load />
   </body>
 </html>

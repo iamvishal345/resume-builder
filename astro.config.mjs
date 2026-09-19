@@ -60,8 +60,8 @@ export default defineConfig({
           },
         ],
       },
-      // Avoid workbox terser flakiness in some CI/sandbox environments
-      injectRegister: "script",
+      // Manual registration via PwaUpdateToast (virtual:pwa-register)
+      injectRegister: false,
       minify: false,
     }),
   ],
