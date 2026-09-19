@@ -57,8 +57,13 @@ const Accomplishments = ({ id }) => {
           </Text>
         </VStack>
         {items?.map((formObj) => (
-          <Grid columns={12} gap={3} key={formObj.key}>
-            <GridSpan columns={4}>
+          <Grid
+            columns={{ minWidth: 200, max: 3 }}
+            gap={3}
+            width="100%"
+            key={formObj.key}
+          >
+            <GridSpan columns={1}>
               <TextInput
                 id={formObj.key}
                 htmlName="title"
@@ -74,7 +79,7 @@ const Accomplishments = ({ id }) => {
                 }
               />
             </GridSpan>
-            <GridSpan columns={6}>
+            <GridSpan columns={1}>
               <TextArea
                 id={formObj.key}
                 htmlName="description"
@@ -91,8 +96,8 @@ const Accomplishments = ({ id }) => {
                 }
               />
             </GridSpan>
-            <GridSpan columns={2}>
-              <HStack align="center" justify="center" width="100%">
+            <GridSpan columns={1}>
+              <HStack align="center" justify="start" width="100%">
                 <IconButton
                   label="Remove accomplishment"
                   tooltip="Remove accomplishment"

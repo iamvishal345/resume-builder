@@ -15,7 +15,7 @@ const Stepper = ({ stepIndex, onJump }) => (
   <HStack
     gap={1}
     justify="start"
-    width="100%"
+    wrap="wrap"
     className="editor-stepper"
     role="tablist"
     aria-label="Resume sections"

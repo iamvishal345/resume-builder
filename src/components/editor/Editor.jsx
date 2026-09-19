@@ -8,6 +8,7 @@ import {
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Divider } from "@astryxdesign/core/Divider";
+import { useToast } from "@astryxdesign/core/Toast";
 import { LayoutTemplate, Palette } from "lucide-react";
 import { Text } from "@astryxdesign/core/Text";
 import ErrorBoundary from "@routes/ErrorBoundary";
@@ -259,7 +260,7 @@ const EditorPage = () => {
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [exportError, setExportError] = useState("");
-  const [fitNote, setFitNote] = useState("");
+  const showToast = useToast();
 
   const personalDetails = useStore((state) => state.personalDetails);
   const socialLinks = useStore((state) => state.socialLinks);
@@ -357,9 +358,13 @@ const EditorPage = () => {
   const handleFitPage = () => {
     const next = nextFitPreset(resumeSettings);
     setResumeSettings(next);
-    setFitNote(
-      `Density set to ${next.fontSize}px / ${next.lineHeight} line height. Click again to tighten further, or Customize to reset.`,
-    );
+    showToast({
+      body: `Density set to ${next.fontSize}px / ${next.lineHeight} line height. Click again to tighten further, or Customize to reset.`,
+      type: "info",
+      uniqueID: "fit-page-density",
+      collisionBehavior: "overwrite",
+      autoHideDuration: 6000,
+    });
   };
 
   const commandActions = useMemo(
@@ -477,7 +482,7 @@ const EditorPage = () => {
             onVersions={() => setVersionsOpen(true)}
             onFitPage={handleFitPage}
             onCommandPalette={() => setPaletteOpen(true)}
-            exportError={exportError || fitNote}
+            exportError={exportError}
           />
         }
         content={
@@ -488,7 +493,7 @@ const EditorPage = () => {
               <div className="editor-shell">
                 <div className="editor-tools-row">
                   <Stepper stepIndex={stepIndex} onJump={goToStep} />
-                  <HStack gap={2} wrap>
+                  <HStack gap={2} wrap="wrap">
                     <Button
                       variant="secondary"
                       size="sm"

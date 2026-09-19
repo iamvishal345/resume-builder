@@ -54,7 +54,7 @@ const educationFormStructure = [
 
 const SingleEducationForm = ({ formData, setFieldValue }) => {
   return (
-    <Grid columns={2} gap={3}>
+    <Grid columns={{ minWidth: 240, max: 2 }} gap={3} width="100%">
         {educationFormStructure.map((field) => (
           <React.Fragment key={field.name}>
             {field.type === "date" ? (

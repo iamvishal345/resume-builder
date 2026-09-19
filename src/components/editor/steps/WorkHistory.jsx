@@ -48,7 +48,7 @@ const workHistoryFormStructure = [
 
 const SingleWorkHistoryForm = ({ formData, setFieldValue }) => {
   return (
-    <Grid columns={2} gap={3}>
+    <Grid columns={{ minWidth: 240, max: 2 }} gap={3} width="100%">
       {workHistoryFormStructure.map((field) => (
         <GridSpan
           key={field.name}

@@ -1,6 +1,11 @@
 /* App shell: desktop & tablet first; mobile is usable, not primary.
    Container queries on .editor-shell so layout follows available width. */
 
+.editor-page-layout {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .editor-shell {
   container-type: inline-size;
   container-name: editor;
@@ -19,6 +24,15 @@
 
 .editor-form-pane {
   min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.editor-form-pane .astryx-grid,
+.editor-form-pane .astryx-card,
+.editor-form-pane .astryx-stack {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .editor-preview-pane {
@@ -41,6 +55,11 @@
   justify-content: space-between;
   gap: var(--spacing-2);
   width: 100%;
+  min-width: 0;
+}
+
+.editor-tools-row > * {
+  min-width: 0;
 }
 
 .editor-mobile-preview-fab {
@@ -52,6 +71,19 @@
   container-type: inline-size;
   container-name: topbar;
   padding: var(--spacing-2) var(--spacing-4);
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.editor-topbar > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.editor-topbar .astryx-stack[data-direction="row"] {
+  flex-wrap: wrap;
+  max-width: 100%;
 }
 
 .editor-actions {
@@ -59,6 +91,17 @@
   border: 1px solid var(--color-border);
   border-radius: var(--radius-element);
   background: var(--color-background-panel);
+  row-gap: var(--spacing-2);
+}
+
+.editor-actions-start,
+.editor-actions-end {
+  min-width: 0;
+  flex: 1 1 16rem;
+}
+
+.editor-actions-end {
+  justify-content: flex-end;
 }
 
 .editor-actions-cluster {
@@ -66,6 +109,18 @@
   align-items: center;
   gap: var(--spacing-1);
   flex-wrap: wrap;
+  min-width: 0;
+}
+
+.editor-stepper.astryx-stack,
+.editor-stepper {
+  flex: 1 1 12rem;
+  max-width: 100%;
+}
+
+.editor-actions-divider {
+  flex-shrink: 0;
+  align-self: center;
 }
 
 /* Tablet: slightly denser split */
@@ -98,11 +153,22 @@
     display: none;
   }
 
+  .editor-form-pane {
+    padding-bottom: calc(
+      var(--spacing-12) + var(--spacing-10) + env(safe-area-inset-bottom, 0px)
+    );
+  }
+
+  .editor-step-nav {
+    padding-bottom: var(--spacing-2);
+  }
+
   .editor-mobile-preview-fab {
     display: inline-flex;
     position: fixed;
-    right: var(--spacing-4);
-    bottom: var(--spacing-4);
+    left: var(--spacing-4);
+    right: auto;
+    bottom: calc(var(--spacing-4) + env(safe-area-inset-bottom, 0px));
     z-index: 40;
     align-items: center;
     gap: var(--spacing-2);
@@ -129,6 +195,10 @@
   .editor-actions-secondary {
     display: none;
   }
+
+  .editor-actions-divider.editor-actions-secondary {
+    display: none;
+  }
 }
 
 @container topbar (max-width: 640px) {
@@ -138,6 +208,19 @@
 
   .editor-topbar {
     padding: var(--spacing-2);
+  }
+
+  .editor-actions-start,
+  .editor-actions-end {
+    flex: 1 1 100%;
+  }
+
+  .editor-actions-end {
+    justify-content: flex-start;
+  }
+
+  .editor-actions-divider {
+    display: none;
   }
 }
 
@@ -158,11 +241,18 @@
       display: none;
     }
 
+    .editor-form-pane {
+      padding-bottom: calc(
+        var(--spacing-12) + var(--spacing-10) + env(safe-area-inset-bottom, 0px)
+      );
+    }
+
     .editor-mobile-preview-fab {
       display: inline-flex;
       position: fixed;
-      right: var(--spacing-4);
-      bottom: var(--spacing-4);
+      left: var(--spacing-4);
+      right: auto;
+      bottom: calc(var(--spacing-4) + env(safe-area-inset-bottom, 0px));
       z-index: 40;
     }
 

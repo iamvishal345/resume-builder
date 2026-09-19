@@ -62,10 +62,18 @@
   .entry-list-fields,
   .entry-list-fields-2,
   .entry-list-fields-4 {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .entry-list-check {
     padding-top: 0;
+  }
+
+  .entry-list-item {
+    min-width: 0;
+  }
+
+  .entry-list-item-head {
+    flex-wrap: wrap;
   }
 }

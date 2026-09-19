@@ -61,6 +61,11 @@ body {
   height: 35px;
 }
 
+html[data-theme="dark"] .brand img,
+html[data-theme="dark"] .hero-brand img {
+  filter: brightness(0) invert(1);
+}
+
 .brand span {
   color: color-mix(
     in srgb,
@@ -200,6 +205,7 @@ html[data-theme="dark"] .icon-dark {
   font-size: 1.05rem;
   color: var(--color-text-secondary);
   margin: 0 auto var(--spacing-6);
+  padding: 0 8px;
   max-width: 34em;
 }
 

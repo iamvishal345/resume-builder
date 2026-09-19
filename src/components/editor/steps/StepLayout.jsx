@@ -28,7 +28,14 @@ export const StepCard = ({
         </VStack>
         {children}
         {showNav && (onNext || onPrev) ? (
-          <HStack justify="between" align="center" width="100%" gap={3}>
+          <HStack
+            justify="between"
+            align="center"
+            width="100%"
+            gap={3}
+            wrap="wrap"
+            className="editor-step-nav"
+          >
             {onPrev ? (
               <Button
                 variant="ghost"

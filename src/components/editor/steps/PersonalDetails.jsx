@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "@astryxdesign/core/Button";
 import { Grid, GridSpan } from "@astryxdesign/core/Grid";
 import { IconButton } from "@astryxdesign/core/IconButton";
-import { HStack } from "@astryxdesign/core/Layout";
+import { HStack, VStack } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Plus, Sparkles, Trash2 } from "lucide-react";
@@ -122,7 +122,7 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
       onPrev={onPrev}
       nextLabel={nextLabel}
     >
-      <HStack gap={2} align="center" wrap>
+      <HStack gap={2} align="center" wrap="wrap">
         {personalDetails.photoDataUrl ? (
           <img
             src={personalDetails.photoDataUrl}
@@ -170,7 +170,7 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
           Optional · stays in this browser · hide on ATS layouts via theme
         </Text>
       </HStack>
-      <HStack gap={2} align="center" wrap>
+      <HStack gap={2} align="center" wrap="wrap">
         <Button
           variant="secondary"
           icon={<Sparkles size={15} />}
@@ -181,7 +181,7 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
           New here? Let AI draft a believable starting point.
         </Text>
       </HStack>
-      <Grid columns={2} gap={4}>
+      <Grid columns={{ minWidth: 240, max: 2 }} gap={4} width="100%">
         {formStructure.map((field) => (
           <GridSpan
             key={field.name}
@@ -200,7 +200,7 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
           </GridSpan>
         ))}
       </Grid>
-      <HStack>
+      <HStack wrap="wrap">
         <Button
           variant="secondary"
           icon={<Plus size={16} />}
@@ -208,10 +208,15 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
           onClick={handleAddSocialLink}
         />
       </HStack>
-      <Grid columns={12} gap={3}>
+      <VStack gap={3} width="100%">
         {socialLinks.map((link) => (
-          <React.Fragment key={link.descriptionKey}>
-            <GridSpan columns={5}>
+          <Grid
+            key={link.descriptionKey}
+            columns={{ minWidth: 160, max: 3 }}
+            gap={3}
+            width="100%"
+          >
+            <GridSpan columns={1}>
               <TextInput
                 id={link.descriptionKey}
                 htmlName={link.descriptionKey}
@@ -225,7 +230,7 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
                 }
               />
             </GridSpan>
-            <GridSpan columns={5}>
+            <GridSpan columns={1}>
               <TextInput
                 id={link.valueKey}
                 htmlName={link.valueKey}
@@ -239,8 +244,8 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
                 }
               />
             </GridSpan>
-            <GridSpan columns={2}>
-              <HStack align="center" justify="center" width="100%">
+            <GridSpan columns={1}>
+              <HStack align="center" justify="start" width="100%">
                 <IconButton
                   label="Remove social link"
                   tooltip="Remove social link"
@@ -250,9 +255,9 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
                 />
               </HStack>
             </GridSpan>
-          </React.Fragment>
+          </Grid>
         ))}
-      </Grid>
+      </VStack>
       <StartFromTitleDialog isOpen={aiDraftOpen} onOpenChange={setAiDraftOpen} />
     </StepCard>
   );

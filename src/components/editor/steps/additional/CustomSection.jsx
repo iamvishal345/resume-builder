@@ -57,8 +57,13 @@ const CustomSection = ({ id }) => {
           onChange={(value) => setSectionTitle(id, value)}
         />
         {items.map((formObj) => (
-          <Grid columns={12} gap={3} key={formObj.key}>
-            <GridSpan columns={5}>
+          <Grid
+            columns={{ minWidth: 220, max: 2 }}
+            gap={3}
+            width="100%"
+            key={formObj.key}
+          >
+            <GridSpan columns={1}>
               <TextInput
                 id={formObj.key}
                 htmlName="title"
@@ -69,7 +74,7 @@ const CustomSection = ({ id }) => {
                 onChange={(value) => setFieldValue("title", value, formObj.key)}
               />
             </GridSpan>
-            <GridSpan columns={7}>
+            <GridSpan columns={1}>
               <TextArea
                 id={`${formObj.key}-desc`}
                 htmlName="description"

@@ -48,7 +48,7 @@ const EditorTopbar = ({
   exportError,
 }) => (
   <VStack gap={2} width="100%" className="editor-topbar">
-    <HStack justify="between" align="center" gap={3} width="100%" wrap>
+    <HStack justify="between" align="center" gap={3} width="100%" wrap="wrap">
       <SegmentedControl
         value={mode}
         onChange={onModeChange}
@@ -59,7 +59,7 @@ const EditorTopbar = ({
         <SegmentedControlItem value="preview" label="Preview" />
         <SegmentedControlItem value="letter" label="Letter" />
       </SegmentedControl>
-      <HStack gap={2} align="center" wrap>
+      <HStack gap={2} align="center" wrap="wrap">
         <IconButton
           label="Command palette (Ctrl+K)"
           tooltip="Command palette (Ctrl+K)"
@@ -96,10 +96,10 @@ const EditorTopbar = ({
       align="center"
       gap={3}
       width="100%"
-      wrap
+      wrap="wrap"
       className="editor-actions"
     >
-      <HStack gap={2} align="center" wrap>
+      <HStack gap={2} align="center" wrap="wrap" className="editor-actions-start">
         <Text
           type="inherit"
           size="sm"
@@ -112,9 +112,10 @@ const EditorTopbar = ({
         </Text>
         <Divider
           orientation="vertical"
+          className="editor-actions-divider"
           style={{ height: "var(--spacing-5)" }}
         />
-        <HStack gap={0} align="center">
+        <HStack gap={0} align="center" wrap="wrap">
           <IconButton
             label="Undo (Ctrl+Z)"
             tooltip="Undo (Ctrl+Z)"
@@ -142,6 +143,7 @@ const EditorTopbar = ({
           </span>
           <Divider
             orientation="vertical"
+            className="editor-actions-divider"
             style={{ height: "var(--spacing-5)" }}
           />
           <IconButton
@@ -155,7 +157,7 @@ const EditorTopbar = ({
           />
         </HStack>
       </HStack>
-      <HStack gap={2} align="center" wrap>
+      <HStack gap={2} align="center" wrap="wrap" className="editor-actions-end">
         <span className="editor-actions-cluster editor-actions-secondary">
           <Button
             variant="secondary"
@@ -173,7 +175,7 @@ const EditorTopbar = ({
           />
         </span>
         <Divider
-          className="editor-actions-secondary"
+          className="editor-actions-secondary editor-actions-divider"
           orientation="vertical"
           style={{ height: "var(--spacing-5)" }}
         />
@@ -195,6 +197,7 @@ const EditorTopbar = ({
         </span>
         <Divider
           orientation="vertical"
+          className="editor-actions-divider"
           style={{ height: "var(--spacing-5)" }}
         />
         <span className="editor-actions-cluster">
