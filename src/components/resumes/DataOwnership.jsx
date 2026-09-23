@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Button } from "@astryxdesign/core/Button";
 import { Text } from "@astryxdesign/core/Text";
@@ -12,6 +12,7 @@ import {
   HardDrive,
   Cloud,
   Sparkles,
+  WifiOff,
 } from "lucide-react";
 import {
   listResumes,
@@ -42,6 +43,7 @@ import {
   downloadBackupFromDrive,
 } from "@features/resumes/drive";
 import { listVersions } from "@features/resumes/versions";
+import { estimateLocalStorage } from "@features/resumes/storageStats";
 
 const DataOwnership = ({ open, onOpenChange, onChanged }) => {
   const [busy, setBusy] = useState("");
@@ -50,10 +52,42 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
   const [demoMode, setDemoModeState] = useState(getDemoMode);
   const [clientId, setClientId] = useState(getGoogleClientId);
   const [restoreMode, setRestoreMode] = useState("merge");
+  const [storageInfo, setStorageInfo] = useState(null);
+  const [online, setOnline] = useState(
+    typeof navigator !== "undefined" ? navigator.onLine : true,
+  );
   const packInputRef = useRef(null);
+  const driveReady = isDriveConfigured();
+
+  const refreshStorage = async () => {
+    try {
+      setStorageInfo(await estimateLocalStorage());
+    } catch {
+      setStorageInfo(null);
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      setClientId(getGoogleClientId());
+      refreshStorage();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    const on = () => setOnline(true);
+    const off = () => setOnline(false);
+    window.addEventListener("online", on);
+    window.addEventListener("offline", off);
+    return () => {
+      window.removeEventListener("online", on);
+      window.removeEventListener("offline", off);
+    };
+  }, []);
 
   const refresh = async () => {
     onChanged?.();
+    await refreshStorage();
   };
 
   const withBusy = async (label, fn) => {
@@ -149,6 +183,16 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
 
   const driveBackup = () =>
     withBusy("drive", async () => {
+      if (!navigator.onLine) {
+        throw new Error(
+          "You're offline. Drive backup needs a network connection — use Download backup instead.",
+        );
+      }
+      if (!isDriveConfigured()) {
+        throw new Error(
+          "Add a Google OAuth client ID below first. Drive is optional — local backup always works.",
+        );
+      }
       const docs = (await listResumes()).filter((d) => !isDemoResumeId(d.id));
       await uploadBackupToDrive(docs);
       setMessage("Backup saved to your Google Drive.");
@@ -156,6 +200,14 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
 
   const driveRestore = () =>
     withBusy("drive", async () => {
+      if (!navigator.onLine) {
+        throw new Error(
+          "You're offline. Drive restore needs a network connection.",
+        );
+      }
+      if (!isDriveConfigured()) {
+        throw new Error("Add a Google OAuth client ID below first.");
+      }
       const text = await downloadBackupFromDrive();
       const result = await restoreFromText(text, {
         newResume,
@@ -193,6 +245,21 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
                 .r.json, .cavren.json) are files on your computer. Cavren has no
                 server for your content and does not harvest analytics.
               </Text>
+              {storageInfo ? (
+                <Text type="inherit" size="sm" color="secondary">
+                  {storageInfo.resumes} resume(s)
+                  {storageInfo.demos
+                    ? ` · ${storageInfo.demos} demo(s)`
+                    : ""}{" "}
+                  · {storageInfo.versions} snapshot(s)
+                  {storageInfo.usageLabel
+                    ? ` · ~${storageInfo.usageLabel} used`
+                    : ""}
+                  {storageInfo.quotaLabel
+                    ? ` of ~${storageInfo.quotaLabel}`
+                    : ""}
+                </Text>
+              ) : null}
             </VStack>
           </Card>
 
@@ -203,7 +270,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
               </Text>
               <Text type="inherit" size="sm" color="secondary">
                 Move to another computer: download one pack, restore with merge
-                or replace.
+                or replace. Works fully offline.
               </Text>
               <HStack gap={2} wrap>
                 <Button
@@ -285,10 +352,26 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
                 Google Drive (optional)
               </Text>
               <Text type="inherit" size="sm" color="secondary">
-                Client-side only. Paste your OAuth client ID (or set
-                PUBLIC_GOOGLE_CLIENT_ID). File goes to your Drive — not to
-                Cavren.
+                Never required. Core edit, preview, and local backup work
+                offline without Drive. Tokens stay in this browser — Cavren has
+                no server.
               </Text>
+              {!driveReady ? (
+                <Text type="inherit" size="sm" color="secondary">
+                  No client ID yet. Create an OAuth client in Google Cloud
+                  Console (Web application) and paste it below, or set
+                  PUBLIC_GOOGLE_CLIENT_ID at build time.
+                </Text>
+              ) : null}
+              {!online ? (
+                <HStack gap={2} align="center">
+                  <WifiOff size={14} />
+                  <Text type="inherit" size="sm" color="secondary">
+                    You're offline — Drive buttons are disabled. Use Download
+                    backup instead.
+                  </Text>
+                </HStack>
+              ) : null}
               <TextInput
                 label="Google OAuth client ID"
                 value={clientId}
@@ -302,7 +385,11 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
                   label="Save client ID"
                   onClick={() => {
                     setGoogleClientId(clientId);
-                    setMessage("Client ID saved in this browser.");
+                    setMessage(
+                      clientId.trim()
+                        ? "Client ID saved in this browser."
+                        : "Client ID cleared.",
+                    );
                   }}
                 />
                 <Button
@@ -310,7 +397,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
                   variant="secondary"
                   icon={<Cloud size={14} />}
                   label="Backup to Drive"
-                  disabled={!!busy || !isDriveConfigured()}
+                  disabled={!!busy || !driveReady || !online}
                   onClick={driveBackup}
                 />
                 <Button
@@ -318,7 +405,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
                   variant="ghost"
                   icon={<HardDrive size={14} />}
                   label="Restore from Drive"
-                  disabled={!!busy || !isDriveConfigured()}
+                  disabled={!!busy || !driveReady || !online}
                   onClick={driveRestore}
                 />
               </HStack>

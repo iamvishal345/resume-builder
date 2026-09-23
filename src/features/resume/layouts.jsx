@@ -14,7 +14,7 @@ import {
   ReferencesBlock,
   InterestsBlock,
 } from "./sections";
-import { availableSections, isExtra } from "./order";
+import { availableSections, columnsSplit, columnsWithSide, kindFromRef, findExtraByRef } from "./order";
 import { SectionShell } from "./canvas";
 
 const STYLE_DEFAULTS = {
@@ -23,8 +23,10 @@ const STYLE_DEFAULTS = {
   experienceStyle: "standard",
 };
 
+const sectionStyle = (sectionVars, id) => sectionVars?.[id] || undefined;
+
 /** Ordered section nodes for the resume paper. */
-export const BuildSections = ({ data, styles = {} }) => {
+export const BuildSections = ({ data, styles = {}, sectionVars = {} }) => {
   const skillStyle = styles.skillStyle || STYLE_DEFAULTS.skillStyle;
   const languageStyle = styles.languageStyle || STYLE_DEFAULTS.languageStyle;
   const experienceStyle =
@@ -36,7 +38,12 @@ export const BuildSections = ({ data, styles = {} }) => {
         return {
           ...entry,
           node: (
-            <section className="r-section" key="summary">
+            <section
+              className="r-section"
+              key="summary"
+              data-section="summary"
+              style={sectionStyle(sectionVars, "summary")}
+            >
               <SectionHeading title="Summary" />
               <RichText html={data.summary} />
             </section>
@@ -46,7 +53,12 @@ export const BuildSections = ({ data, styles = {} }) => {
         return {
           ...entry,
           node: (
-            <section className="r-section" key="experience">
+            <section
+              className="r-section"
+              key="experience"
+              data-section="experience"
+              style={sectionStyle(sectionVars, "experience")}
+            >
               <SectionHeading title="Experience" />
               <ExperienceItems
                 items={data.experience}
@@ -59,7 +71,12 @@ export const BuildSections = ({ data, styles = {} }) => {
         return {
           ...entry,
           node: (
-            <section className="r-section" key="education">
+            <section
+              className="r-section"
+              key="education"
+              data-section="education"
+              style={sectionStyle(sectionVars, "education")}
+            >
               <SectionHeading title="Education" />
               <EducationItems items={data.education} style={experienceStyle} />
             </section>
@@ -69,38 +86,42 @@ export const BuildSections = ({ data, styles = {} }) => {
         return {
           ...entry,
           node: (
-            <section className="r-section" key="skills">
+            <section
+              className="r-section"
+              key="skills"
+              data-section="skills"
+              style={sectionStyle(sectionVars, "skills")}
+            >
               <SectionHeading title="Skills" />
               <SkillList items={data.skills} style={skillStyle} />
             </section>
           ),
         };
       default: {
-        const section = (data.extras || []).find(
-          (extra) => `extra:${extra.id}` === entry.id
-        );
+        const section = findExtraByRef(data.extras || [], entry.id);
         const items = section?.data || [];
+        const kind = entry.kind ?? kindFromRef(entry.id, data.extras || []);
         let content = null;
-        switch (entry.id) {
-          case "extra:1":
+        switch (kind) {
+          case 1:
             content = <CustomSectionBlock items={items} title={entry.title} />;
             break;
-          case "extra:2":
+          case 2:
             content = <AccomplishmentsBlock items={items} />;
             break;
-          case "extra:3":
+          case 3:
             content = <VolunteerBlock items={items} />;
             break;
-          case "extra:4":
+          case 4:
             content = <CertificationsBlock items={items} />;
             break;
-          case "extra:5":
+          case 5:
             content = <LanguagesBlock items={items} style={languageStyle} />;
             break;
-          case "extra:6":
+          case 6:
             content = <ReferencesBlock items={items} />;
             break;
-          case "extra:7":
+          case 7:
             content = (
               <InterestsBlock
                 items={items}
@@ -113,12 +134,17 @@ export const BuildSections = ({ data, styles = {} }) => {
             );
             break;
           default:
-            content = null;
+            content = <CustomSectionBlock items={items} title={entry.title} />;
         }
         return {
           ...entry,
           node: (
-            <section className="r-section" key={entry.id}>
+            <section
+              className="r-section"
+              key={entry.id}
+              data-section={entry.id}
+              style={sectionStyle(sectionVars, entry.id)}
+            >
               <SectionHeading title={entry.title} />
               {content}
             </section>
@@ -137,7 +163,15 @@ const HEADER_STYLE_CLASS = {
   accent: "r-header-accent",
 };
 
-export const PaperHeader = ({
+export /** Shared resume photo — size comes from --r-photo-size. */
+const ResumePhoto = ({ src }) => (
+  <img className="r-photo" src={src} alt="" decoding="async" />
+);
+
+const showPhotoOf = (data, cfg) =>
+  Boolean(data?.pd?.photoDataUrl) && cfg?.showPhoto !== false;
+
+const PaperHeader = ({
   data,
   align = "left",
   style = "plain",
@@ -146,8 +180,7 @@ export const PaperHeader = ({
 }) => {
   const headerStyle = style || cfg.headerStyle || "plain";
   const variant = HEADER_STYLE_CLASS[headerStyle] || "";
-  const photo = data?.pd?.photoDataUrl;
-  const showPhoto = Boolean(photo) && cfg.showPhoto !== false;
+  const showPhoto = showPhotoOf(data, cfg);
   return (
     <header
       className={[
@@ -158,16 +191,9 @@ export const PaperHeader = ({
       ]
         .filter(Boolean)
         .join(" ")}
+      style={cfg.sectionVars?.header || undefined}
     >
-      {showPhoto ? (
-        <img
-          className="r-photo"
-          src={photo}
-          alt=""
-          width={72}
-          height={72}
-        />
-      ) : null}
+      {showPhoto ? <ResumePhoto src={data.pd.photoDataUrl} /> : null}
       <div className="r-header-text">
         <h1 className="r-name">
           {[data.pd.firstName, data.pd.lastName].filter(Boolean).join(" ") ||
@@ -207,19 +233,31 @@ const HeaderShell = ({ data, align, style, cfg, className, canvas }) => {
 };
 
 /** In-sidebar name/contact (Metro / dark sidebar). */
-const SidebarIdentity = ({ data, canvas }) => {
+const SidebarIdentity = ({ data, canvas, cfg }) => {
+  const showPhoto = showPhotoOf(data, cfg);
   const node = (
-    <div className="r-sidebar-identity">
-      <h1 className="r-name">
-        {[data.pd.firstName, data.pd.lastName].filter(Boolean).join(" ") ||
-          "Your Name"}
-      </h1>
-      <div className="r-title">{data.pd.designation || "Job Title"}</div>
-      <ContactLine
-        personalDetails={data.pd}
-        socialLinks={data.socialLinks}
-        align="left"
-      />
+    <div
+      className={[
+        "r-sidebar-identity",
+        showPhoto ? "r-sidebar-identity-with-photo" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      style={cfg?.sectionVars?.header || undefined}
+    >
+      {showPhoto ? <ResumePhoto src={data.pd.photoDataUrl} /> : null}
+      <div className="r-sidebar-identity-text">
+        <h1 className="r-name">
+          {[data.pd.firstName, data.pd.lastName].filter(Boolean).join(" ") ||
+            "Your Name"}
+        </h1>
+        <div className="r-title">{data.pd.designation || "Job Title"}</div>
+        <ContactLine
+          personalDetails={data.pd}
+          socialLinks={data.socialLinks}
+          align="left"
+        />
+      </div>
     </div>
   );
   if (!canvas || !canvas.interactive) return node;
@@ -251,20 +289,6 @@ const renderColumn = (ids, sections, canvas) => {
 };
 
 export const columnsSingle = (ids) => [ids];
-
-export const columnsWithSide = (ids) => {
-  const side = ids.filter(
-    (id) => id === "summary" || id === "skills" || isExtra(id)
-  );
-  const main = ids.filter((id) => !side.includes(id));
-  return [side, main];
-};
-
-export const columnsSplit = (ids) => {
-  const left = ids.filter((id) => id === "summary" || id === "experience");
-  const right = ids.filter((id) => !left.includes(id));
-  return [left, right];
-};
 
 const withCols = (render, columnsOf) => ({ render, columnsOf });
 
@@ -313,7 +337,11 @@ const SidebarLayout = ({
   layoutId,
   reverse,
 }) => {
-  const [side, main] = columnsWithSide(order);
+  const [side, main] = columnsWithSide(
+    order,
+    cfg?.sectionCols,
+    data?.extras || [],
+  );
   const tone = cfg.sidebarTone || "light";
   const darkIdentity = tone === "dark";
   const align = cfg.headerAlign || "left";
@@ -323,7 +351,7 @@ const SidebarLayout = ({
 
   const sideCol = (
     <aside className={sideClass}>
-      {darkIdentity ? <SidebarIdentity data={data} canvas={canvas} /> : null}
+      {darkIdentity ? <SidebarIdentity data={data} canvas={canvas} cfg={cfg} /> : null}
       {renderColumn(side, sections, canvas)}
     </aside>
   );
@@ -372,7 +400,7 @@ const LayoutSidebarRight = withCols(
 );
 
 const LayoutSplit = withCols(({ data, vars, cfg, sections, order, canvas }) => {
-  const [left, right] = columnsSplit(order);
+  const [left, right] = columnsSplit(order, cfg?.sectionCols);
   const align = cfg.headerAlign || "left";
   return (
     <div className={paperClass("split", cfg)} style={vars}>

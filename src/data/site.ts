@@ -6,7 +6,7 @@ export const SITE = {
   legalName: "Cavren",
   tagline: "Build a resume that gets you hired.",
   description:
-    "A fast, free, and private resume builder. Fill in guided sections, live-preview, and export a clean PDF or DOCX in minutes — no sign-up required.",
+    "A fast, free, and private resume builder. Guided sections, live preview, and honest PDF or DOCX export — no sign-up, no tracking, data stays on your device.",
   url: "https://resume-builder.example.com",
   email: "findvishalsharma@gmail.com",
   ownerName: "Vishal Sharma",

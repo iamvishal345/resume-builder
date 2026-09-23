@@ -12,17 +12,17 @@ import { SITE } from "../data/site";
   <section class="page">
     <h1>Privacy</h1>
     <p class="lede">
-      Short version: Cavren is a community, local-first tool. Your resumes stay
-      on your device. We don't run an app server for your content, we don't
-      require accounts, and we don't embed analytics or advertising trackers.
+      Short version: Cavren is a community, local-first tool. Your resumes stay on
+      your device. We don't run an app server for your content, we don't require
+      accounts, and we don't embed analytics or advertising trackers.
     </p>
 
     <div class="prose">
       <h2>Where your data lives</h2>
       <p>
         Resumes are stored in this browser's IndexedDB. Backups you download
-        (.r.json, .cavren.json, PDF, DOCX) are ordinary files on your computer.
-        Optional snapshots (versions) also stay in IndexedDB on this device.
+        (.r.json, PDF, DOCX) are ordinary files on your computer. Optional
+        version snapshots also stay in IndexedDB on this device.
       </p>
 
       <h2>What we collect</h2>
@@ -38,9 +38,9 @@ import { SITE } from "../data/site";
       <h2>Optional AI</h2>
       <p>
         AI features are off until you configure them. You can use on-device
-        Chrome AI or supply your own API key. Text you explicitly send goes
-        only to that provider — never to a Cavren-hosted model. You can clear
-        the key anytime in AI settings.
+        Chrome AI or supply your own API key. Text you explicitly send goes only
+        to that provider — never to a Cavren-hosted model. You can clear the key
+        anytime in AI settings.
       </p>
 
       <h2>Optional Google Drive backup</h2>
@@ -53,14 +53,15 @@ import { SITE } from "../data/site";
       <h2>Exports &amp; offline</h2>
       <p>
         PDF and DOCX are generated locally. Once installed as a PWA (or after a
-        visit), the app shell can work offline for editing and export. Network
-        is only needed for optional AI APIs and Drive.
+        visit), the app shell can work offline for editing and export. Network is
+        only needed for optional AI APIs and Drive.
       </p>
 
       <h2>Contact</h2>
       <p>
         Questions? Reach us at{" "}
-        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a> or visit{" "}
+        <a href="/contact">contact</a>.
       </p>
     </div>
   </section>

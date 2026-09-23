@@ -1,7 +1,9 @@
 ---
 import "../styles/global.css";
 import { SITE } from "../data/site";
+import { pwaInfo } from "virtual:pwa-info";
 import PwaUpdateToast from "../components/PwaUpdateToast.jsx";
+import PwaInstallToast from "../components/PwaInstallToast.jsx";
 
 interface Props {
   title?: string;
@@ -50,8 +52,13 @@ const fullTitle = `${title} · ${SITE.name}`;
     <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
     <link rel="apple-touch-icon" href="/icons/icon-192.png" />
-    <meta name="theme-color" content="#4b7a57" />
+    <meta name="theme-color" content="#437250" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e100f" media="(prefers-color-scheme: dark)" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content={SITE.name} />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    {pwaInfo && <Fragment set:html={pwaInfo.webManifest.linkTag} />}
 
     <meta property="og:type" content={ogType} />
     <meta property="og:site_name" content={SITE.name} />
@@ -69,6 +76,8 @@ const fullTitle = `${title} · ${SITE.name}`;
     <script is:inline>
       (function () {
         var key = "rb-theme";
+        var LIGHT_THEME = "#437250";
+        var DARK_THEME = "#0e100f";
         var doc = document.documentElement;
         var mq = window.matchMedia("(prefers-color-scheme: dark)");
         function scheme(mode) {
@@ -76,11 +85,32 @@ const fullTitle = `${title} · ${SITE.name}`;
           if (mode === "light") return "light";
           return mq.matches ? "dark" : "light";
         }
+        function syncThemeColor(resolved) {
+          var color = resolved === "dark" ? DARK_THEME : LIGHT_THEME;
+          var metas = document.querySelectorAll('meta[name="theme-color"]');
+          if (!metas.length) {
+            var created = document.createElement("meta");
+            created.setAttribute("name", "theme-color");
+            document.head.appendChild(created);
+            metas = [created];
+          }
+          for (var i = 0; i < metas.length; i++) {
+            metas[i].setAttribute("content", color);
+            metas[i].removeAttribute("media");
+          }
+          var status = document.querySelector(
+            'meta[name="apple-mobile-web-app-status-bar-style"]'
+          );
+          if (status) {
+            status.content = resolved === "dark" ? "black-translucent" : "default";
+          }
+        }
         function applyTheme(mode, persist) {
           var resolved = scheme(mode);
           doc.dataset.theme = resolved;
           var meta = document.querySelector('meta[name="color-scheme"]');
           if (meta) meta.content = resolved;
+          syncThemeColor(resolved);
           if (persist) {
             if (mode === "system") localStorage.removeItem(key);
             else localStorage.setItem(key, mode);
@@ -95,11 +125,25 @@ const fullTitle = `${title} · ${SITE.name}`;
           return next;
         };
         applyTheme(localStorage.getItem(key) || "system", false);
+        if (typeof mq.addEventListener === "function") {
+          mq.addEventListener("change", function () {
+            if (!localStorage.getItem(key)) applyTheme("system", false);
+          });
+        }
       })();
+    </script>
+    <script is:inline>
+      // Capture beforeinstallprompt before React hydrates so we don't miss it.
+      window.addEventListener("beforeinstallprompt", function (e) {
+        e.preventDefault();
+        window.__deferredPrompt = e;
+        window.dispatchEvent(new CustomEvent("pwa-install-ready"));
+      });
     </script>
   </head>
   <body>
     <slot />
+    <PwaInstallToast client:load />
     <PwaUpdateToast client:load />
   </body>
 </html>

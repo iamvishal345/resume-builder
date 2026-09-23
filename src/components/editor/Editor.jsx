@@ -22,6 +22,7 @@ import CoverLetterEditor from "./CoverLetterEditor";
 import JobMatchDrawer from "./JobMatchDrawer";
 import AtScorePanel from "./AtScorePanel";
 import CoherencePanel from "./CoherencePanel";
+import ReadingLevelPanel from "./ReadingLevelPanel";
 import SideDrawer from "./SideDrawer";
 import Stepper, { STEPS } from "./Stepper";
 import EditorTopbar from "./EditorTopbar";
@@ -30,6 +31,7 @@ import VersionsPanel from "./VersionsPanel";
 import { computeResumeScore } from "@features/ats/score";
 import { findWeakBullets, metricsHint } from "@features/ats/metrics";
 import { nextFitPreset } from "@features/resume/pageFit";
+import { availableSections } from "@features/resume/order";
 import { buildResumeDocx, downloadDocx } from "@features/export/docx";
 import { getPalette } from "@features/resume/palettes";
 import { resumeViewModel } from "@features/resume/viewModel";
@@ -40,6 +42,11 @@ import {
 } from "@store";
 import { getResume, putResume, newResume, listResumes } from "@features/resumes/db";
 import { saveVersion } from "@features/resumes/versions";
+import { snapshotBefore } from "@features/resumes/snapshot";
+import {
+  downloadResumeMarkdown,
+  downloadResumePlainText,
+} from "@features/export/markdown";
 import { downloadResumePdf } from "@features/export/pdf";
 import PersonalDetails from "./steps/PersonalDetails";
 import WorkHistory from "./steps/WorkHistory";
@@ -368,7 +375,12 @@ const EditorPage = () => {
     }
   };
 
-  const handleFitPage = () => {
+  const handleFitPage = async () => {
+    await snapshotBefore(
+      resumeId,
+      resumeDataOf(useStore.getState()),
+      "Before fit to page",
+    );
     const next = nextFitPreset(resumeSettings);
     setResumeSettings(next);
     showToast({
@@ -378,6 +390,28 @@ const EditorPage = () => {
       collisionBehavior: "overwrite",
       autoHideDuration: 6000,
     });
+  };
+
+  const handleTemplateSelect = async (preset) => {
+    await snapshotBefore(
+      resumeId,
+      resumeDataOf(useStore.getState()),
+      "Before template change",
+    );
+    setResumeSettings(preset);
+  };
+
+  const exportBaseName = () =>
+    [resumeData.pd?.firstName, resumeData.pd?.lastName]
+      .filter(Boolean)
+      .join(" ") || "resume";
+
+  const handleDownloadMarkdown = () => {
+    downloadResumeMarkdown(resumeDataOf(useStore.getState()), exportBaseName());
+  };
+
+  const handleDownloadTxt = () => {
+    downloadResumePlainText(resumeDataOf(useStore.getState()), exportBaseName());
   };
 
   const commandActions = useMemo(
@@ -425,7 +459,10 @@ const EditorPage = () => {
       {
         id: "customize",
         label: "Customize theme",
-        run: () => setCustomizeOpen(true),
+        run: () => {
+          setMode("editor");
+          setCustomizeOpen(true);
+        },
       },
       {
         id: "versions",
@@ -446,6 +483,16 @@ const EditorPage = () => {
         id: "docx",
         label: "Download DOCX",
         run: handleDownloadDocx,
+      },
+      {
+        id: "markdown",
+        label: "Download Markdown",
+        run: handleDownloadMarkdown,
+      },
+      {
+        id: "txt",
+        label: "Download plain text",
+        run: handleDownloadTxt,
       },
       {
         id: "snapshot",
@@ -505,14 +552,20 @@ const EditorPage = () => {
             ) : mode === "editor" ? (
               <div className="editor-shell">
                 <div className="editor-tools-row">
-                  <Stepper stepIndex={stepIndex} onJump={goToStep} />
+                  {customizeOpen ? (
+                    <Text type="inherit" size="sm" color="secondary">
+                      Editing layout & theme — preview updates live.
+                    </Text>
+                  ) : (
+                    <Stepper stepIndex={stepIndex} onJump={goToStep} />
+                  )}
                   <HStack gap={2} wrap="wrap">
                     <Button
-                      variant="secondary"
+                      variant={customizeOpen ? "primary" : "secondary"}
                       size="sm"
                       icon={<Palette size={15} />}
-                      label="Customize"
-                      onClick={() => setCustomizeOpen(true)}
+                      label={customizeOpen ? "Done" : "Customize"}
+                      onClick={() => setCustomizeOpen((open) => !open)}
                     />
                     <Button
                       variant="secondary"
@@ -523,22 +576,45 @@ const EditorPage = () => {
                     />
                   </HStack>
                 </div>
-                <div className="editor-workspace">
-                  <div className="editor-form-pane">
-                    <ActiveStep
-                      onNext={
-                        isLastStep ? () => setMode("preview") : goNext
-                      }
-                      onPrev={stepIndex > 0 ? goPrev : undefined}
-                      nextLabel={isLastStep ? "Finish" : "Next"}
-                    />
-                  </div>
+                <div
+                  className={
+                    customizeOpen
+                      ? "editor-workspace editor-workspace-customize"
+                      : "editor-workspace"
+                  }
+                >
+                  {customizeOpen ? (
+                    <aside
+                      className="editor-customize-pane"
+                      aria-label="Layout and theme"
+                    >
+                      <TemplateCustomize
+                        settings={resumeSettings}
+                        onSelect={setResumeSettings}
+                        onClose={() => setCustomizeOpen(false)}
+                        sections={[
+                          { id: "header", title: "Header" },
+                          ...availableSections(resumeData),
+                        ]}
+                      />
+                    </aside>
+                  ) : (
+                    <div className="editor-form-pane">
+                      <ActiveStep
+                        onNext={
+                          isLastStep ? () => setMode("preview") : goNext
+                        }
+                        onPrev={stepIndex > 0 ? goPrev : undefined}
+                        nextLabel={isLastStep ? "Finish" : "Next"}
+                      />
+                    </div>
+                  )}
                   <aside className="editor-preview-pane" aria-label="Live resume preview">
                     <Card padding={0} variant="transparent">
                       <div className="preview-sheet-wrap">
                         <div className="preview-sheet-container">
                           <ResumePreview
-                            interactive
+                            interactive={!customizeOpen}
                             onEditSection={handleCanvasEdit}
                           />
                         </div>
@@ -558,12 +634,11 @@ const EditorPage = () => {
               <FullPagePreview
                 onDownloadPdf={handleDownloadPdf}
                 onDownloadDocx={handleDownloadDocx}
-                onCustomize={() => setCustomizeOpen(true)}
-              >
-                <div>
-                  <ResumePreview interactive onEditSection={handleCanvasEdit} />
-                </div>
-              </FullPagePreview>
+                onCustomize={() => {
+                  setMode("editor");
+                  setCustomizeOpen(true);
+                }}
+              />
             )}
           </LayoutContent>
         }
@@ -610,6 +685,17 @@ const EditorPage = () => {
             goToStep(index);
           }}
         />
+        <Divider
+          orientation="horizontal"
+          style={{ margin: "var(--spacing-3) 0" }}
+        />
+        <ReadingLevelPanel
+          bare
+          data={{
+            summary: resumeData.summary,
+            experience: resumeData.experience,
+          }}
+        />
         {findWeakBullets(workHistory).length > 0 ? (
           <>
             <Divider
@@ -646,13 +732,7 @@ const EditorPage = () => {
         isOpen={templateGalleryOpen}
         onOpenChange={setTemplateGalleryOpen}
         settings={resumeSettings}
-        onSelect={setResumeSettings}
-      />
-      <TemplateCustomize
-        isOpen={customizeOpen}
-        onOpenChange={setCustomizeOpen}
-        settings={resumeSettings}
-        onSelect={setResumeSettings}
+        onSelect={handleTemplateSelect}
       />
       <AiSettingsDialog
         isOpen={aiSettingsOpen}

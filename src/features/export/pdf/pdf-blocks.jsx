@@ -1,5 +1,7 @@
 import React from "react";
 import { View, Text } from "@react-pdf/renderer";
+import { withSection } from "./pdf-tokens";
+import { findExtraByRef, kindFromRef } from "@features/resume/order";
 import {
   htmlLines,
   rangeText,
@@ -8,11 +10,16 @@ import {
 } from "./pdf-utils";
 
 export const Section = ({ t, heading, children, noRule, headingColor }) => (
-  <View style={{ marginBottom: t.sectionSpacing }}>
+  <View
+    style={{
+      marginTop: t.marginTop ?? 0,
+      marginBottom: (t.marginBottom ?? 0) + t.sectionSpacing,
+    }}
+  >
     <View
       style={{
         flexDirection: "row",
-        borderBottomWidth: noRule ? 0 : 1,
+        borderBottomWidth: noRule ? 0 : t.sectionRuleWidth,
         borderBottomColor: noRule ? "transparent" : t.rule,
         paddingBottom: Math.max(2, round(t.headingGap * 0.6)),
         marginBottom: t.headingGap,
@@ -20,10 +27,10 @@ export const Section = ({ t, heading, children, noRule, headingColor }) => (
     >
       <Text
         style={{
-          fontSize: round(t.fontSize * 0.86),
+          fontSize: t.headingSize,
           fontWeight: 700,
           textTransform: "uppercase",
-          letterSpacing: round(t.fontSize * 0.12),
+          letterSpacing: t.headingLetterSpacing,
           color: headingColor || t.accent,
         }}
       >
@@ -60,9 +67,14 @@ export const skillsDots = (level) =>
 
 const LevelDots = ({ t, level }) => {
   const n = Math.min(5, Math.max(0, Number(level) || 0));
-  const size = round(t.fontSize * 0.45);
+  const size = t.levelDotSize;
   return (
-    <View style={{ flexDirection: "row", gap: round(size * 0.45) }}>
+    <View
+      style={{
+        flexDirection: "row",
+        gap: t.levelDotGap,
+      }}
+    >
       {Array.from({ length: 5 }, (_, i) => (
         <View
           key={i}
@@ -70,7 +82,7 @@ const LevelDots = ({ t, level }) => {
             width: size,
             height: size,
             borderRadius: size / 2,
-            backgroundColor: i < n ? t.accent : t.accentSoft,
+            backgroundColor: i < n ? t.accent : t.rule,
           }}
         />
       ))}
@@ -83,10 +95,11 @@ const LevelBar = ({ t, level, fillColor, trackColor }) => {
   return (
     <View
       style={{
-        flex: 1,
-        height: round(t.fontSize * 0.45),
-        backgroundColor: trackColor || t.accentSoft,
-        borderRadius: 2,
+        flexBasis: `${t.levelBarWidth}%`,
+        maxWidth: t.levelBarMax,
+        height: t.levelBarHeight,
+        backgroundColor: trackColor || t.rule,
+        borderRadius: t.radiusSm,
         overflow: "hidden",
       }}
     >
@@ -101,8 +114,10 @@ const LevelBar = ({ t, level, fillColor, trackColor }) => {
   );
 };
 
-const skillNameStyle = (t, ink) => ({
-  fontSize: round(t.fontSize * 0.9),
+// Screen parity: chips scale with --r-skill-size (0.9), bullets/columns with
+// the section font, dot/bar labels with --r-skill-name-size (0.92).
+const skillNameStyle = (t, ink, ratio = 1) => ({
+  fontSize: ratio === "name" ? t.skillNameSize : ratio === "chip" ? t.skillSize : t.fontSize,
   color: ink || t.ink,
 });
 
@@ -121,7 +136,7 @@ export const SkillsRow = ({ t, items, style = "chips", ink }) => {
 
   if (style === "list") {
     return (
-      <View style={{ gap: round(t.richGap * 0.8) }}>
+      <View style={{ gap: t.skillListGap }}>
         {list.map((item) => (
           <Text key={item.key || item.name} style={skillNameStyle(t, textInk)}>
             •  {item.name}
@@ -137,7 +152,7 @@ export const SkillsRow = ({ t, items, style = "chips", ink }) => {
     return (
       <View style={{ flexDirection: "row", gap: t.colGap }}>
         {cols.map((col, i) => (
-          <View key={i} style={{ flex: 1, gap: round(t.richGap * 0.8) }}>
+          <View key={i} style={{ flex: 1, gap: t.skillListGap }}>
             {col.map((item) => (
               <Text
                 key={item.key || item.name}
@@ -154,7 +169,7 @@ export const SkillsRow = ({ t, items, style = "chips", ink }) => {
 
   if (style === "dots") {
     return (
-      <View style={{ gap: round(t.richGap) }}>
+      <View style={{ gap: t.skillStackGap }}>
         {list.map((item) => (
           <View
             key={item.key || item.name}
@@ -162,10 +177,10 @@ export const SkillsRow = ({ t, items, style = "chips", ink }) => {
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              gap: round(t.colGap * 0.4),
+              gap: t.skillRowGap,
             }}
           >
-            <Text style={{ ...skillNameStyle(t, textInk), flex: 1 }}>
+            <Text style={{ ...skillNameStyle(t, textInk, "name"), flex: 1 }}>
               {item.name}
             </Text>
             <LevelDots t={t} level={item.level} />
@@ -177,20 +192,20 @@ export const SkillsRow = ({ t, items, style = "chips", ink }) => {
 
   if (style === "bars") {
     return (
-      <View style={{ gap: round(t.richGap) }}>
+      <View style={{ gap: t.skillStackGap }}>
         {list.map((item) => (
           <View
             key={item.key || item.name}
             style={{
               flexDirection: "row",
               alignItems: "center",
-              gap: round(t.colGap * 0.5),
+              gap: t.skillRowGap,
             }}
           >
             <Text
               style={{
-                ...skillNameStyle(t, textInk),
-                width: "38%",
+                ...skillNameStyle(t, textInk, "name"),
+                flex: 1,
               }}
             >
               {item.name}
@@ -208,7 +223,8 @@ export const SkillsRow = ({ t, items, style = "chips", ink }) => {
       style={{
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: round(t.colGap * 0.35),
+        columnGap: t.chipColGap,
+        rowGap: t.chipRowGap,
       }}
     >
       {list.map((item) => (
@@ -217,12 +233,12 @@ export const SkillsRow = ({ t, items, style = "chips", ink }) => {
           style={{
             borderWidth: 1,
             borderColor: t.rule,
-            borderRadius: 3,
-            paddingHorizontal: round(t.fontSize * 0.45),
-            paddingVertical: round(t.fontSize * 0.2),
+            borderRadius: t.radiusSm,
+            paddingHorizontal: t.chipPadX,
+            paddingVertical: t.chipPadY,
           }}
         >
-          <Text style={skillNameStyle(t, textInk)}>{item.name}</Text>
+          <Text style={skillNameStyle(t, textInk, "chip")}>{item.name}</Text>
         </View>
       ))}
     </View>
@@ -233,36 +249,37 @@ export const Entry = ({
   t,
   title,
   org,
-  meta,
+  location,
   dates,
   children,
   timeline,
   compact,
+  below,
 }) => {
   const gap = compact ? round(t.entryGap * 0.75) : t.entryGap;
-  const titleNode = (
-    <Text style={{ fontSize: t.fontSize, fontWeight: 600, color: t.ink }}>
-      {title}
-      {org ? (
-        <Text style={{ fontWeight: 400, color: t.muted }}>, {org}</Text>
-      ) : null}
-    </Text>
-  );
-  const metaNode = meta ? (
+  const titleNode = title ? (
     <Text
       style={{
-        fontSize: round(t.fontSize * 0.88),
-        color: t.muted,
-        marginTop: 1,
+        fontSize: compact ? t.compactTitleSize : t.entryTitleSize,
+        fontWeight: 600,
+        color: t.ink,
       }}
     >
-      {meta}
+      {title}
     </Text>
   ) : null;
+  const orgNode = org ? (
+    <Text
+      style={{ fontSize: t.entryOrgSize, fontWeight: 400, color: t.muted }}
+    >
+      {org}
+    </Text>
+  ) : null;
+  const metaSize = { fontSize: t.metaSize, color: t.muted, lineHeight: t.lineHeight };
   const datesNode = dates ? (
     <Text
       style={{
-        fontSize: round(t.fontSize * 0.88),
+        ...metaSize,
         color: timeline ? t.accent : t.muted,
         fontWeight: timeline ? 600 : 400,
       }}
@@ -270,24 +287,52 @@ export const Entry = ({
       {dates}
     </Text>
   ) : null;
+  const locationNode = location ? (
+    <Text style={metaSize}>{location}</Text>
+  ) : null;
+  const rightCol = locationNode || datesNode ? (
+    <View
+      style={{
+        flexShrink: 0,
+        alignItems: "flex-end",
+        gap: t.metaStackGap,
+      }}
+    >
+      {locationNode}
+      {datesNode}
+    </View>
+  ) : null;
 
   if (timeline) {
     return (
       <View style={{ marginBottom: gap }}>
-        <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-          <View style={{ width: "22%", paddingRight: t.colGap * 0.5 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "flex-start",
+            gap: t.colGap,
+          }}
+        >
+          <View
+            style={{
+              width: "22%",
+              minWidth: t.timelineRailMin,
+              paddingTop: t.timelineRailTopPad,
+            }}
+          >
             {datesNode}
           </View>
           <View
             style={{
               flex: 1,
-              paddingLeft: t.colGap * 0.65,
-              borderLeftWidth: 2,
+              paddingLeft: t.timelineContentInset,
+              borderLeftWidth: t.timelineRailWidth,
               borderLeftColor: t.accentSoft,
             }}
           >
             {titleNode}
-            {metaNode}
+            {orgNode}
+            {locationNode}
             {children}
           </View>
         </View>
@@ -304,10 +349,13 @@ export const Entry = ({
           alignItems: "baseline",
         }}
       >
-        <View style={{ flex: 1, paddingRight: t.colGap }}>{titleNode}</View>
-        <View style={{ flexShrink: 0 }}>{datesNode}</View>
+        <View style={{ flex: 1, paddingRight: t.colGap }}>
+          {titleNode}
+          {orgNode}
+        </View>
+        {rightCol}
       </View>
-      {metaNode}
+      {below}
       {children}
     </View>
   );
@@ -317,7 +365,7 @@ export const ContactLine = ({
   t,
   data,
   ink = t.muted,
-  sep = t.rule,
+  sep = t.contactSep || t.rule,
   align = "center",
 }) => {
   const parts = pdfContactParts(data.pd, data.socialLinks);
@@ -327,7 +375,8 @@ export const ContactLine = ({
       style={{
         flexDirection: "row",
         flexWrap: "wrap",
-        gap: 4,
+        columnGap: t.contactGapCol,
+        rowGap: t.contactGapRow,
         alignItems: "center",
         justifyContent: align === "left" ? "flex-start" : "center",
       }}
@@ -336,15 +385,15 @@ export const ContactLine = ({
         <React.Fragment key={i}>
           <Text
             style={{
-              fontSize: round(t.fontSize * 0.88),
+              fontSize: t.contactSize,
               color: ink,
-              lineHeight: 1.35,
+              lineHeight: t.lineHeight,
             }}
           >
             {part}
           </Text>
           {i < parts.length - 1 ? (
-            <Text style={{ color: sep, fontSize: round(t.fontSize * 0.75) }}>
+            <Text style={{ color: sep, fontSize: t.contactSepSize }}>
               {" "}
               •{" "}
             </Text>
@@ -358,7 +407,7 @@ export const ContactLine = ({
 export const SectionHead = ({ t, heading, noRule }) => (
   <View
     style={{
-      borderBottomWidth: noRule ? 0 : 1,
+      borderBottomWidth: noRule ? 0 : t.sectionRuleWidth,
       borderBottomColor: noRule ? "transparent" : t.rule,
       paddingBottom: Math.max(2, round(t.headingGap * 0.6)),
       marginBottom: t.headingGap,
@@ -366,10 +415,10 @@ export const SectionHead = ({ t, heading, noRule }) => (
   >
     <Text
       style={{
-        fontSize: round(t.fontSize * 0.86),
+        fontSize: t.headingSize,
         fontWeight: 700,
         textTransform: "uppercase",
-        letterSpacing: round(t.fontSize * 0.12),
+        letterSpacing: t.headingLetterSpacing,
         color: t.accent,
       }}
     >
@@ -380,24 +429,26 @@ export const SectionHead = ({ t, heading, noRule }) => (
 
 /* ---------- Section-by-id renderer (matches DOM BuildSections) ---------- */
 
-export const sectionNode = (id, { t, data, styles = {} }, opts) => {
+export const sectionNode = (id, { t, data, styles = {}, config }, opts) => {
   const experienceStyle = styles.experienceStyle || "standard";
   const skillStyle = styles.skillStyle || "chips";
   const languageStyle = styles.languageStyle || "dots";
   const timeline = experienceStyle === "timeline";
   const compact = experienceStyle === "compact";
   const ink = opts?.ink;
+  // Per-section overrides recompute the scale for this section alone.
+  const sectionT = withSection(t, config, config?.sectionStyles?.[id]);
 
   switch (id) {
     case "summary":
       return (
-        <Section key={id} t={t} heading="Summary" noRule={opts?.noRule}>
-          <Rich t={t} html={data.summary} />
+        <Section key={id} t={sectionT} heading="Summary" noRule={opts?.noRule}>
+          <Rich t={sectionT} html={data.summary} />
         </Section>
       );
     case "experience":
       return (
-        <Section key={id} t={t} heading="Experience" noRule={opts?.noRule}>
+        <Section key={id} t={sectionT} heading="Experience" noRule={opts?.noRule}>
           {(data.experience || [])
             .filter(
               (entry) =>
@@ -406,19 +457,10 @@ export const sectionNode = (id, { t, data, styles = {} }, opts) => {
             .map((entry, i) => (
               <Entry
                 key={entry.key ?? i}
-                t={t}
+                t={sectionT}
                 title={entry.positionTitle}
-                org={
-                  entry.positionTitle && entry.companyName
-                    ? entry.companyName
-                    : ""
-                }
-                meta={[
-                  entry.positionTitle ? "" : entry.companyName,
-                  entry.location,
-                ]
-                  .filter(Boolean)
-                  .join(" · ")}
+                org={entry.companyName}
+                location={entry.location}
                 dates={rangeText(
                   entry.startDate,
                   entry.endDate,
@@ -427,14 +469,14 @@ export const sectionNode = (id, { t, data, styles = {} }, opts) => {
                 timeline={timeline}
                 compact={compact}
               >
-                <Rich t={t} html={entry.workSummary} />
+                <Rich t={sectionT} html={entry.workSummary} />
               </Entry>
             ))}
         </Section>
       );
     case "education":
       return (
-        <Section key={id} t={t} heading="Education" noRule={opts?.noRule}>
+        <Section key={id} t={sectionT} heading="Education" noRule={opts?.noRule}>
           {(data.education || [])
             .filter(
               (entry) =>
@@ -443,14 +485,10 @@ export const sectionNode = (id, { t, data, styles = {} }, opts) => {
             .map((entry, i) => (
               <Entry
                 key={entry.key ?? i}
-                t={t}
-                title={
-                  [entry.degree, entry.fieldOfStudy]
-                    .filter(Boolean)
-                    .join(", ") +
-                  (entry.schoolName ? ` — ${entry.schoolName}` : "")
-                }
-                meta={entry.location}
+                t={sectionT}
+                title={[entry.degree, entry.fieldOfStudy].filter(Boolean).join(", ")}
+                org={entry.schoolName}
+                location={entry.location}
                 dates={rangeText(
                   entry.startDate,
                   entry.endDate,
@@ -459,31 +497,30 @@ export const sectionNode = (id, { t, data, styles = {} }, opts) => {
                 timeline={timeline}
                 compact={compact}
               >
-                <Rich t={t} html={entry.educationSummary} />
+                <Rich t={sectionT} html={entry.educationSummary} />
               </Entry>
             ))}
         </Section>
       );
     case "skills":
       return (
-        <Section key={id} t={t} heading="Skills" noRule={opts?.noRule}>
-          <SkillsRow t={t} items={data.skills} style={skillStyle} ink={ink} />
+        <Section key={id} t={sectionT} heading="Skills" noRule={opts?.noRule}>
+          <SkillsRow t={sectionT} items={data.skills} style={skillStyle} ink={ink} />
         </Section>
       );
     default: {
-      const extra = (data.extras || []).find(
-        (section) => `extra:${section.id}` === id,
-      );
+      const extra = findExtraByRef(data.extras || [], id);
       const items = (extra?.data || []).filter(Boolean);
+      const kind = kindFromRef(id, data.extras || []);
       const heading =
         (extra?.title && String(extra.title).trim()) ||
-        (id === "extra:1" ? "Custom Section" : id);
+        (kind === 1 ? "Custom Section" : id);
 
-      if (id === "extra:5") {
+      if (kind === 5) {
         return (
-          <Section key={id} t={t} heading="Languages" noRule={opts?.noRule}>
+          <Section key={id} t={sectionT} heading="Languages" noRule={opts?.noRule}>
             <SkillsRow
-              t={t}
+              t={sectionT}
               items={items}
               style={languageStyle}
               ink={ink}
@@ -492,12 +529,12 @@ export const sectionNode = (id, { t, data, styles = {} }, opts) => {
         );
       }
 
-      if (id === "extra:7") {
+      if (kind === 7) {
         const hasLevels = items.some((item) => Number(item.level) > 0);
         return (
-          <Section key={id} t={t} heading={heading} noRule={opts?.noRule}>
+          <Section key={id} t={sectionT} heading={heading} noRule={opts?.noRule}>
             <SkillsRow
-              t={t}
+              t={sectionT}
               items={items}
               style={hasLevels ? languageStyle : "chips"}
               ink={ink}
@@ -506,79 +543,128 @@ export const sectionNode = (id, { t, data, styles = {} }, opts) => {
         );
       }
 
-      if (id === "extra:1" || id === "extra:2") {
+      if (kind === 1 || kind === 2) {
         return (
-          <Section key={id} t={t} heading={heading} noRule={opts?.noRule}>
+          <Section key={id} t={sectionT} heading={heading} noRule={opts?.noRule}>
             {items.map((item, i) => (
-              <View key={item.key ?? i} style={{ marginBottom: t.entryGap }}>
+              <View key={item.key ?? i} style={{ marginBottom: sectionT.entryGap }}>
                 {item.title ? (
                   <Text
                     style={{
-                      fontSize: t.fontSize,
-                      fontWeight: 700,
-                      color: t.ink,
+                      fontSize: sectionT.entryTitleSize,
+                      fontWeight: 600,
+                      color: sectionT.ink,
                     }}
                   >
                     {item.title}
                   </Text>
                 ) : null}
-                <Rich t={t} html={item.description} />
+                <Rich t={sectionT} html={item.description} />
               </View>
             ))}
           </Section>
         );
       }
 
-      if (id === "extra:3") {
+      if (kind === 3) {
         return (
-          <Section key={id} t={t} heading={heading} noRule={opts?.noRule}>
+          <Section key={id} t={sectionT} heading={heading} noRule={opts?.noRule}>
             {items.map((item, i) => (
               <Entry
                 key={item.key ?? i}
-                t={t}
+                t={sectionT}
                 title={item.role}
                 org={item.organization}
-                meta={item.location}
+                location={item.location}
                 dates={rangeText(
                   item.startDate,
                   item.endDate,
                   item.current || item.disabledendDate,
                 )}
               >
-                <Rich t={t} html={item.description} />
+                <Rich t={sectionT} html={item.description} />
               </Entry>
             ))}
           </Section>
         );
       }
 
-      if (id === "extra:4") {
+      if (kind === 4) {
         return (
-          <Section key={id} t={t} heading={heading} noRule={opts?.noRule}>
+          <Section key={id} t={sectionT} heading={heading} noRule={opts?.noRule}>
             {items.map((item, i) => (
               <Entry
                 key={item.key ?? i}
-                t={t}
+                t={sectionT}
                 title={item.name}
                 org={item.issuer}
-                meta={[item.credentialId, item.url].filter(Boolean).join(" · ")}
                 dates={item.date || ""}
+                below={
+                  <>
+                    {item.credentialId ? (
+                      <Text
+                        style={{
+                          fontSize: sectionT.certMetaSize,
+                          color: sectionT.muted,
+                          marginTop: sectionT.referenceMarginTop,
+                        }}
+                      >
+                        ID: {item.credentialId}
+                      </Text>
+                    ) : null}
+                    {item.url ? (
+                      <Text
+                        style={{
+                          fontSize: sectionT.certMetaSize,
+                          color: sectionT.accent,
+                          marginTop: sectionT.certMarginTop,
+                        }}
+                      >
+                        Verify
+                      </Text>
+                    ) : null}
+                  </>
+                }
               />
             ))}
           </Section>
         );
       }
 
-      if (id === "extra:6") {
+      if (kind === 6) {
         return (
-          <Section key={id} t={t} heading={heading} noRule={opts?.noRule}>
+          <Section key={id} t={sectionT} heading={heading} noRule={opts?.noRule}>
             {items.map((item, i) => (
               <Entry
                 key={item.key ?? i}
-                t={t}
+                t={sectionT}
                 title={item.name}
-                org={[item.role, item.organization].filter(Boolean).join(" · ")}
-                meta={[item.email, item.phone].filter(Boolean).join(" · ")}
+                below={
+                  <>
+                    {(item.role || item.organization) ? (
+                      <Text
+                        style={{
+                          fontSize: sectionT.referenceMetaSize,
+                          color: sectionT.muted,
+                          marginTop: sectionT.referenceMarginTop,
+                        }}
+                      >
+                        {[item.role, item.organization].filter(Boolean).join(" · ")}
+                      </Text>
+                    ) : null}
+                    {(item.email || item.phone) ? (
+                      <Text
+                        style={{
+                          fontSize: sectionT.referenceMetaSize,
+                          color: sectionT.muted,
+                          marginTop: sectionT.referenceMarginTop,
+                        }}
+                      >
+                        {[item.email, item.phone].filter(Boolean).join(" · ")}
+                      </Text>
+                    ) : null}
+                  </>
+                }
               />
             ))}
           </Section>
@@ -586,7 +672,7 @@ export const sectionNode = (id, { t, data, styles = {} }, opts) => {
       }
 
       return (
-        <Section key={id} t={t} heading={heading} noRule={opts?.noRule}>
+        <Section key={id} t={sectionT} heading={heading} noRule={opts?.noRule}>
           {null}
         </Section>
       );

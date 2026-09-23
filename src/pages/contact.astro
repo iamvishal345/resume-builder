@@ -5,15 +5,15 @@ import { SITE } from "../data/site";
 
 <MarketingLayout
   title="Contact"
-  description={`Get in touch with ${SITE.name} - Offline Resume Builder.`}
+  description={`Get in touch with ${SITE.name}. Bugs, ideas, or a hello — email works best.`}
   ogType="article"
   canonical={`${SITE.url}/contact`}
 >
   <section class="page">
     <h1>Contact</h1>
     <p class="lede">
-      Found a bug, have an idea, or just want to say hi? We'd love to hear
-      from you.
+      Found a bug, have an idea, or just want to say hi? I'd love to hear from
+      you.
     </p>
 
     <div class="prose">
@@ -23,18 +23,31 @@ import { SITE } from "../data/site";
           Email: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
         </li>
         <li>
-          Issues, bugs &amp; feature requests: same address — please include
-          steps to reproduce and what you expected.
+          Bugs &amp; feature requests: same address — include steps to reproduce
+          and what you expected.
         </li>
       </ul>
 
       <h2>Before you write</h2>
       <p>
-        Because everything runs locally, we can't see your resumes or your
-        browser data. When reporting an issue, please share steps to reproduce
-        and what you expected to happen, rather than pasting personal resume
-        content.
+        Because everything runs locally, I can't see your resumes or browser
+        data. Share steps and expected behavior rather than pasting personal
+        resume content.
+      </p>
+      <p>
+        Prefer browsing first? See <a href="/about#support">support</a> or{" "}
+        <a href="/privacy">privacy</a>.
       </p>
     </div>
+
+    <p class="contact-cta">
+      <a class="btn btn-primary" href={`mailto:${SITE.email}`}>Send an email</a>
+    </p>
   </section>
 </MarketingLayout>
+
+<style>
+  .contact-cta {
+    margin: var(--spacing-8) 0 0;
+  }
+</style>

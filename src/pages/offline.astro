@@ -1,6 +1,5 @@
 ---
 import MarketingLayout from "../layouts/MarketingLayout.astro";
-import { SITE } from "../data/site";
 ---
 
 <MarketingLayout
@@ -8,16 +7,28 @@ import { SITE } from "../data/site";
   description="Cavren is offline. Open a cached page or reconnect to continue."
   noindex={true}
 >
-  <section class="page">
+  <section class="hero">
     <h1>You're offline</h1>
-    <p class="lede">
-      Cavren works without a network once you've visited before. Open{" "}
-      <a href="/resumes">My resumes</a> from your install or history — editing and
-      exports stay on this device.
-    </p>
     <p>
-      Features that need the internet (optional AI API, Google Drive backup) will
-      wait until you're back online.
+      Cavren keeps working without a network once you've visited before. Open My
+      resumes from your install or history — editing and exports stay on this
+      device.
+    </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="/resumes">My resumes</a>
+      <a class="btn btn-secondary" href="/">Home</a>
+    </div>
+    <p class="offline-note">
+      Optional AI APIs and Google Drive backup wait until you're back online.
     </p>
   </section>
 </MarketingLayout>
+
+<style>
+  .offline-note {
+    margin: var(--spacing-6) auto 0;
+    max-width: 32em;
+    font-size: 0.95rem;
+    color: var(--color-text-secondary);
+  }
+</style>

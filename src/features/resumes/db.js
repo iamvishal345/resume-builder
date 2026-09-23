@@ -2,9 +2,10 @@
 import { defaultResumeData } from "@store";
 
 const DB_NAME = "resume-builder";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const STORE = "resumes";
 const VERSION_STORE = "versions";
+const THEME_STORE = "themes";
 
 let dbPromise = null;
 
@@ -24,6 +25,9 @@ export const openDb = () => {
       if (!db.objectStoreNames.contains(VERSION_STORE)) {
         const vs = db.createObjectStore(VERSION_STORE, { keyPath: "id" });
         vs.createIndex("byResume", "resumeId", { unique: false });
+      }
+      if (!db.objectStoreNames.contains(THEME_STORE)) {
+        db.createObjectStore(THEME_STORE, { keyPath: "id" });
       }
     };
     request.onsuccess = () => resolve(request.result);

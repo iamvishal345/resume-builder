@@ -32,6 +32,7 @@ static marketing.
 - Single place (dashboard or settings): export all, import/restore, clear all local data
 - Explain what lives in IndexedDB vs files the user downloads
 - Privacy page copy aligned with “no servers, no harvesting”
+- Storage meter (usage estimate + resume/version counts)
 
 ### A3. Full backup pack
 - One-click download of **all** resumes + cover letters + settings as one archive/JSON pack
@@ -47,9 +48,9 @@ static marketing.
 ## Phase B — Local power features
 
 ### B1. Versions / snapshots
-- Named snapshots before import, tailor, or big edits
-- Diff summary (optional, light) + restore one click
-- All stored in IndexedDB with the resume
+- Named snapshots before import, tailor, fit-to-page, and template apply
+- Section-level diff summary vs current + restore one click
+- All stored in IndexedDB with the resume (cap 20)
 
 ### B2. Deeper JD tailor (client-only)
 - Paste JD → propose changes to summary **and** multiple roles/skills
@@ -60,6 +61,7 @@ static marketing.
 - Soft page-break hints in preview
 - “Fit to one page” density/spacing adjust (user-triggered)
 - Avoid surprise cut-offs on PDF
+- Print CSS: hide canvas chrome; clean paper margins/gaps
 
 ### B4. Interview packet (local)
 - From one JD: resume variant + cover letter + optional talking-point notes
@@ -80,6 +82,7 @@ static marketing.
 ### C2. Photo (optional, template-aware)
 - Local image only (IndexedDB / object URL); never uploaded
 - Hide on ATS-safe layouts; show on creative ones
+- Photo in PDF + dark sidebar identity parity
 
 ### C3. Cover letter parity
 - Letter templates matching resume themes
@@ -87,11 +90,22 @@ static marketing.
 
 ### C4. DOCX layout option
 - Keep flat ATS DOCX as default
-- Optional “match preview layout” for multi-column where feasible
+- Optional “match preview layout” two-column table for sidebar/split
 
 ### C5. Responsive polish
 - Tablet split editor/preview as primary layout
 - Mobile: single-column, preview on demand — not a redesign of desktop
+
+### C6. Template sidebar presets + move-to-column
+- Templates may ship default `sectionCols`
+- Customize Tune: Sidebar / Main (or Left / Right) without drag
+
+### C7. Local theme presets
+- Named theme snapshots in IndexedDB (device-local)
+- Save / Apply / Delete from Customize Color & Type
+
+### C8. Markdown / plain-text export
+- Ordered sections via `effectiveOrder`; command palette download
 
 ---
 
@@ -102,8 +116,19 @@ static marketing.
 - Write/read a Cavren backup file in **their** Drive
 - Explicit consent; works only online; core app still offline without it
 - **No** Cavren server, token storage only in the browser
+- Empty / offline / missing-client-ID states that never imply Drive is required
 
 Out of scope for D: Cavren-hosted sync, multi-user collaboration, view-tracking share links.
+
+---
+
+## Phase E — Craft polish (done)
+
+- Side-by-side template compare UI
+- Browser spellcheck / reading-level hints (Resume check)
+- AI bullet rewrite + skills-from-experience (Chrome AI / user key)
+- Duplicate section / reorder extras in Customize
+- “Export this page only” (per-page PDF from preview)
 
 ---
 
@@ -123,17 +148,16 @@ Out of scope for D: Cavren-hosted sync, multi-user collaboration, view-tracking 
 | Order | Item | Status |
 |------:|------|--------|
 | 1 | A1 PWA offline | Done |
-| 2 | A2–A3 Data ownership + full backup | Done |
+| 2 | A2–A3 Data ownership + full backup + storage meter | Done |
 | 3 | A4 Demo seed control | Done |
-| 4 | B1 Versions | Done |
+| 4 | B1 Versions + diffs + auto-snapshot | Done |
 | 5 | B2 Deeper tailor | Done |
-| 6 | B3 Page fit | Done |
+| 6 | B3 Page fit + print polish | Done |
 | 7 | B4–B5 Interview packet + metrics prompts | Done |
-| 8 | C1–C5 Craft (keyboard, photo, letter, DOCX option, responsive) | Done — desktop/tablet shell + mobile FAB |
-| 9 | D1 Drive backup/restore | Done (client OAuth; needs your client ID) |
-
-Polish remaining: richer multi-column DOCX, Drive UX hardening, photo in PDF export.
-
+| 8 | C1–C5 Craft (keyboard, photo, letter, DOCX option, responsive) | Done |
+| 9 | C6–C8 Sidebar presets, theme presets, MD/txt export | Done |
+| 10 | D1 Drive backup/restore + UX hardening | Done (client OAuth; needs your client ID) |
+| 11 | Phase E (compare, spellcheck, AI rewrite, duplicate section, export page) | Done |
 
 ---
 

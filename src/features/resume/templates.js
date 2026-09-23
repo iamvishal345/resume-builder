@@ -79,6 +79,7 @@ export const RESUME_TEMPLATES = [
     languageStyle: "bars",
     experienceStyle: "standard",
     sidebarTone: "light",
+    sectionCols: { skills: 0, "extra:5": 0, education: 0 },
   }),
   T("nova", "Nova", "modern", "teal", "grotesk", {
     layoutId: "sidebar",
@@ -88,6 +89,7 @@ export const RESUME_TEMPLATES = [
     languageStyle: "dots",
     experienceStyle: "standard",
     sidebarTone: "light",
+    sectionCols: { skills: 0, "extra:5": 0 },
   }),
   T("orbit", "Orbit", "modern", "slate", "sans", {
     layoutId: "sidebar-right",
@@ -97,6 +99,7 @@ export const RESUME_TEMPLATES = [
     languageStyle: "chips",
     experienceStyle: "standard",
     sidebarTone: "light",
+    sectionCols: { skills: 0, "extra:5": 0, education: 0 },
   }),
   T("pulse", "Pulse", "modern", "terracotta", "sans", {
     layoutId: "single",
@@ -113,6 +116,13 @@ export const RESUME_TEMPLATES = [
     skillStyle: "bars",
     languageStyle: "bars",
     experienceStyle: "standard",
+    sectionCols: {
+      summary: 0,
+      experience: 0,
+      education: 1,
+      skills: 1,
+      "extra:5": 1,
+    },
   }),
   T("vertex", "Vertex", "modern", "navy", "grotesk", {
     layoutId: "sidebar",
@@ -122,6 +132,7 @@ export const RESUME_TEMPLATES = [
     languageStyle: "list",
     experienceStyle: "timeline",
     sidebarTone: "accent",
+    sectionCols: { skills: 0, "extra:5": 0, education: 0 },
   }),
 
   // —— Professional (recruiter-safe) ——
@@ -141,6 +152,7 @@ export const RESUME_TEMPLATES = [
     languageStyle: "list",
     experienceStyle: "standard",
     sidebarTone: "light",
+    sectionCols: { skills: 0, "extra:5": 0, education: 0 },
   }),
   T("hayes", "Hayes", "professional", "indigo", "sans", {
     layoutId: "sidebar",
@@ -150,6 +162,7 @@ export const RESUME_TEMPLATES = [
     languageStyle: "dots",
     experienceStyle: "standard",
     sidebarTone: "light",
+    sectionCols: { skills: 0, "extra:5": 0 },
   }),
   T("grant", "Grant", "professional", "olive", "elegant", {
     layoutId: "single",
@@ -166,6 +179,12 @@ export const RESUME_TEMPLATES = [
     skillStyle: "columns",
     languageStyle: "dots",
     experienceStyle: "compact",
+    sectionCols: {
+      summary: 0,
+      experience: 0,
+      education: 1,
+      skills: 1,
+    },
   }),
   T("smith", "Smith", "professional", "teal", "elegant", {
     layoutId: "single",
@@ -185,6 +204,7 @@ export const RESUME_TEMPLATES = [
     languageStyle: "bars",
     experienceStyle: "standard",
     sidebarTone: "dark",
+    sectionCols: { skills: 0, "extra:5": 0, education: 0 },
   }),
   T("onyx", "Onyx", "creative", "slate", "slab", {
     layoutId: "sidebar",
@@ -194,6 +214,7 @@ export const RESUME_TEMPLATES = [
     languageStyle: "chips",
     experienceStyle: "standard",
     sidebarTone: "dark",
+    sectionCols: { skills: 0, "extra:5": 0, "extra:7": 0 },
   }),
   T("torch", "Torch", "creative", "rose", "display", {
     layoutId: "single",
@@ -210,6 +231,12 @@ export const RESUME_TEMPLATES = [
     skillStyle: "bars",
     languageStyle: "bars",
     experienceStyle: "standard",
+    sectionCols: {
+      summary: 0,
+      experience: 0,
+      education: 1,
+      skills: 1,
+    },
   }),
   T("amp", "Amp", "creative", "terracotta", "grotesk", {
     layoutId: "sidebar-right",
@@ -219,6 +246,7 @@ export const RESUME_TEMPLATES = [
     languageStyle: "dots",
     experienceStyle: "timeline",
     sidebarTone: "accent",
+    sectionCols: { skills: 0, "extra:5": 0, education: 0 },
   }),
 
   // —— Elegant (serif, refined) ——
@@ -238,6 +266,7 @@ export const RESUME_TEMPLATES = [
     languageStyle: "dots",
     experienceStyle: "standard",
     sidebarTone: "light",
+    sectionCols: { skills: 0, "extra:5": 0, education: 0 },
   }),
   T("chateau", "Chateau", "elegant", "burgundy", "elegant", {
     layoutId: "sidebar",
@@ -247,6 +276,7 @@ export const RESUME_TEMPLATES = [
     languageStyle: "dots",
     experienceStyle: "standard",
     sidebarTone: "light",
+    sectionCols: { skills: 0, "extra:5": 0 },
   }),
   T("regent", "Regent", "elegant", "navy", "serif", {
     layoutId: "single",
@@ -358,10 +388,26 @@ export const settingsFromTemplate = (template) => {
     languageStyle: resolved.languageStyle,
     experienceStyle: resolved.experienceStyle,
     sidebarTone: resolved.sidebarTone,
+    // Legacy density/structure knobs a preset may carry (e.g. pageFit or
+    // preset-level spacing tweaks).
+    fontSize: resolved.fontSize,
+    lineHeight: resolved.lineHeight,
+    sectionSpacing: resolved.sectionSpacing,
+    pagePadX: resolved.pagePadX,
+    pagePadY: resolved.pagePadY,
+    colGap: resolved.colGap,
+    nameSize: resolved.nameSize,
+    photoSize: resolved.photoSize,
+    radiusSm: resolved.radiusSm,
+    sidebarWidth: resolved.sidebarWidth,
     // Drop per-resume color overrides so a prior dark-sidebar white ink
     // cannot linger on a light template (white-on-white).
     primaryColor: "",
     bgColor: "",
     textColor: "",
+    // Drop per-section style overrides when switching templates.
+    // Seed column placements from the template when it ships defaults.
+    sectionStyles: {},
+    sectionCols: { ...(template.style?.sectionCols || {}) },
   };
 };

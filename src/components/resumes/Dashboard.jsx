@@ -39,8 +39,10 @@ import {
   restoreFromText,
 } from "@features/resumes/backup";
 import { resolveTemplate } from "@features/resume/templates";
+import { availableSections } from "@features/resume/order";
+import { resumeViewModel } from "@features/resume/viewModel";
 import TemplateGallery from "../preview/TemplateGallery";
-import TemplateCustomize from "../preview/TemplateCustomize";
+import CustomizeSheet from "../preview/CustomizeSheet";
 import PreviewDialog from "./PreviewDialog";
 import LetterDialog from "./LetterDialog";
 import ResumeListItem from "./ResumeListItem";
@@ -184,6 +186,17 @@ const ResumesDashboard = () => {
     current.updatedAt = Date.now();
     current.name = nameOf(current);
     await putResume(current);
+    setGalleryDoc((prev) =>
+      prev && prev.id === current.id
+        ? {
+            ...current,
+            data: {
+              ...current.data,
+              resumeSettings: { ...current.data.resumeSettings },
+            },
+          }
+        : prev,
+    );
     await load();
   };
 
@@ -363,13 +376,35 @@ const ResumesDashboard = () => {
         settings={galleryDoc?.data?.resumeSettings}
         onSelect={(patch) => galleryDoc && updateSettings(galleryDoc, patch)}
       />
-      <TemplateCustomize
+      <CustomizeSheet
         isOpen={!!customizeDoc}
         onOpenChange={(open) => !open && setCustomizeDoc(null)}
         settings={customizeDoc?.data?.resumeSettings}
-        onSelect={(patch) =>
-          customizeDoc && updateSettings(customizeDoc, patch)
-        }
+        onSelect={(patch) => {
+          if (!customizeDoc) return;
+          setCustomizeDoc((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  data: {
+                    ...prev.data,
+                    resumeSettings: {
+                      ...(prev.data.resumeSettings || {}),
+                      ...patch,
+                    },
+                  },
+                }
+              : prev,
+          );
+          updateSettings(customizeDoc, patch);
+        }}
+        docData={customizeDoc?.data}
+        sections={[
+          { id: "header", title: "Header" },
+          ...(customizeDoc?.data
+            ? availableSections(resumeViewModel(customizeDoc.data))
+            : []),
+        ]}
       />
 
       <Dialog

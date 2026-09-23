@@ -1,15 +1,12 @@
-import { clamp, contrastInk } from "@features/resume/style";
+import { contrastInk, computeMetrics, mixHex } from "@features/resume/style";
 import { PDF_FONTS } from "./fonts";
 import { round } from "./pdf-utils";
 
 // Runtime token model mirroring buildResumeStyle (style.js) so the PDF matches
-// the on-screen preview: same colors, rhythm and density scale.
+// the on-screen preview: same colors, rhythm and density scale. The numeric
+// metrics come straight from computeMetrics() — a single source with the DOM.
 export const pdfTokens = ({ palette, font, settings }) => {
-  const density = settings.density === "dense";
-  const s = density ? 0.88 : 1;
-  const fontSize = round(clamp(settings.fontSize, 11, 18) * s);
-  const sectionSpacing = round(clamp(settings.sectionSpacing, 8, 28) * s);
-  const lineHeight = clamp(settings.lineHeight, 1.15, 1.9);
+  const m = computeMetrics(settings);
   const accent = settings.primaryColor || palette.accent;
   const bg = settings.bgColor || "#ffffff";
   const rawInk = settings.textColor || palette.ink;
@@ -22,18 +19,35 @@ export const pdfTokens = ({ palette, font, settings }) => {
     ink,
     muted: palette.muted,
     rule: palette.rule,
+    contactSep: mixHex(palette.muted, palette.rule, 0.5),
     surface: palette.surface,
     bg,
     fontFamily: PDF_FONTS[font.id] || PDF_FONTS.sans,
-    fontSize,
-    lineHeight,
-    sectionSpacing,
-    entryGap: round(sectionSpacing * 0.72),
-    headingGap: round(sectionSpacing * 0.45),
-    richGap: round(sectionSpacing * 0.28),
-    padX: round(26 * s),
-    padY: round(30 * s),
-    colGap: round(24 * s),
-    nameSize: round(27 * s),
+    // Integer-rounded values keep the PDF grid crisp (react-pdf renders points).
+    ...Object.fromEntries(
+      Object.entries(m).map(([key, value]) => [
+        key,
+        typeof value === "number" ? round(value) : value,
+      ]),
+    ),
+  };
+};
+
+/**
+ * Recompute the metric subset for one section from settings.sectionStyles[id].
+ * Returns the same token object (colors untouched) when the section has no
+ * override, so callers can always render against the returned `t`.
+ */
+export const withSection = (t, settings, override) => {
+  if (!override) return t;
+  const m = computeMetrics(settings, override);
+  return {
+    ...t,
+    ...Object.fromEntries(
+      Object.entries(m).map(([key, value]) => [
+        key,
+        typeof value === "number" ? round(value) : value,
+      ]),
+    ),
   };
 };

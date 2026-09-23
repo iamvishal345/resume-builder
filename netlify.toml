@@ -1,0 +1,11 @@
+# Netlify / Cloudflare Pages also honor public/_headers.
+# This file documents the same rules for Netlify builds that read netlify.toml.
+[[headers]]
+  for = "/sw.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/manifest.webmanifest"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"

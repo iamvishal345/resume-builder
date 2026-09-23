@@ -21,13 +21,12 @@ const triggerDownload = (blob, name) => {
   window.setTimeout(() => URL.revokeObjectURL(url), 4000);
 };
 
-export const downloadResumePdf = async ({
+export const buildResumePdf = async ({
   data,
   templateId = "classic",
   paletteId,
   fontId = "sans",
   settings = {},
-  fileName,
 }) => {
   const [{ pdf }, { default: PdfResume }] = await Promise.all([
     import("@react-pdf/renderer"),
@@ -42,7 +41,24 @@ export const downloadResumePdf = async ({
       settings={settings}
     />
   );
-  const blob = await doc.toBlob();
+  return doc.toBlob();
+};
+
+export const downloadResumePdf = async ({
+  data,
+  templateId = "classic",
+  paletteId,
+  fontId = "sans",
+  settings = {},
+  fileName,
+}) => {
+  const blob = await buildResumePdf({
+    data,
+    templateId,
+    paletteId,
+    fontId,
+    settings,
+  });
   const name =
     fileName ||
     sanitizeFileName(

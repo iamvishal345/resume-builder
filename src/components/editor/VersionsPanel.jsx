@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Button } from "@astryxdesign/core/Button";
 import { Text } from "@astryxdesign/core/Text";
@@ -10,11 +10,48 @@ import {
   deleteVersion,
   getVersion,
 } from "@features/resumes/versions";
+import { formatDiffLines, diffVersions } from "@features/resumes/versionDiff";
 import { useStore, resumeDataOf } from "@store";
+
+const DiffVsCurrent = ({ lines }) => {
+  if (!lines.length) {
+    return (
+      <Text type="inherit" size="sm" color="secondary">
+        Matches current
+      </Text>
+    );
+  }
+  return (
+    <VStack gap={0} width="100%">
+      <Text type="inherit" size="sm" color="secondary">
+        vs current
+      </Text>
+      <ul className="ver-diff-list">
+        {lines.map((line) => (
+          <li key={line}>
+            <Text type="inherit" size="sm" color="secondary">
+              {line}
+            </Text>
+          </li>
+        ))}
+      </ul>
+    </VStack>
+  );
+};
 
 const VersionsPanel = ({ open, onOpenChange, resumeId }) => {
   const [items, setItems] = useState([]);
   const [busy, setBusy] = useState(false);
+
+  // Snapshot current editor state only when the list changes (dialog is modal).
+  const diffsById = useMemo(() => {
+    const current = resumeDataOf(useStore.getState());
+    const map = {};
+    for (const v of items) {
+      map[v.id] = formatDiffLines(diffVersions(v.data || {}, current));
+    }
+    return map;
+  }, [items]);
 
   const reload = async () => {
     if (!resumeId) return;
@@ -29,8 +66,7 @@ const VersionsPanel = ({ open, onOpenChange, resumeId }) => {
     if (!resumeId) return;
     setBusy(true);
     try {
-      const data = resumeDataOf(useStore.getState());
-      await saveVersion(resumeId, data);
+      await saveVersion(resumeId, resumeDataOf(useStore.getState()));
       await reload();
     } finally {
       setBusy(false);
@@ -38,7 +74,11 @@ const VersionsPanel = ({ open, onOpenChange, resumeId }) => {
   };
 
   const restore = async (id) => {
-    if (!window.confirm("Restore this snapshot? Current editor content will be replaced.")) {
+    if (
+      !window.confirm(
+        "Restore this snapshot? Current editor content will be replaced.",
+      )
+    ) {
       return;
     }
     setBusy(true);
@@ -88,39 +128,46 @@ const VersionsPanel = ({ open, onOpenChange, resumeId }) => {
               </Text>
             ) : (
               items.map((v) => (
-                <HStack
-                  key={v.id}
-                  justify="between"
-                  align="center"
-                  width="100%"
-                  gap={2}
-                >
-                  <VStack gap={0}>
-                    <Text type="inherit" size="sm" weight="semibold" color="primary">
-                      {v.name}
-                    </Text>
-                    <Text type="inherit" size="sm" color="secondary">
-                      {v.summary}
-                    </Text>
-                  </VStack>
-                  <HStack gap={1}>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      icon={<RotateCcw size={14} />}
-                      label="Restore"
-                      disabled={busy}
-                      onClick={() => restore(v.id)}
-                    />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      icon={<Trash2 size={14} />}
-                      label="Delete"
-                      onClick={() => remove(v.id)}
-                    />
+                <VStack key={v.id} gap={1} width="100%">
+                  <HStack
+                    justify="between"
+                    align="start"
+                    width="100%"
+                    gap={2}
+                  >
+                    <VStack gap={0}>
+                      <Text
+                        type="inherit"
+                        size="sm"
+                        weight="semibold"
+                        color="primary"
+                      >
+                        {v.name}
+                      </Text>
+                      <Text type="inherit" size="sm" color="secondary">
+                        {v.summary}
+                      </Text>
+                    </VStack>
+                    <HStack gap={1}>
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        icon={<RotateCcw size={14} />}
+                        label="Restore"
+                        disabled={busy}
+                        onClick={() => restore(v.id)}
+                      />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        icon={<Trash2 size={14} />}
+                        label="Delete"
+                        onClick={() => remove(v.id)}
+                      />
+                    </HStack>
                   </HStack>
-                </HStack>
+                  <DiffVsCurrent lines={diffsById[v.id] || []} />
+                </VStack>
               ))
             )}
           </VStack>

@@ -14,8 +14,22 @@ const clean = (html) =>
     .trim();
 
 export const buildCoverLetterDocx = (view, letter) => {
-  const style = buildResumeStyle(view?.settings || {});
-  const accent = (style.primaryColor || "#2e5c38").replace("#", "");
+  const settings = view?.settings || {};
+  const fallbackPalette = {
+    accent: settings.primaryColor || "#2e5c38",
+    accentSoft: "#e9efe6",
+    accentInk: "#ffffff",
+    ink: "#111827",
+    muted: "#5b6672",
+    rule: "#d8dee5",
+    surface: "#f1f5f9",
+  };
+  const style = buildResumeStyle({
+    palette: fallbackPalette,
+    font: { stack: "Arial, Helvetica, sans-serif" },
+    settings,
+  });
+  const accent = (style["--r-accent"] || "#2e5c38").replace("#", "");
   const pd = view?.pd || {};
   const name = [pd.firstName, pd.lastName].filter(Boolean).join(" ") || "Applicant";
   const contact = [pd.email, pd.contactNumber, pd.city].filter(Boolean).join(" · ");

@@ -6,32 +6,31 @@ const steps = [
   {
     title: "Personal details",
     description:
-      "Name, job title, contact info, and social links like GitHub or LinkedIn.",
+      "Name, job title, contact info, photo, and social links like GitHub or LinkedIn.",
   },
   {
     title: "Work history",
     description:
-      "Positions with companies, location, dates, and a rich-text summary of achievements — drag to reorder.",
+      "Roles with rich-text achievements — polish bullets with optional AI, drag to reorder.",
   },
   {
     title: "Education",
-    description:
-      "Degrees, schools, and field of study with the same clean editor.",
+    description: "Degrees, schools, and field of study in the same clean editor.",
   },
   {
     title: "Skills",
     description:
-      "Name the skills recruiters care about and rate your proficiency visually.",
+      "Name what recruiters look for, rate proficiency, or suggest skills from your experience.",
   },
   {
     title: "Summary",
     description:
-      "A headline summary that ties together your experience, skills, and goals.",
+      "A headline summary that ties experience, skills, and goals — with browser spellcheck on.",
   },
   {
     title: "Additional sections",
     description:
-      "Languages, certifications, accomplishments, references, and more.",
+      "Languages, certifications, and more — duplicate or reorder extras from Customize.",
   },
 ];
 
@@ -41,50 +40,50 @@ const capabilities = [
     icon: "download",
     title: "Export PDF & DOCX",
     description:
-      "Download a print-ready PDF or a Word document, generated from the exact same layout you preview — themes, fonts, and all.",
+      "Print-ready PDF or Word from the layout you preview. Export the whole resume or a single page.",
   },
   {
     icon: "upload",
     title: "Import anything",
     description:
-      "Paste old text, or upload a PDF, .docx, or a Cavren backup file to keep your writing and rewrite the rest.",
+      "Paste text, or upload a PDF, .docx, or Cavren backup to keep your writing and reshape the rest.",
   },
   {
     id: "ai",
     icon: "sparkles",
-    title: "AI first draft",
+    title: "AI drafting & polish",
     description:
-      "Start from a job title (with optional emphasis) and the AI drafts a summary, highlights, and skills you can edit freely.",
+      "First draft from a job title, bullet polish, and skills-from-experience — Chrome AI or your API key only.",
   },
   {
     icon: "clipboard",
-    title: "Resume check & coherence",
+    title: "Resume check",
     description:
-      "A live score for completeness, plus automatic detection of overlapping dates, duplicated contacts, and skills you claim but never list.",
+      "Live completeness score, coherence lint, reading-level hint, and achievement prompts.",
   },
   {
     icon: "target",
     title: "Job match",
     description:
-      "Paste a job description and see missing keywords, tailoring suggestions, and a match score before you apply.",
+      "Paste a job description for missing keywords, tailoring suggestions, and a match score.",
   },
   {
     icon: "roadmap",
-    title: "Templates, themes, fonts",
+    title: "Templates & compare",
     description:
-      "Multiple templates with accent palettes and typefaces — including serif, grotesk, and slab options for print.",
+      "Layouts, palettes, and fonts — including side-by-side compare before you apply.",
   },
   {
     icon: "backup",
-    title: "Backup & restore",
+    title: "Backup & versions",
     description:
-      "Export any resume as a portable .r.json backup, then restore it later with a click or a drag-and-drop.",
+      "Portable .r.json backups, local version snapshots, and optional client-side Drive backup.",
   },
   {
     icon: "lock",
-    title: "Private & local",
+    title: "Private & offline",
     description:
-      "No account, no uploads, no tracking. Everything is stored in your browser, and exports are generated on your machine.",
+      "No account, no analytics. IndexedDB on device; install the PWA and keep editing offline.",
   },
 ];
 ---
@@ -97,93 +96,62 @@ const capabilities = [
   <section class="hero">
     <h1>An editor that checks, matches, and exports</h1>
     <p>
-      Six guided steps keep a live preview beside your forms, and the tools
-      around them — export, import, AI, checks — turn that draft into a resume
-      you'd be proud to send.
+      Six guided steps keep a live preview beside your forms. Export, import, AI,
+      and checks turn that draft into a resume you'd send with confidence.
     </p>
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="/resumes">Start building free</a>
+      <a class="btn btn-secondary" href="/privacy">How privacy works</a>
+    </div>
   </section>
 
-  <section class="container cards-pad">
+  <section class="container section-pad reveal">
     <div class="section-title">
       <h2>What you get</h2>
-      <p>
-        The capabilities that make a resume easy to write and hard to mess up.
-      </p>
+      <p>Capabilities that make a resume easy to write and hard to mess up.</p>
     </div>
     <div class="grid">
-      {capabilities.map((cap) => (
-        <article class="card" id={cap.id}>
-          <span class="icon">
-            <FeatureIcon name={cap.icon} />
-          </span>
-          <h3>{cap.title}</h3>
-          <p>{cap.description}</p>
-        </article>
-      ))}
+      {
+        capabilities.map((cap) => (
+          <article class="feature" id={cap.id}>
+            <span class="icon">
+              <FeatureIcon name={cap.icon} />
+            </span>
+            <h3>{cap.title}</h3>
+            <p>{cap.description}</p>
+          </article>
+        ))
+      }
     </div>
   </section>
 
-  <section class="container cards-pad">
+  <section class="container section-pad reveal">
     <div class="section-title">
       <h2>How the editor works</h2>
-      <p>
-        Six focused steps — nothing gets missed, everything stays in one place.
-      </p>
+      <p>Six focused steps — nothing missed, everything in one place.</p>
     </div>
-    <div class="list">
-      {steps.map((step, index) => (
-        <article>
-          <span class="step-num">{String(index + 1).padStart(2, "0")}</span>
-          <div>
-            <h3>{step.title}</h3>
-            <p>{step.description}</p>
-          </div>
-        </article>
-      ))}
+    <div class="step-rows">
+      {
+        steps.map((step, index) => (
+          <article>
+            <span class="step-num">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <div>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </div>
+          </article>
+        ))
+      }
     </div>
   </section>
 
-  <section class="cta-band">
+  <section class="cta-band reveal">
     <div class="container">
-      <h2>Try it — it's free and private</h2>
+      <h2>Try it — free and private</h2>
       <p>No sign-up, no uploads. Just a faster way to a better resume.</p>
       <a class="btn btn-primary" href="/resumes">Start building free</a>
     </div>
   </section>
 </MarketingLayout>
-
-<style>
-  .list {
-    max-width: 720px;
-    margin: 0 auto;
-  }
-
-  .list article {
-    display: flex;
-    gap: var(--spacing-6);
-    padding: var(--spacing-5) 0;
-    border-top: 1px solid var(--color-border);
-  }
-
-  .list article:last-child {
-    border-bottom: 1px solid var(--color-border);
-  }
-
-  .step-num {
-    font-weight: 700;
-    color: var(--color-accent);
-    font-size: 0.9rem;
-    line-height: 1.9;
-    flex-shrink: 0;
-  }
-
-  .list h3 {
-    margin: 0 0 4px;
-    font-size: 1.15rem;
-  }
-
-  .list p {
-    margin: 0;
-    color: var(--color-text-secondary);
-  }
-</style>

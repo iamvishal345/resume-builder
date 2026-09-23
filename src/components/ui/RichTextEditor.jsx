@@ -272,6 +272,9 @@ const RichTextEditor = ({
             placeholder={placeholder}
             renderElement={renderElement}
             renderLeaf={renderLeaf}
+            spellCheck
+            autoCorrect="on"
+            autoCapitalize="sentences"
             onFocus={() => { focusedRef.current = true; }}
             onBlur={() => { focusedRef.current = false; }}
           />

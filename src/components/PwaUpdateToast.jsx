@@ -18,6 +18,8 @@ export default function PwaUpdateToast() {
 
   useEffect(() => {
     let updateSW = () => Promise.resolve();
+    let intervalId = 0;
+    let onVisible = null;
 
     updateSW = registerSW({
       immediate: true,
@@ -30,11 +32,22 @@ export default function PwaUpdateToast() {
             /* private mode */
           }
         }
-        setInterval(
+
+        // Check immediately, on tab focus, and periodically so deploys surface quickly.
+        registration.update().catch(() => {});
+
+        onVisible = () => {
+          if (document.visibilityState === "visible") {
+            registration.update().catch(() => {});
+          }
+        };
+        document.addEventListener("visibilitychange", onVisible);
+
+        intervalId = window.setInterval(
           () => {
             registration.update().catch(() => {});
           },
-          60 * 60 * 1000,
+          10 * 60 * 1000,
         );
       },
       onNeedRefresh() {
@@ -58,6 +71,13 @@ export default function PwaUpdateToast() {
     });
 
     updateSWRef.current = updateSW;
+
+    return () => {
+      if (onVisible) {
+        document.removeEventListener("visibilitychange", onVisible);
+      }
+      if (intervalId) clearInterval(intervalId);
+    };
   }, []);
 
   const dismiss = () => setVisible(false);

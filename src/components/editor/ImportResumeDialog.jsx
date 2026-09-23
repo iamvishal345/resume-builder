@@ -14,21 +14,17 @@ import {
   isJsonBackupFile,
 } from "@features/import/extract";
 import { parseResumeBackup } from "@features/resumes/backup";
-import { saveVersion } from "@features/resumes/versions";
+import { snapshotBefore } from "@features/resumes/snapshot";
 
 const snapshotBeforeImport = async () => {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get("resume");
-    if (!id) return;
-    await saveVersion(
-      id,
-      resumeDataOf(useStore.getState()),
-      `Before import · ${new Date().toLocaleString()}`,
-    );
-  } catch {
-    /* ignore */
-  }
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("resume");
+  if (!id) return;
+  await snapshotBefore(
+    id,
+    resumeDataOf(useStore.getState()),
+    `Before import · ${new Date().toLocaleString()}`,
+  );
 };
 
 const ImportResumeDialog = ({ isOpen, onOpenChange }) => {

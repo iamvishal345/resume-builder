@@ -15,7 +15,7 @@ import {
   textToParagraphs,
 } from "@features/ai/provider";
 import { getResume, putResume, newResume } from "@features/resumes/db";
-import { saveVersion } from "@features/resumes/versions";
+import { snapshotBefore } from "@features/resumes/snapshot";
 import { extractBullets } from "@features/ats/metrics";
 import AiSettingsDialog from "../ai/AiSettingsDialog";
 import { nameOf } from "./resumeMeta";
@@ -87,7 +87,7 @@ const TailorDialog = ({ doc, onOpenChange }) => {
     setError("");
     try {
       const current = proposal.source;
-      await saveVersion(
+      await snapshotBefore(
         current.id,
         current.data,
         `Before tailor · ${new Date().toLocaleString()}`,

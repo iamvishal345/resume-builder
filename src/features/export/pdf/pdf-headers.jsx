@@ -1,6 +1,7 @@
 import React from "react";
-import { View, Text } from "@react-pdf/renderer";
+import { View, Text, Image } from "@react-pdf/renderer";
 import { ContactLine } from "./pdf-blocks";
+import { withSection } from "./pdf-tokens";
 import { round } from "./pdf-utils";
 
 export const contentPad = (t, top) => ({
@@ -9,6 +10,28 @@ export const contentPad = (t, top) => ({
   paddingTop: top ?? t.padY,
   paddingBottom: t.padY,
 });
+
+const showPhotoOf = (data, config) =>
+  Boolean(data?.pd?.photoDataUrl) && config?.showPhoto !== false;
+
+const PhotoBadge = ({ t, data, config, inkBorder }) => {
+  if (!showPhotoOf(data, config)) return null;
+  const size = Math.max(40, round(t.photoSize || 72));
+  return (
+    <Image
+      src={data.pd.photoDataUrl}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        objectFit: "cover",
+        borderWidth: Math.max(1, round(t.photoBorder || 2)),
+        borderColor: inkBorder || t.accent,
+        flexShrink: 0,
+      }}
+    />
+  );
+};
 
 const NameBlock = ({
   t,
@@ -30,8 +53,8 @@ const NameBlock = ({
         style={{
           fontSize: round(t.nameSize * nameRatio),
           fontWeight: 700,
-          lineHeight: 1.15,
-          letterSpacing: 0.3,
+          lineHeight: t.nameLineHeight,
+          letterSpacing: t.nameLetterSpacing,
           color: nameColor || t.accent,
         }}
       >
@@ -39,11 +62,11 @@ const NameBlock = ({
       </Text>
       <Text
         style={{
-          fontSize: round(t.fontSize * 0.95),
+          fontSize: t.titleSize,
           fontWeight: 600,
           color: titleColor || t.accentSoft,
-          marginTop: 3,
-          marginBottom: 6,
+          marginTop: round(t.titleMarginTop),
+          marginBottom: round(t.titleMarginBottom),
         }}
       >
         {data.pd.designation || "Job Title"}
@@ -52,9 +75,36 @@ const NameBlock = ({
         t={t}
         data={data}
         ink={contactInk || t.muted}
-        sep={contactSep || t.rule}
+        sep={contactSep || t.contactSep || t.rule}
         align={contactAlign || (center ? "center" : "left")}
       />
+    </View>
+  );
+};
+
+const HeaderWithPhoto = ({ t, data, config, center, children, inkBorder }) => {
+  const photo = showPhotoOf(data, config) ? (
+    <PhotoBadge t={t} data={data} config={config} inkBorder={inkBorder} />
+  ) : null;
+  if (!photo) return children;
+  if (center) {
+    return (
+      <View style={{ alignItems: "center", gap: round(t.headerPhotoGap || 14) }}>
+        {photo}
+        {children}
+      </View>
+    );
+  }
+  return (
+    <View
+      style={{
+        flexDirection: "row",
+        alignItems: "flex-start",
+        gap: round(t.headerPhotoGap || 14),
+      }}
+    >
+      {photo}
+      <View style={{ flex: 1, minWidth: 0 }}>{children}</View>
     </View>
   );
 };
@@ -63,6 +113,7 @@ const NameBlock = ({
 export const HeaderClassic = ({
   t,
   data,
+  config,
   center = false,
   headerStyle = "rule",
   nameRatio = 1,
@@ -70,71 +121,83 @@ export const HeaderClassic = ({
   const isDouble = headerStyle === "double";
   const isAccent = headerStyle === "accent";
   const isPlain = headerStyle === "plain";
-  const rule = isPlain || isAccent ? 0 : isDouble ? 3 : 2;
+  const rule = isPlain ? 0 : isDouble ? t.headerDoubleWidth : t.headerRuleWidth;
 
   return (
     <View
       style={{
         borderBottomWidth: rule,
-        borderBottomColor: isDouble ? t.accent : t.rule,
-        borderLeftWidth: isAccent ? 4 : 0,
+        borderBottomColor: isDouble || rule ? t.accent : t.rule,
+        borderLeftWidth: isAccent ? t.accentBarWidth : 0,
         borderLeftColor: t.accent,
-        paddingLeft: isAccent ? round(t.colGap * 0.55) : 0,
-        paddingBottom: isPlain || isAccent ? 0 : round(t.sectionSpacing * 0.5),
+        paddingLeft: isAccent ? round(t.accentBarInset) : 0,
+        paddingBottom: isAccent ? 0 : round(t.headerPad),
         marginBottom: t.sectionSpacing,
         ...(center ? { alignItems: "center" } : {}),
       }}
     >
-      <NameBlock t={t} data={data} center={center} nameRatio={nameRatio} />
+      <HeaderWithPhoto t={t} data={data} config={config} center={center}>
+        <NameBlock t={t} data={data} center={center} nameRatio={nameRatio} />
+      </HeaderWithPhoto>
     </View>
   );
 };
 
-export const HeaderMinimal = ({ t, data }) => {
+export const HeaderMinimal = ({ t, data, config }) => {
   const name =
     [data.pd.firstName, data.pd.lastName].filter(Boolean).join(" ") ||
     "Your Name";
   return (
     <View style={{ marginBottom: t.sectionSpacing }}>
-      <Text
-        style={{
-          fontSize: round(t.nameSize * 0.92),
-          fontWeight: 700,
-          textTransform: "uppercase",
-          letterSpacing: round(t.nameSize * 0.06),
-          color: t.accent,
-        }}
-      >
-        {name}
-      </Text>
-      <Text
-        style={{
-          fontSize: round(t.fontSize * 0.82),
-          fontWeight: 500,
-          textTransform: "uppercase",
-          letterSpacing: round(t.fontSize * 0.14),
-          color: t.accentSoft,
-          marginTop: 4,
-        }}
-      >
-        {data.pd.designation || "Job Title"}
-      </Text>
-      <View
-        style={{
-          borderTopWidth: 1,
-          borderBottomWidth: 1,
-          borderColor: t.rule,
-          paddingVertical: round(t.fontSize * 0.5),
-          marginTop: round(t.fontSize * 0.55),
-        }}
-      >
-        <ContactLine t={t} data={data} />
-      </View>
+      <HeaderWithPhoto t={t} data={data} config={config} center={false}>
+        <View>
+          <Text
+            style={{
+              fontSize: round(t.nameSize * 0.92),
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: round(t.nameSize * 0.06),
+              color: t.accent,
+            }}
+          >
+            {name}
+          </Text>
+          <Text
+            style={{
+              fontSize: round(t.fontSize * 0.82),
+              fontWeight: 500,
+              textTransform: "uppercase",
+              letterSpacing: round(t.fontSize * 0.14),
+              color: t.accentSoft,
+              marginTop: round(t.titleMarginTop),
+            }}
+          >
+            {data.pd.designation || "Job Title"}
+          </Text>
+          <View
+            style={{
+              borderTopWidth: t.sectionRuleWidth,
+              borderBottomWidth: t.sectionRuleWidth,
+              borderColor: t.rule,
+              paddingVertical: round(t.darkContactPadY),
+              marginTop: round(t.darkContactMarginY),
+            }}
+          >
+            <ContactLine t={t} data={data} />
+          </View>
+        </View>
+      </HeaderWithPhoto>
     </View>
   );
 };
 
-export const HeaderBand = ({ t, data, surface = false, center = true }) => (
+export const HeaderBand = ({
+  t,
+  data,
+  config,
+  surface = false,
+  center = true,
+}) => (
   <View
     style={{
       backgroundColor: surface ? t.surface : t.accent,
@@ -143,33 +206,48 @@ export const HeaderBand = ({ t, data, surface = false, center = true }) => (
       alignItems: center ? "center" : "flex-start",
     }}
   >
-    <NameBlock
+    <HeaderWithPhoto
       t={t}
       data={data}
+      config={config}
       center={center}
-      nameColor={surface ? t.accent : t.accentInk}
-      titleColor={surface ? t.accentSoft : t.accentInk}
-      contactInk={surface ? t.muted : t.accentInk}
-      contactSep={surface ? t.rule : t.accentInk}
-      contactAlign={center ? "center" : "left"}
-    />
+      inkBorder={surface ? t.accent : t.accentInk}
+    >
+      <NameBlock
+        t={t}
+        data={data}
+        center={center}
+        nameColor={surface ? t.accent : t.accentInk}
+        titleColor={surface ? t.accentSoft : t.accentInk}
+        contactInk={surface ? t.muted : t.accentInk}
+        contactSep={surface ? t.contactSep || t.rule : t.accentInk}
+        contactAlign={center ? "center" : "left"}
+      />
+    </HeaderWithPhoto>
   </View>
 );
 
 /** In-sidebar identity for dark sidebar tone. */
-export const SidebarIdentity = ({ t, data }) => (
+export const SidebarIdentity = ({ t, data, config }) => (
   <View style={{ marginBottom: t.sectionSpacing }}>
-    <NameBlock
+    <HeaderWithPhoto
       t={t}
       data={data}
+      config={config}
       center={false}
-      nameColor={t.accentInk}
-      titleColor={t.accentInk}
-      contactInk={t.accentInk}
-      contactSep={t.accentInk}
-      contactAlign="left"
-      nameRatio={0.85}
-    />
+      inkBorder={t.accentInk}
+    >
+      <NameBlock
+        t={t}
+        data={data}
+        center={false}
+        nameColor={t.accentInk}
+        titleColor={t.accentInk}
+        contactInk={t.accentInk}
+        contactSep={t.accentInk}
+        contactAlign="left"
+      />
+    </HeaderWithPhoto>
   </View>
 );
 
@@ -178,16 +256,18 @@ export const niceHeader = (config, data, t) => {
   const style = config?.headerStyle || "plain";
   const center = (config?.headerAlign || "left") === "center";
   const band = style === "band" || style === "color";
+  const ht = withSection(t, config, config?.sectionStyles?.header);
 
   if (band) {
-    return <HeaderBand t={t} data={data} center={center} />;
+    return <HeaderBand t={ht} data={data} config={config} center={center} />;
   }
 
   return (
     <View style={contentPad(t)}>
       <HeaderClassic
-        t={t}
+        t={ht}
         data={data}
+        config={config}
         center={center}
         headerStyle={style === "normal" ? "plain" : style}
       />

@@ -5,10 +5,12 @@ import { RESUME_LAYOUTS, BuildSections } from "./layouts";
 import { resolveTemplate } from "./templates";
 import {
   buildResumeStyle,
+  buildSectionStyle,
   resolveLayoutSettings,
 } from "./style";
-import { effectiveOrder } from "./order";
+import { availableSections, effectiveOrder } from "./order";
 import { useResumeCanvas } from "./canvas";
+import "./resume-fonts.css";
 import "./resume.css";
 
 export const Resume = ({
@@ -29,6 +31,13 @@ export const Resume = ({
   const Layout = meta.render;
   const vars = buildResumeStyle({ palette, font, settings: cfg });
 
+  const sectionVars = {};
+  const knownIds = availableSections(data).map((entry) => entry.id);
+  for (const id of ["header", ...knownIds]) {
+    const secStyle = buildSectionStyle({ settings: cfg, sectionId: id });
+    if (secStyle) sectionVars[id] = secStyle;
+  }
+
   const sections = BuildSections({
     data,
     styles: {
@@ -36,6 +45,7 @@ export const Resume = ({
       languageStyle: cfg.languageStyle,
       experienceStyle: cfg.experienceStyle,
     },
+    sectionVars,
   });
   const order = effectiveOrder(
     settings?.sectionOrder ?? cfg.sectionOrder,
@@ -50,11 +60,20 @@ export const Resume = ({
     onEditSection,
   });
 
+  // Feed the layout the columns the canvas currently renders (persisted
+  // sectionCols, plus any transient override during a drag) so cross-column
+  // drags show live and the final DOM order matches the PDF export.
+  const domCfg = {
+    ...cfg,
+    ...(sectionVars.header ? { sectionVars } : {}),
+    sectionCols: canvas.displayCols,
+  };
+
   const paper = (
     <Layout
       data={data}
       vars={vars}
-      cfg={cfg}
+      cfg={domCfg}
       sections={sections}
       order={canvas.interactive ? canvas.displayOrder : order}
       canvas={canvas}

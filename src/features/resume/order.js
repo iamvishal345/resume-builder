@@ -2,10 +2,8 @@ import { toSkillList } from "@features/resume/skillList";
 import { extraSectionHasContent } from "@features/resume/extraContent";
 
 // Canonical resume sections and ordering helpers.
-// Section ids: "summary" | "experience" | "education" | "skills" | `extra:<n>`
-// where <n> is the numeric id of an additional section (e.g. Languages = 5).
-// Ordering is stored in resumeSettings.sectionOrder so the canvas reorder
-// persists, survives reloads, and prints with the same layout.
+// Section ids: "summary" | "experience" | "education" | "skills" | `extra:<instanceId>`
+// Catalog kind (1–7) lives on additionalSections[].kind (fallback: id when 1–7).
 
 export const BASE_SECTION_IDS = ["summary", "experience", "education", "skills"];
 
@@ -18,24 +16,43 @@ export const SECTION_TITLES = {
 
 export const isExtra = (id) => typeof id === "string" && id.startsWith("extra:");
 
-export const extraIdOf = (id) => Number(id.slice("extra:".length));
+export const extraIdOf = (id) => Number(String(id).slice("extra:".length));
+
+/** Stable canvas / order id for an additional section instance. */
+export const extraRefOf = (section) =>
+  section?.id !== undefined && section?.id !== null
+    ? `extra:${section.id}`
+    : "";
+
+/** Catalog type 1–7 (Custom…Interests). */
+export const catalogKindOf = (section) => {
+  const raw = Number(section?.kind ?? section?.id);
+  if (raw >= 1 && raw <= 7) return raw;
+  return 1;
+};
+
+export const findExtraByRef = (extras, ref) =>
+  (extras || []).find((section) => extraRefOf(section) === ref);
+
+export const kindFromRef = (ref, extras = []) => {
+  const section = findExtraByRef(extras, ref);
+  if (section) return catalogKindOf(section);
+  const n = extraIdOf(ref);
+  return n >= 1 && n <= 7 ? n : 1;
+};
 
 export const titleOf = (id, list) => {
   const found = list.find((entry) => entry.id === id);
   return found ? found.title : SECTION_TITLES[id] || id;
 };
 
-// Canonical order given the current content — new/last sections appended last.
 export const defaultOrder = (data) => {
   const extras = (data?.additionalSections || data?.extras || []).map((section) =>
-    section && section.id !== undefined ? `extra:${section.id}` : ""
+    extraRefOf(section),
   );
   return [...BASE_SECTION_IDS, ...extras.filter(Boolean)];
 };
 
-// The ordered list of sections that currently have content. This is the single
-// source of truth for section gating shared by the DOM renderer and the PDF
-// export (both must agree on what exists and in what canonical order).
 export const availableSections = (data) => {
   const out = [];
   if (data.summary) out.push({ id: "summary", title: "Summary" });
@@ -45,19 +62,30 @@ export const availableSections = (data) => {
   if (skillEntries.some((s) => s.name)) out.push({ id: "skills", title: "Skills" });
   for (const section of data.extras || []) {
     if (!extraSectionHasContent(section)) continue;
-    const id = `extra:${section.id}`;
+    const id = extraRefOf(section);
+    const kind = catalogKindOf(section);
     out.push({
       id,
+      kind,
       title:
         (section.title && String(section.title).trim()) ||
-        (section.id === 5 ? "Languages" : "Additional"),
+        (kind === 5 ? "Languages" : "Additional"),
     });
   }
   return out;
 };
 
-// The stored order filtered to sections that still exist, with missing ones
-// appended in canonical order.
+/** All extras for Customize reorder (including empty ones). */
+export const listExtraSections = (extras = []) =>
+  (extras || []).map((section) => ({
+    id: extraRefOf(section),
+    kind: catalogKindOf(section),
+    instanceId: section.id,
+    title:
+      (section.title && String(section.title).trim()) ||
+      (catalogKindOf(section) === 5 ? "Languages" : "Additional"),
+  }));
+
 export const effectiveOrder = (stored, available, data) => {
   const inUse = new Set(available);
   const result = (Array.isArray(stored) ? stored : [])
@@ -69,9 +97,17 @@ export const effectiveOrder = (stored, available, data) => {
   return result;
 };
 
-// Move `id` one step up/down inside its layout column and return the new flat
-// order (the layout's column order then main order, i.e. final DOM order).
-// `columns` is the array of id arrays a layout currently renders.
+/** Move id one step in a flat order list (Customize Tune). */
+export const moveInOrder = (order, id, dir) => {
+  const list = Array.isArray(order) ? [...order] : [];
+  const pos = list.indexOf(id);
+  if (pos < 0) return list;
+  const target = dir === "up" ? pos - 1 : pos + 1;
+  if (target < 0 || target >= list.length) return list;
+  [list[pos], list[target]] = [list[target], list[pos]];
+  return list;
+};
+
 export const moveWithinColumn = (columns, id, dir) => {
   const stack = columns.find((col) => col.includes(id));
   if (!stack) return columns.flat();
@@ -83,16 +119,48 @@ export const moveWithinColumn = (columns, id, dir) => {
   return columns.map((col) => (col === stack ? next : col)).flat();
 };
 
-// Reorder `movingId` relative to `targetId` (same column) and return the new
-// flat order. By default the moving section lands immediately BEFORE the
-// target; pass `after=true` to land immediately AFTER it. Used by drag & drop.
 export const placeBefore = (columns, movingId, targetId, after = false) => {
-  const stack = columns.find(
-    (col) => col.includes(movingId) && col.includes(targetId)
+  if (movingId === targetId) return columns.flat();
+  const sourceIdx = columns.findIndex((col) => col.includes(movingId));
+  const targetIdx = columns.findIndex((col) => col.includes(targetId));
+  if (sourceIdx === -1 || targetIdx === -1) return columns.flat();
+  const next = columns.map((col, i) =>
+    i === sourceIdx
+      ? col.filter((id) => id !== movingId)
+      : i === targetIdx
+        ? [...col]
+        : col,
   );
-  if (!stack || movingId === targetId) return columns.flat();
-  const next = stack.filter((id) => id !== movingId);
-  const idx = next.indexOf(targetId);
-  next.splice(after ? idx + 1 : idx, 0, movingId);
-  return columns.map((col) => (col === stack ? next : col)).flat();
+  const stack = next[targetIdx];
+  const idx = stack.indexOf(targetId);
+  stack.splice(after ? idx + 1 : idx, 0, movingId);
+  return next.flat();
+};
+
+export const SIDEBAR_SIDE_IDS = new Set(["skills"]);
+export const SIDEBAR_EXTRA_IDS = new Set([5, 7]);
+
+export const defaultSideColumn = (id, extras = []) => {
+  if (SIDEBAR_SIDE_IDS.has(id)) return 0;
+  if (isExtra(id) && SIDEBAR_EXTRA_IDS.has(kindFromRef(id, extras))) return 0;
+  return 1;
+};
+
+export const defaultSplitColumn = (id) =>
+  id === "summary" || id === "experience" ? 0 : 1;
+
+export const columnsWithSide = (ids, sectionCols = {}, extras = []) => {
+  const side = ids.filter(
+    (id) => (sectionCols?.[id] ?? defaultSideColumn(id, extras)) === 0,
+  );
+  const main = ids.filter((id) => !side.includes(id));
+  return [side, main];
+};
+
+export const columnsSplit = (ids, sectionCols = {}) => {
+  const left = ids.filter(
+    (id) => (sectionCols?.[id] ?? defaultSplitColumn(id)) === 0,
+  );
+  const right = ids.filter((id) => !left.includes(id));
+  return [left, right];
 };

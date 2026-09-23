@@ -1,44 +1,45 @@
 ---
 import MarketingLayout from "../layouts/MarketingLayout.astro";
 import FeatureIcon from "../components/marketing/FeatureIcon.astro";
+import MarketingPreview from "../components/marketing/MarketingPreview.jsx";
 import { SITE } from "../data/site";
 
 const features = [
   {
     icon: "download",
-    title: "One-click export",
+    title: "PDF & DOCX export",
     description:
-      "Export a pixel-perfect PDF or a Word .docx straight from the same live preview you see on screen.",
+      "Print-ready PDF or Word from the same layout you preview — including a single page when you only need one.",
   },
   {
     icon: "upload",
-    title: "Import from PDF or DOCX",
+    title: "Import what you have",
     description:
-      "Already have a resume? Upload your current PDF, Word document, or backup file and start from your writing, not a blank page.",
+      "Bring a PDF, Word file, or Cavren backup and keep writing from your own content.",
   },
   {
     icon: "roadmap",
-    title: "Live preview & themes",
+    title: "Templates you can compare",
     description:
-      "Swap templates, accent colors, and typefaces and watch the preview update instantly as you type.",
+      "Swap layouts, accents, and type — or put two templates side by side before you commit.",
   },
   {
     icon: "sparkles",
-    title: "AI first draft",
+    title: "AI that stays yours",
     description:
-      "Type a job title and get a believable starting point — summary, highlights, and skills — ready for you to make your own.",
+      "Optional first drafts and bullet polish via Chrome AI or your own API key — never a Cavren proxy.",
   },
   {
     icon: "clipboard",
-    title: "Resume check & job match",
+    title: "Resume check",
     description:
-      "Run an at-a-glance score plus a coherence pass — overlapping dates, duplicated contacts, unsupported claims — before you send it.",
+      "Live score, coherence pass, reading-level hint, and achievement prompts before you hit send.",
   },
   {
     icon: "lock",
     title: "Private by default",
     description:
-      "Everything is saved in your browser. No account, no uploads, no tracking. Back up and restore with a file you own.",
+      "IndexedDB on your device. No account, no analytics SDKs. Install as a PWA and keep editing offline.",
   },
 ];
 
@@ -46,17 +47,17 @@ const steps = [
   {
     title: "Write guided",
     description:
-      "Six focused steps — details, work, education, skills, summary, extras — with drag-and-drop reordering and rich-text editing.",
+      "Details, experience, education, skills, summary, extras — with rich text and drag-to-reorder.",
   },
   {
     title: "Check & polish",
     description:
-      "A live resume score and a coherence pass flag overlaps, duplicates, and unsupported claims before a recruiter ever sees them.",
+      "Score, coherence, and soft prompts catch overlaps and thin bullets before a recruiter does.",
   },
   {
     title: "Export & send",
     description:
-      "Download a PDF or DOCX that matches the preview exactly, or paste a job description into Job match to tailor your wording.",
+      "Download PDF or DOCX that matches the preview, or tailor against a pasted job description.",
   },
 ];
 ---
@@ -66,80 +67,82 @@ const steps = [
   description={SITE.description}
   ogTitle="Cavren — offline, free, private resume builder with PDF & DOCX export"
 >
-  <section class="hero">
-    <p class="hero-brand">
-      <img src="/logo.svg" alt="" height="40px" />
-    </p>
-    <h1>
-      Build a resume that gets <br />
-      <span class="grad">you hired</span>
-    </h1>
-    <p>
-      A fast, free, and fully private resume builder. Fill in guided
-      sections, keep a live preview on screen, and export a clean PDF or DOCX
-      in minutes — no sign-up, no uploads, no tracking.
-    </p>
-    <div class="hero-actions">
-      <a class="btn btn-primary" href="/resumes">Start building free</a>
-      <a class="btn btn-secondary" href="/features">See features</a>
+  <section class="hero-plane">
+    <div class="hero-copy">
+      <p class="hero-brand">
+        <img src="/logo.svg" alt="" width="72" height="72" />
+      </p>
+      <h1>
+        Build a resume that gets <span class="grad">you hired</span>
+      </h1>
+      <p class="lede">
+        Guided sections, a live preview, and free PDF or DOCX — on your device.
+        No sign-up, no uploads, no tracking.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/resumes">Start building free</a>
+        <a class="btn btn-secondary" href="/features">See features</a>
+      </div>
+    </div>
+    <div class="hero-stage" aria-hidden="true">
+      <div class="hero-stage-glow"></div>
+      <MarketingPreview client:load />
     </div>
   </section>
 
-  <section class="container">
+  <p class="trust-line reveal">
+    <span>Works offline</span>
+    <span>Data stays local</span>
+    <span>Honest free exports</span>
+  </p>
+
+  <section class="container section-pad reveal">
     <div class="section-title">
       <h2>From blank page to PDF in minutes</h2>
-      <p>A guided path that keeps a polished preview beside every step.</p>
+      <p>One path. A polished preview beside every step.</p>
     </div>
-    <div class="grid grid-3">
-      {steps.map((step, index) => (
-        <article class="card">
-          <h3>{index + 1} · {step.title}</h3>
-          <p>{step.description}</p>
-        </article>
-      ))}
+    <div class="step-rows">
+      {
+        steps.map((step, index) => (
+          <article>
+            <span class="step-num">
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <div>
+              <h3>{step.title}</h3>
+              <p>{step.description}</p>
+            </div>
+          </article>
+        ))
+      }
     </div>
   </section>
 
-  <section class="container cards-pad">
+  <section class="container section-pad reveal">
     <div class="section-title">
-      <h2>Everything you need, nothing you don't</h2>
-      <p>Optimized for the way people actually build resumes today.</p>
+      <h2>Built for how resumes get made</h2>
+      <p>Craft, check, and export — without giving up privacy.</p>
     </div>
     <div class="grid">
-      {features.map((feature) => (
-        <article class="card">
-          <span class="icon">
-            <FeatureIcon name={feature.icon} />
-          </span>
-          <h3>{feature.title}</h3>
-          <p>{feature.description}</p>
-        </article>
-      ))}
+      {
+        features.map((feature) => (
+          <article class="feature">
+            <span class="icon">
+              <FeatureIcon name={feature.icon} />
+            </span>
+            <h3>{feature.title}</h3>
+            <p>{feature.description}</p>
+          </article>
+        ))
+      }
     </div>
   </section>
 
-  <section class="cta-band">
+  <section class="cta-band reveal">
     <div class="container">
-      <h2>Ready to give your career a refresh?</h2>
-      <p>Your data stays local. Your best resume is a few minutes away.</p>
+      <h2>Ready when you are</h2>
+      <p>Your data stays here. Your next resume is a few minutes away.</p>
       <a class="btn btn-primary" href="/resumes">Build your resume now</a>
     </div>
   </section>
 </MarketingLayout>
-
-<style>
-  .grad {
-    background: linear-gradient(
-      90deg,
-      var(--color-accent),
-      color-mix(in srgb, var(--color-accent) 55%, var(--color-background-surface))
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-
-  .cards-pad {
-    padding-block: var(--spacing-10) var(--spacing-12);
-  }
-</style>

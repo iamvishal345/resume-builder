@@ -1,13 +1,18 @@
 /* Resume paper — compositional Zety-style system.
-   Tokens from buildResumeStyle(); fallbacks keep static/preview usable. */
+   All metrics come from computeMetrics() (style.js) via buildResumeStyle and
+   the per-section inline vars from buildSectionStyle. The fallback block keeps
+   static/(non-Resume) previews usable. No raw px/em sizing here — only vars
+   and calc() between vars. */
 
 .r-paper {
+  /* Fallback tokens → normally overridden by buildResumeStyle() inline vars. */
   --r-accent: #0f172a;
   --r-accent-soft: #3f4f65;
   --r-accent-ink: #ffffff;
   --r-ink: #111827;
   --r-muted: #5b6672;
   --r-rule: #d8dee5;
+  --r-contact-sep: #9aa2ac;
   --r-border: var(--r-rule, #d8dee5);
   --r-surface: #f1f5f9;
   --r-bg: #ffffff;
@@ -15,16 +20,79 @@
     -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   --r-font-size: 14px;
   --r-line-height: 1.5;
+  --r-name-line-height: 1.15;
   --r-section-gap: 16px;
-  --r-heading-gap: 8px;
   --r-entry-gap: 12px;
-  --r-rich-gap: 5px;
+  --r-heading-gap: 7px;
+  --r-rich-gap: 4px;
   --r-pad-x: 26px;
   --r-pad-y: 30px;
   --r-col-gap: 24px;
   --r-name-size: 27px;
+  --r-name-letter-spacing: 0.14px;
+  --r-photo-size: 72px;
   --r-radius-sm: 4px;
   --r-sidebar-width: 32%;
+  --r-heading-size: 12.04px;
+  --r-title-size: 13.3px;
+  --r-contact-size: 12.32px;
+  --r-contact-sep-size: 10.5px;
+  --r-entry-title-size: 14px;
+  --r-entry-org-size: 13.16px;
+  --r-meta-size: 12.32px;
+  --r-compact-title-size: 13.44px;
+  --r-skill-size: 12.6px;
+  --r-skill-name-size: 12.88px;
+  --r-reference-meta-size: 12.32px;
+  --r-cert-meta-size: 12.32px;
+  --r-heading-letter-spacing: 1.12px;
+  --r-title-margin-top: 2.1px;
+  --r-title-margin-bottom: 5.6px;
+  --r-contact-gap-x: 7.7px;
+  --r-contact-gap-y: 3.5px;
+  --r-header-pad: 7.2px;
+  --r-accent-bar-inset: 13.2px;
+  --r-header-photo-gap: 14px;
+  --r-section-rule-width: 1px;
+  --r-header-rule-width: 2px;
+  --r-header-double-width: 3px;
+  --r-accent-bar-width: 4px;
+  --r-timeline-rail-width: 2px;
+  --r-photo-border: 2px;
+  --r-skill-row-gap: 10.5px;
+  --r-skill-stack-gap: 5.6px;
+  --r-skill-list-gap: 3.5px;
+  --r-skill-inline-gap: 4.9px;
+  --r-chip-row-gap: 4.9px;
+  --r-chip-col-gap: 6.3px;
+  --r-chip-pad-y: 2.1px;
+  --r-chip-pad-x: 7.7px;
+  --r-interest-row-gap: 4.9px;
+  --r-interest-col-gap: 7.7px;
+  --r-level-dot-size: 7.7px;
+  --r-level-dot-gap: 3.08px;
+  --r-level-bar-height: 6.3px;
+  --r-level-bar-width: 42%;
+  --r-level-bar-max: 105px;
+  --r-timeline-rail-min: 77px;
+  --r-timeline-rail-top-pad: 2.1px;
+  --r-timeline-content-inset: 15.6px;
+  --r-sidebar-pad-y: 22.5px;
+  --r-sidebar-pad-x: 18.2px;
+  --r-sidebar-bleed-pad-y: 30px;
+  --r-sidebar-bleed-pad-x: 22.1px;
+  --r-extras-gap: 10.2px;
+  --r-compact-header-gap: 1.4px;
+  --r-compact-rich-margin: 2.1px;
+  --r-reference-margin-top: 2.1px;
+  --r-cert-margin-top: 2.1px;
+  --r-cert-url-margin-top: 2.8px;
+  --r-meta-stack-gap: 1.4px;
+  --r-subtitle-gap: 2.8px;
+  --r-list-indent: 16.1px;
+  --r-indent-pad: 18.2px;
+  --r-dark-contact-pad-y: 7px;
+  --r-dark-contact-margin-y: 7.7px;
   background: var(--r-bg);
   color: var(--r-ink);
   font-family: var(--r-font);
@@ -43,17 +111,27 @@
   box-sizing: border-box;
 }
 
+/* The Astryx theme reset scopes color to bare <p>/<small> via
+   :where(p){color:var(--color-text-primary)}. That paints the app's dark-theme
+   light body text onto the white sheet (invisible). Re-anchor to paper ink.
+   The dark sidebar keeps its own ink via the !important overrides below. */
+.r-paper p,
+.r-paper small {
+  color: var(--r-ink);
+}
+
 /* —— Header —— */
 
 .r-header {
-  margin-block-end: var(--r-section-gap);
-  padding-block-end: calc(var(--r-section-gap) * 0.45);
+  margin-block-start: var(--r-section-margin-top, 0px);
+  margin-block-end: calc(var(--r-section-gap) + var(--r-section-margin-bottom, 0px));
+  padding-block-end: var(--r-header-pad);
 }
 
 .r-header-with-photo {
   display: flex;
   align-items: flex-start;
-  gap: 1em;
+  gap: var(--r-header-photo-gap);
 }
 
 .r-header-with-photo .r-header-text {
@@ -62,12 +140,12 @@
 }
 
 .r-photo {
-  width: 72px;
-  height: 72px;
+  width: var(--r-photo-size);
+  height: var(--r-photo-size);
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
-  border: 2px solid var(--r-accent, currentColor);
+  border: var(--r-photo-border) solid var(--r-accent, currentColor);
 }
 
 .r-align-center .r-header-with-photo {
@@ -77,18 +155,17 @@
 }
 
 .r-header-rule {
-  border-block-end: 2px solid var(--r-accent);
+  border-block-end: var(--r-header-rule-width) solid var(--r-accent);
 }
 
 .r-header-double {
-  border-block-end: 3px double var(--r-accent);
-  padding-block-end: calc(var(--r-section-gap) * 0.55);
+  border-block-end: var(--r-header-double-width) double var(--r-accent);
 }
 
 .r-header-accent {
   border-block-end: 0;
-  border-inline-start: 4px solid var(--r-accent);
-  padding-inline-start: calc(var(--r-col-gap) * 0.55);
+  border-inline-start: var(--r-accent-bar-width) solid var(--r-accent);
+  padding-inline-start: var(--r-accent-bar-inset);
   padding-block-end: 0;
 }
 
@@ -98,7 +175,7 @@
   border-block-end: 0;
   margin-block-start: calc(var(--r-pad-y) * -1);
   margin-inline: calc(var(--r-pad-x) * -1);
-  margin-block-end: var(--r-section-gap);
+  margin-block-end: calc(var(--r-section-gap) + var(--r-section-margin-bottom, 0px));
   padding: var(--r-pad-y) var(--r-pad-x);
 }
 
@@ -131,14 +208,14 @@
   margin: 0;
   font-size: var(--r-name-size);
   font-weight: 700;
-  line-height: 1.15;
-  letter-spacing: 0.01em;
+  line-height: var(--r-name-line-height);
+  letter-spacing: var(--r-name-letter-spacing);
   color: var(--r-accent);
 }
 
 .r-title {
-  margin: 0.15em 0 0.4em;
-  font-size: 0.95em;
+  margin: var(--r-title-margin-top) 0 var(--r-title-margin-bottom);
+  font-size: var(--r-title-size);
   font-weight: 600;
   color: var(--r-accent-soft);
 }
@@ -146,9 +223,9 @@
 .r-contact {
   display: flex;
   flex-wrap: wrap;
-  column-gap: 0.55em;
-  row-gap: 0.25em;
-  font-size: 0.88em;
+  column-gap: var(--r-contact-gap-x);
+  row-gap: var(--r-contact-gap-y);
+  font-size: var(--r-contact-size);
   color: var(--r-muted);
 }
 
@@ -167,27 +244,44 @@
 }
 
 .r-contact-sep {
-  color: var(--r-rule);
+  font-size: var(--r-contact-sep-size);
+  color: var(--r-contact-sep, var(--r-rule));
 }
 
 /* —— Sections —— */
 
 .r-section {
-  margin-block-start: var(--r-section-gap);
+  margin-block-start: calc(var(--r-section-gap) + var(--r-section-margin-top, 0px));
+  margin-block-end: var(--r-section-margin-bottom, 0px);
 }
 
-.r-section:first-child {
-  margin-block-start: 0;
+/* First section in a column skips the shared gap — the header (or column
+   padding) already provides the opening rhythm. Must NOT use a bare
+   :first-child on .r-section: the interactive canvas wraps each section in
+   .rcs-section, which made every section match and wiped spacing to 0. */
+.r-main > .r-section:first-child,
+.r-sidebar > .r-section:first-child,
+.r-main > .rcs-section:first-child .r-section,
+.r-sidebar > .rcs-section:first-child .r-section,
+.r-paper > .r-header + .r-section,
+.r-paper > .rcs-section-header + .r-section,
+.r-paper > .rcs-section-header + .rcs-section .r-section,
+/* Dark sidebar: identity sits above the first section and already ends with
+   --r-section-gap — skip the section's own top gap so they don't stack. */
+.r-sidebar-identity + .r-section,
+.r-sidebar > .rcs-section-header + .rcs-section .r-section,
+.r-sidebar > .r-sidebar-identity + .rcs-section .r-section {
+  margin-block-start: var(--r-section-margin-top, 0px);
 }
 
 .r-section-heading {
   margin: 0 0 var(--r-heading-gap);
-  font-size: 0.86em;
+  font-size: var(--r-heading-size);
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--r-heading-letter-spacing);
   color: var(--r-accent);
-  border-block-end: 1px solid var(--r-rule);
+  border-block-end: var(--r-section-rule-width) solid var(--r-rule);
   padding-block-end: calc(var(--r-heading-gap) * 0.6);
 }
 
@@ -208,7 +302,7 @@
 .r-rich ul,
 .r-rich ol {
   margin: var(--r-rich-gap) 0;
-  padding-inline-start: 1.3em;
+  padding-inline-start: var(--r-indent-pad);
 }
 
 .r-rich li {
@@ -224,15 +318,15 @@
 .r-skills {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35em 0.45em;
+  gap: var(--r-chip-row-gap) var(--r-chip-col-gap);
 }
 
 .r-skill {
   display: inline-flex;
   align-items: center;
-  gap: 0.35em;
-  font-size: 0.9em;
-  padding: 0.15em 0.55em;
+  gap: var(--r-skill-inline-gap);
+  font-size: var(--r-skill-size);
+  padding: var(--r-chip-pad-y) var(--r-chip-pad-x);
   border-radius: var(--r-radius-sm, 4px);
   border: 1px solid var(--r-border, var(--r-rule));
   color: var(--r-ink);
@@ -240,15 +334,16 @@
 
 .r-skills-list {
   margin: 0;
-  padding-inline-start: 1.15em;
+  padding-inline-start: var(--r-list-indent);
 }
 
 .r-skills-list li {
-  margin-block-end: 0.25em;
+  margin-block-end: var(--r-skill-list-gap);
 }
 
 .r-skills-comma {
   margin: 0;
+  font-size: var(--r-entry-title-size);
 }
 
 .r-skills-columns {
@@ -261,7 +356,7 @@
 .r-skills-bars {
   display: flex;
   flex-direction: column;
-  gap: 0.4em;
+  gap: var(--r-skill-stack-gap);
 }
 
 .r-skill-dot-row,
@@ -269,25 +364,25 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75em;
+  gap: var(--r-skill-row-gap);
 }
 
 .r-skill-dot-name,
 .r-skill-bar-name {
   min-inline-size: 0;
   flex: 1 1 auto;
-  font-size: 0.92em;
+  font-size: var(--r-skill-name-size);
 }
 
 .r-level-dots {
   display: inline-flex;
-  gap: 0.22em;
+  gap: var(--r-level-dot-gap);
   flex-shrink: 0;
 }
 
 .r-level-dot {
-  inline-size: 0.55em;
-  block-size: 0.55em;
+  inline-size: var(--r-level-dot-size);
+  block-size: var(--r-level-dot-size);
   border-radius: 50%;
   background: var(--r-rule);
 }
@@ -298,9 +393,9 @@
 
 .r-level-bar {
   display: block;
-  flex: 0 0 42%;
-  max-inline-size: 7.5em;
-  block-size: 0.45em;
+  flex: 0 0 var(--r-level-bar-width);
+  max-inline-size: var(--r-level-bar-max);
+  block-size: var(--r-level-bar-height);
   border-radius: var(--r-radius-sm, 4px);
   background: var(--r-rule);
   overflow: hidden;
@@ -341,7 +436,7 @@
 
 .r-entry-title {
   margin: 0;
-  font-size: 1em;
+  font-size: var(--r-entry-title-size);
   font-weight: 600;
   color: var(--r-ink);
 }
@@ -350,22 +445,22 @@
   display: block;
   font-weight: 400;
   color: var(--r-muted);
-  font-size: 0.94em;
+  font-size: var(--r-entry-org-size);
 }
 
 .r-entry-meta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 0.1em;
-  font-size: 0.88em;
+  gap: var(--r-meta-stack-gap);
+  font-size: var(--r-meta-size);
   color: var(--r-muted);
   flex-shrink: 0;
 }
 
 .r-entry-location,
 .r-dates {
-  font-size: 0.88em;
+  font-size: var(--r-meta-size);
   color: var(--r-muted);
 }
 
@@ -374,15 +469,15 @@
 }
 
 .r-entry-compact .r-entry-header {
-  margin-block-end: 0.1em;
+  margin-block-end: var(--r-compact-header-gap);
 }
 
 .r-entry-compact .r-entry-title {
-  font-size: 0.96em;
+  font-size: var(--r-compact-title-size);
 }
 
 .r-entry-compact .r-rich {
-  margin-block-start: 0.15em;
+  margin-block-start: var(--r-compact-rich-margin);
 }
 
 .r-exp-compact .r-entry {
@@ -393,13 +488,13 @@
 
 .r-entry-timeline {
   display: grid;
-  grid-template-columns: minmax(5.5em, 22%) 1fr;
+  grid-template-columns: minmax(var(--r-timeline-rail-min), 22%) 1fr;
   column-gap: var(--r-col-gap);
   align-items: start;
 }
 
 .r-entry-timeline-rail {
-  padding-block-start: 0.15em;
+  padding-block-start: var(--r-timeline-rail-top-pad);
 }
 
 .r-entry-timeline-rail .r-dates {
@@ -411,21 +506,21 @@
 }
 
 .r-entry-timeline .r-entry-main {
-  padding-inline-start: calc(var(--r-col-gap) * 0.65);
-  border-inline-start: 2px solid var(--r-accent-soft);
+  padding-inline-start: var(--r-timeline-content-inset);
+  border-inline-start: var(--r-timeline-rail-width) solid var(--r-accent-soft);
 }
 
 /* —— Sidebar / split —— */
 
 .r-sidebar-grid {
   display: grid;
-  grid-template-columns: var(--r-sidebar-width, 32%) 1fr;
+  grid-template-columns: var(--r-sidebar-width) 1fr;
   column-gap: var(--r-col-gap);
   align-items: start;
 }
 
 .r-l-sidebar-right .r-sidebar-grid {
-  grid-template-columns: 1fr var(--r-sidebar-width, 32%);
+  grid-template-columns: 1fr var(--r-sidebar-width);
 }
 
 .r-sidebar,
@@ -441,14 +536,14 @@
 .r-sidebar-tone-light {
   background: var(--r-surface);
   border-radius: var(--r-radius-sm, 4px);
-  padding: calc(var(--r-pad-y) * 0.75) calc(var(--r-pad-x) * 0.7);
+  padding: var(--r-sidebar-pad-y) var(--r-sidebar-pad-x);
 }
 
 .r-sidebar-tone-dark {
   background: var(--r-accent);
   color: var(--r-accent-ink);
   border-radius: var(--r-radius-sm, 4px);
-  padding: calc(var(--r-pad-y) * 0.85) calc(var(--r-pad-x) * 0.75);
+  padding: var(--r-sidebar-pad-y) var(--r-sidebar-pad-x);
 }
 
 .r-sidebar-tone-dark .r-name,
@@ -496,8 +591,8 @@
 .r-sidebar-tone-dark .r-contact {
   justify-content: flex-start;
   border-block: 1px solid rgba(255, 255, 255, 0.28);
-  padding-block: 0.5em;
-  margin-block: 0.55em var(--r-section-gap);
+  padding-block: var(--r-dark-contact-pad-y);
+  margin-block: var(--r-dark-contact-margin-y) var(--r-section-gap);
 }
 
 .r-sidebar-tone-dark .r-skill {
@@ -518,50 +613,73 @@
   margin-block-end: var(--r-section-gap);
 }
 
+.r-sidebar-identity-with-photo {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--r-header-photo-gap);
+}
+
+.r-sidebar-identity-with-photo .r-sidebar-identity-text {
+  flex: 1;
+  min-width: 0;
+}
+
 .r-l-sidebar.r-sidebar-dark,
 .r-l-sidebar-right.r-sidebar-dark {
   padding: 0;
-}
-
-.r-l-sidebar.r-sidebar-dark .r-sidebar-grid,
-.r-l-sidebar-right.r-sidebar-dark .r-sidebar-grid {
-  column-gap: 0;
 }
 
 .r-l-sidebar.r-sidebar-dark .r-sidebar-tone-dark,
 .r-l-sidebar-right.r-sidebar-dark .r-sidebar-tone-dark {
   border-radius: 0;
   min-block-size: 100%;
-  padding: var(--r-pad-y) calc(var(--r-pad-x) * 0.85);
+  padding: var(--r-sidebar-bleed-pad-y) var(--r-sidebar-bleed-pad-x);
 }
 
-.r-l-sidebar.r-sidebar-dark .r-main,
+/* Main keeps page pad on the outer edge only — space next to the sidebar
+   is controlled solely by --r-col-gap (Customize → Sidebar gap). */
+.r-l-sidebar .r-main {
+  padding-inline-start: 0;
+}
+
+.r-l-sidebar-right .r-main {
+  padding-inline-end: 0;
+}
+
+.r-l-sidebar.r-sidebar-dark .r-main {
+  padding-block: var(--r-pad-y);
+  padding-inline-end: var(--r-pad-x);
+  padding-inline-start: 0;
+}
+
 .r-l-sidebar-right.r-sidebar-dark .r-main {
-  padding: var(--r-pad-y) var(--r-pad-x);
+  padding-block: var(--r-pad-y);
+  padding-inline-start: var(--r-pad-x);
+  padding-inline-end: 0;
 }
 
 .r-sidebar-tone-accent {
   background: var(--r-surface);
-  border-inline-start: 3px solid var(--r-accent);
+  border-inline-start: var(--r-accent-bar-width) solid var(--r-accent);
   border-radius: 0;
-  padding: calc(var(--r-pad-y) * 0.8) calc(var(--r-pad-x) * 0.7);
+  padding: var(--r-sidebar-pad-y) var(--r-sidebar-pad-x);
 }
 
 .r-l-sidebar-right .r-sidebar-tone-accent {
   border-inline-start: 0;
-  border-inline-end: 3px solid var(--r-accent);
+  border-inline-end: var(--r-accent-bar-width) solid var(--r-accent);
 }
 
 .r-split-grid {
   grid-template-columns: 1fr 1fr;
 }
 
+/* Divider only — column-gap on .r-sidebar-grid already spaces the columns. */
 .r-split-grid .r-sidebar {
   background: transparent;
   border-radius: 0;
   padding: 0;
-  border-inline-start: 1px solid var(--r-rule);
-  padding-inline-start: var(--r-col-gap);
+  border-inline-start: var(--r-section-rule-width) solid var(--r-rule);
 }
 
 /* —— Extras —— */
@@ -573,14 +691,14 @@
 .r-references {
   display: flex;
   flex-direction: column;
-  gap: calc(var(--r-entry-gap) * 0.85);
+  gap: var(--r-extras-gap);
 }
 
 .r-custom-title,
 .r-accomplishment-title,
 .r-reference-name {
-  margin: 0 0 0.2em;
-  font-size: 1em;
+  margin: 0 0 var(--r-subtitle-gap);
+  font-size: var(--r-entry-title-size);
   font-weight: 600;
   color: var(--r-ink);
 }
@@ -593,21 +711,20 @@
 .r-reference-meta,
 .r-reference-contact {
   display: block;
-  font-size: 0.88em;
+  font-size: var(--r-reference-meta-size);
   color: var(--r-muted);
-  margin-block-start: 0.15em;
+  margin-block-start: var(--r-reference-margin-top);
 }
 
-.r-reference-meta,
-.r-reference-contact {
-  font-size: 0.92em;
+.r-cert-credential {
+  font-size: var(--r-cert-meta-size);
 }
 
 .r-cert-url {
   display: inline-block;
-  font-size: 0.88em;
+  font-size: var(--r-cert-meta-size);
   color: var(--r-accent);
-  margin-block-start: 0.2em;
+  margin-block-start: var(--r-cert-url-margin-top);
   text-decoration: none;
 }
 
@@ -618,12 +735,12 @@
 .r-interests {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35em 0.55em;
+  gap: var(--r-interest-row-gap) var(--r-interest-col-gap);
 }
 
 .r-interest {
-  font-size: 0.92em;
-  padding: 0.12em 0.5em;
+  font-size: var(--r-skill-size);
+  padding: var(--r-chip-pad-y) var(--r-chip-pad-x);
   border-radius: var(--r-radius-sm, 4px);
   border: 1px solid var(--r-border, var(--r-rule));
   color: var(--r-ink);
@@ -631,6 +748,23 @@
 
 @media print {
   .r-paper {
-    box-shadow: none;
+    box-shadow: none !important;
+    margin: 0 !important;
+    width: 210mm !important;
+    min-height: auto !important;
+  }
+
+  .r-section {
+    break-inside: avoid;
+  }
+
+  .r-section + .r-section {
+    margin-top: var(--r-section-gap, 16px);
+  }
+
+  .r-page-break-hint,
+  .rcs-toolbar,
+  .rcs-panel {
+    display: none !important;
   }
 }

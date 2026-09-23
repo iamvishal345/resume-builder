@@ -14,9 +14,16 @@ export default defineConfig({
       mode: "production",
       base: "/",
       scope: "/",
-      includeAssets: ["logo.svg", "bmc_qr.png", "icons/*.png"],
+      includeAssets: [
+        "logo.svg",
+        "bmc_qr.png",
+        "icons/icon-192.png",
+        "icons/icon-512.png",
+        "icons/icon-maskable-512.png",
+      ],
       registerType: "prompt",
       manifest: {
+        id: "/",
         name: "Cavren Resume Builder",
         short_name: "Cavren",
         description:
@@ -26,28 +33,66 @@ export default defineConfig({
         display: "standalone",
         start_url: "/resumes",
         lang: "en",
+        categories: ["productivity"],
+        orientation: "any",
         icons: [
           {
             src: "/icons/icon-192.png",
             sizes: "192x192",
             type: "image/png",
+            purpose: "any",
           },
           {
             src: "/icons/icon-512.png",
             sizes: "512x512",
             type: "image/png",
+            purpose: "any",
           },
           {
-            src: "/icons/icon-512.png",
+            src: "/icons/icon-maskable-512.png",
             sizes: "512x512",
             type: "image/png",
             purpose: "maskable",
           },
         ],
+        shortcuts: [
+          {
+            name: "My resumes",
+            short_name: "Resumes",
+            url: "/resumes",
+            icons: [
+              {
+                src: "/icons/icon-192.png",
+                sizes: "192x192",
+                type: "image/png",
+              },
+            ],
+          },
+          {
+            name: "Editor",
+            short_name: "Editor",
+            url: "/editor",
+            icons: [
+              {
+                src: "/icons/icon-192.png",
+                sizes: "192x192",
+                type: "image/png",
+              },
+            ],
+          },
+        ],
       },
       workbox: {
-        navigateFallback: "/offline/index.html",
-        globPatterns: ["**/*.{js,css,html,svg,png,ico,woff2,woff,ttf,json,webmanifest}"],
+        // Must match the precache key Astro emits ("offline"), not /offline/index.html
+        navigateFallback: "/offline",
+        navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
+        clientsClaim: true,
+        // Include .mjs so pdf.js worker is available offline for import/preview
+        globPatterns: [
+          "**/*.{js,mjs,css,html,svg,png,ico,woff2,woff,ttf,json,webmanifest}",
+        ],
+        // pdf.worker.min.mjs is ~1.2MB; keep headroom for future assets
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
@@ -59,6 +104,10 @@ export default defineConfig({
             },
           },
         ],
+      },
+      experimental: {
+        // Map /resumes ↔ /resumes/ ↔ resumes/index.html in the precache
+        directoryAndTrailingSlashHandler: true,
       },
       // Manual registration via PwaUpdateToast (virtual:pwa-register)
       injectRegister: false,
@@ -76,6 +125,9 @@ export default defineConfig({
         "@lib": path.resolve(__dirname, "./src/lib"),
         "@hooks": path.resolve(__dirname, "./src/hooks"),
       },
+    },
+    optimizeDeps: {
+      include: ["pdfjs-dist"],
     },
   },
 });

@@ -12,6 +12,12 @@
   padding-right: var(--spacing-1);
 }
 
+.ver-diff-list {
+  margin: 0;
+  padding-inline-start: var(--spacing-4);
+  list-style: disc;
+}
+
 .r-gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -24,7 +30,7 @@
   align-items: stretch;
   gap: var(--spacing-1);
   padding: 0;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-emphasized);
   border-radius: var(--radius-element);
   background: var(--color-background-card);
   cursor: pointer;
@@ -61,6 +67,40 @@
   font-weight: 500;
   color: var(--color-text-primary);
   align-self: flex-start;
+}
+
+.r-compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-3);
+  width: 100%;
+}
+
+.r-compare-pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  min-width: 0;
+}
+
+.r-compare-frame {
+  border: 1px solid var(--color-border-emphasized);
+  border-radius: var(--radius-element);
+  background: var(--color-background-muted);
+  overflow: hidden;
+  height: 280px;
+}
+
+.r-compare-canvas {
+  width: 420px;
+  transform: scale(0.52);
+  transform-origin: top left;
+}
+
+@media (max-width: 720px) {
+  .r-compare-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .r-palette-dot {
@@ -110,6 +150,11 @@
 .r-opt-chip-active {
   border-color: var(--color-accent);
   background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.r-opt-chip-active:hover {
+  border-color: var(--color-accent);
   color: var(--color-on-accent);
 }
 

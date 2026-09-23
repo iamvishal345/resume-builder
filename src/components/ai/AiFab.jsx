@@ -9,11 +9,15 @@ const IMPROVE_SYSTEM =
 const REWRITE_SYSTEM =
   "You are a professional resume editor. Completely rewrite the given text from scratch: make it concise, strong and achievement-oriented. Only use facts present in the input; never invent anything. Respond as plain text: separate paragraphs with a blank line, or use '- ' bullets when a list of achievements is clearer.";
 
+const BULLET_SYSTEM =
+  "You are a professional resume editor. Rewrite each achievement as a strong resume bullet. Start every line with an action verb. Prefer measurable outcomes when numbers already appear in the input; never invent metrics, employers, or tools. Respond ONLY as a plain list of lines each starting with '- '. Keep one idea per bullet.";
+
 const toneSystem = (tone) =>
   `You are a professional resume editor. Rewrite the given text in a ${tone} tone. Keep the meaning and all facts exactly as given; never invent anything. Respond as plain text: separate paragraphs with a blank line, or use '- ' bullets when a short list is clearer.`;
 
 const ACTIONS = [
   { id: "improve", label: "Improve", hint: "Polish wording & fix grammar", system: IMPROVE_SYSTEM },
+  { id: "bullets", label: "Polish as bullets", hint: "Action verbs, one idea each", system: BULLET_SYSTEM },
   { id: "rewrite", label: "Rewrite completely", hint: "Fresh, punchier version", system: REWRITE_SYSTEM },
   { id: "professional", label: "Professional tone", hint: "Formal, corporate voice", system: toneSystem("professional") },
   { id: "confident", label: "Confident tone", hint: "Bold, assertive voice", system: toneSystem("confident") },

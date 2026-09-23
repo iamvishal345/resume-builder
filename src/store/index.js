@@ -121,7 +121,16 @@ export const DEFAULT_RESUME_SETTINGS = {
   fontSize: 14,
   lineHeight: 1.5,
   sectionSpacing: 16,
+  pagePadX: 26,
+  pagePadY: 30,
+  colGap: 24,
+  nameSize: 27,
+  photoSize: 72,
+  radiusSm: 4,
+  sidebarWidth: 32,
+  sectionStyles: {},
   sectionOrder: [],
+  sectionCols: {},
 };
 
 export const defaultResumeData = () => ({
@@ -229,6 +238,46 @@ export const useStore = create(
             return true;
           }),
         })),
+
+      /** Clone an extra section instance (unique id; preserves catalog kind). */
+      duplicateAdditionalSection: (sectionId) => {
+        const list = get().additionalSections || [];
+        const src = list.find((s) => s.id === sectionId);
+        if (!src) return null;
+        const kind =
+          Number(src.kind ?? src.id) >= 1 && Number(src.kind ?? src.id) <= 7
+            ? Number(src.kind ?? src.id)
+            : 1;
+        const newId =
+          typeof crypto !== "undefined" && crypto.randomUUID
+            ? Number(
+                String(Date.now()) +
+                  String(Math.floor(Math.random() * 1000)).padStart(3, "0"),
+              )
+            : Date.now();
+        const clone =
+          typeof structuredClone === "function"
+            ? structuredClone(src)
+            : JSON.parse(JSON.stringify(src));
+        clone.id = newId;
+        clone.kind = kind;
+        clone.title = `${src.title || "Section"} (copy)`;
+        clone.key = `extra-${newId}`;
+        set(() => ({ additionalSections: [...list, clone] }));
+        const settings = get().resumeSettings || {};
+        const order = Array.isArray(settings.sectionOrder)
+          ? [...settings.sectionOrder]
+          : [];
+        const ref = `extra:${newId}`;
+        const srcRef = `extra:${src.id}`;
+        const at = order.indexOf(srcRef);
+        if (at >= 0) order.splice(at + 1, 0, ref);
+        else order.push(ref);
+        set(() => ({
+          resumeSettings: { ...settings, sectionOrder: order },
+        }));
+        return clone;
+      },
       // Resume Theme / Template
       resumeSettings: { ...DEFAULT_RESUME_SETTINGS },
       setResumeSettings: (patch) =>
@@ -283,10 +332,11 @@ export const useStore = create(
         // (component/icon functions) and normalize skill shape (rating → level).
         if (Array.isArray(merged.additionalSections)) {
           merged.additionalSections = merged.additionalSections.map(
-            ({ id, title, data: sectionData, key, showLevel }) => ({
+            ({ id, title, data: sectionData, key, showLevel, kind }) => ({
               id,
               title,
               key,
+              ...(kind !== undefined ? { kind } : {}),
               ...(showLevel !== undefined ? { showLevel } : {}),
               data: Array.isArray(sectionData) ? sectionData : [],
             }),
