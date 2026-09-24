@@ -49,10 +49,14 @@ import ResumeListItem from "./ResumeListItem";
 import TailorDialog from "./TailorDialog";
 import InterviewPacketDialog from "./InterviewPacketDialog";
 import DataOwnership from "./DataOwnership";
+import OwnershipTip from "./OwnershipTip";
+import LocaleSelect from "../LocaleSelect";
+import { useI18n } from "@features/i18n/useI18n";
 import { nameOf, relativeTime } from "./resumeMeta";
 import "./dashboard.css";
 
 const ResumesDashboard = () => {
+  const { t } = useI18n();
   const [list, setList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -143,7 +147,9 @@ const ResumesDashboard = () => {
         text:
           result.kind === "pack"
             ? `Restored ${result.count} resume(s) from pack.`
-            : `Restored "${result.doc.name}" from backup.`,
+            : result.kind === "json-resume"
+              ? `Imported JSON Resume as "${result.doc.name}".`
+              : `Restored "${result.doc.name}" from backup.`,
       });
     } catch (e) {
       setMessage({
@@ -214,33 +220,33 @@ const ResumesDashboard = () => {
           <div className="rdash-header">
             <VStack gap={0}>
               <Text type="inherit" size="xl" weight="semibold" color="primary">
-                Your resumes
+                {t("dash.title")}
               </Text>
               <Text type="inherit" size="sm" color="secondary">
-                Local-only library (IndexedDB). Drop a .r.json or .cavren.json
-                anywhere to restore. Nothing is uploaded.
+                {t("dash.blurb")}
               </Text>
             </VStack>
             <div className="rdash-header-actions">
+              <LocaleSelect />
               <Button
                 variant="ghost"
                 size="sm"
                 icon={<Shield size={15} />}
-                label="Data & privacy"
+                label={t("dash.dataPrivacy")}
                 onClick={() => setDataOpen(true)}
               />
               <Button
                 variant="secondary"
                 size="sm"
                 icon={<Upload size={15} />}
-                label="Restore"
+                label={t("dash.restore")}
                 onClick={() => restoreInputRef.current?.click()}
               />
               <Button
                 variant="primary"
                 size="sm"
                 icon={<Plus size={15} />}
-                label="New resume"
+                label={t("dash.newResume")}
                 onClick={createNew}
               />
             </div>
@@ -258,11 +264,15 @@ const ResumesDashboard = () => {
             }}
           />
 
+          <OwnershipTip onOpenPrivacy={() => setDataOpen(true)} />
+
           {message && (
             <Card
               variant={message.kind === "ok" ? "green" : "red"}
               padding={3}
               width="100%"
+              role="status"
+              aria-live="polite"
             >
               <HStack gap={2} align="center">
                 {message.kind === "ok" ? (

@@ -24,7 +24,7 @@ import AtScorePanel from "./AtScorePanel";
 import CoherencePanel from "./CoherencePanel";
 import ReadingLevelPanel from "./ReadingLevelPanel";
 import SideDrawer from "./SideDrawer";
-import Stepper, { STEPS } from "./Stepper";
+import Stepper, { STEPS, STEP_LABELS_EN } from "./Stepper";
 import EditorTopbar from "./EditorTopbar";
 import CommandPalette from "./CommandPalette";
 import VersionsPanel from "./VersionsPanel";
@@ -43,10 +43,8 @@ import {
 import { getResume, putResume, newResume, listResumes } from "@features/resumes/db";
 import { saveVersion } from "@features/resumes/versions";
 import { snapshotBefore } from "@features/resumes/snapshot";
-import {
-  downloadResumeMarkdown,
-  downloadResumePlainText,
-} from "@features/export/markdown";
+import { downloadResumeMarkdown, downloadResumePlainText } from "@features/export/markdown";
+import { downloadJsonResume } from "@features/import/jsonResume";
 import { downloadResumePdf } from "@features/export/pdf";
 import PersonalDetails from "./steps/PersonalDetails";
 import WorkHistory from "./steps/WorkHistory";
@@ -414,11 +412,15 @@ const EditorPage = () => {
     downloadResumePlainText(resumeDataOf(useStore.getState()), exportBaseName());
   };
 
+  const handleDownloadJsonResume = () => {
+    downloadJsonResume(resumeDataOf(useStore.getState()), exportBaseName());
+  };
+
   const commandActions = useMemo(
     () => [
       ...STEPS.map((step, i) => ({
         id: `step-${step.id}`,
-        label: `Go to ${step.label || step.title || step.id}`,
+        label: `Go to ${STEP_LABELS_EN[i] || step.id}`,
         hint: `⌘${i + 1}`,
         keywords: step.id,
         run: () => {
@@ -493,6 +495,11 @@ const EditorPage = () => {
         id: "txt",
         label: "Download plain text",
         run: handleDownloadTxt,
+      },
+      {
+        id: "json-resume",
+        label: "Download JSON Resume",
+        run: handleDownloadJsonResume,
       },
       {
         id: "snapshot",

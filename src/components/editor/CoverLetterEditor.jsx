@@ -33,6 +33,7 @@ const CoverLetterEditor = () => {
         socialLinks,
         coverLetter,
         fontId: resumeSettings.fontId,
+        paperSize: resumeSettings.paperSize,
       });
     } catch (error) {
       setExportError(

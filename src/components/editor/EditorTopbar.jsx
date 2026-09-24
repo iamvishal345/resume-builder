@@ -24,6 +24,8 @@ import {
   Command,
 } from "lucide-react";
 import AuthBar from "../auth/AuthBar";
+import LocaleSelect from "../LocaleSelect";
+import { useI18n } from "@features/i18n/useI18n";
 
 const EditorTopbar = ({
   mode,
@@ -46,99 +48,163 @@ const EditorTopbar = ({
   onFitPage,
   onCommandPalette,
   exportError,
-}) => (
-  <VStack gap={2} width="100%" className="editor-topbar">
-    <HStack justify="between" align="center" gap={3} width="100%" wrap="wrap">
-      <SegmentedControl
-        value={mode}
-        onChange={onModeChange}
-        label="Editor view"
-        size="sm"
-      >
-        <SegmentedControlItem value="editor" label="Edit" />
-        <SegmentedControlItem value="preview" label="Preview" />
-        <SegmentedControlItem value="letter" label="Letter" />
-      </SegmentedControl>
-      <HStack gap={2} align="center" wrap="wrap">
-        <IconButton
-          label="Command palette (Ctrl+K)"
-          tooltip="Command palette (Ctrl+K)"
-          variant="ghost"
-          icon={<Command size={16} />}
-          onClick={onCommandPalette}
-        />
-        <IconButton
-          label="AI preferences"
-          tooltip="AI preferences"
-          variant="ghost"
-          icon={<Sparkles size={16} />}
-          onClick={onAiSettings}
-        />
-        <IconButton
-          label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-          tooltip={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-          variant="ghost"
-          icon={theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
-          onClick={onToggleTheme}
-        />
-        <span className="editor-actions-tertiary">
-          <AuthBar />
-        </span>
-      </HStack>
-    </HStack>
-    {exportError ? (
-      <Text type="inherit" size="sm" color="accent" role="alert">
-        {exportError}
-      </Text>
-    ) : null}
-    <HStack
-      justify="between"
-      align="center"
-      gap={3}
-      width="100%"
-      wrap="wrap"
-      className="editor-actions"
-    >
-      <HStack gap={2} align="center" wrap="wrap" className="editor-actions-start">
-        <Text
-          type="inherit"
+}) => {
+  const { t } = useI18n();
+  const themeLabel =
+    theme === "dark" ? t("editor.themeToLight") : t("editor.themeToDark");
+  const saved = autosaveLabel === "Saved in this browser" || autosaveLabel === t("editor.saved");
+
+  return (
+    <VStack gap={2} width="100%" className="editor-topbar">
+      <HStack justify="between" align="center" gap={3} width="100%" wrap="wrap">
+        <SegmentedControl
+          value={mode}
+          onChange={onModeChange}
+          label={t("editor.view")}
           size="sm"
-          weight="medium"
-          color={
-            autosaveLabel === "Saved in this browser" ? "secondary" : "accent"
-          }
         >
-          {autosaveLabel}
+          <SegmentedControlItem value="editor" label={t("editor.edit")} />
+          <SegmentedControlItem value="preview" label={t("editor.preview")} />
+          <SegmentedControlItem value="letter" label={t("editor.letter")} />
+        </SegmentedControl>
+        <HStack gap={2} align="center" wrap="wrap">
+          <IconButton
+            label={t("editor.command")}
+            tooltip={t("editor.command")}
+            variant="ghost"
+            icon={<Command size={16} />}
+            onClick={onCommandPalette}
+          />
+          <IconButton
+            label={t("editor.aiPrefs")}
+            tooltip={t("editor.aiPrefs")}
+            variant="ghost"
+            icon={<Sparkles size={16} />}
+            onClick={onAiSettings}
+          />
+          <IconButton
+            label={themeLabel}
+            tooltip={themeLabel}
+            variant="ghost"
+            icon={theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            onClick={onToggleTheme}
+          />
+          <LocaleSelect />
+          <span className="editor-actions-tertiary">
+            <AuthBar />
+          </span>
+        </HStack>
+      </HStack>
+      {exportError ? (
+        <Text type="inherit" size="sm" color="accent" role="alert">
+          {exportError}
         </Text>
-        <Divider
-          orientation="vertical"
-          className="editor-actions-divider"
-          style={{ height: "var(--spacing-5)" }}
-        />
-        <HStack gap={0} align="center" wrap="wrap">
-          <IconButton
-            label="Undo (Ctrl+Z)"
-            tooltip="Undo (Ctrl+Z)"
-            variant="ghost"
-            icon={<Undo2 size={16} />}
-            disabled={!canUndo}
-            onClick={onUndo}
+      ) : null}
+      <HStack
+        justify="between"
+        align="center"
+        gap={3}
+        width="100%"
+        wrap="wrap"
+        className="editor-actions"
+      >
+        <HStack
+          gap={2}
+          align="center"
+          wrap="wrap"
+          className="editor-actions-start"
+        >
+          <Text
+            type="inherit"
+            size="sm"
+            weight="medium"
+            color={saved ? "secondary" : "accent"}
+          >
+            {autosaveLabel}
+          </Text>
+          <Divider
+            orientation="vertical"
+            className="editor-actions-divider"
+            style={{ height: "var(--spacing-5)" }}
           />
-          <IconButton
-            label="Redo (Ctrl+Shift+Z)"
-            tooltip="Redo (Ctrl+Shift+Z)"
-            variant="ghost"
-            icon={<Redo2 size={16} />}
-            disabled={!canRedo}
-            onClick={onRedo}
-          />
-          <span className="editor-actions-secondary">
+          <HStack gap={0} align="center" wrap="wrap">
             <IconButton
-              label="Versions"
-              tooltip="Local snapshots"
+              label={t("editor.undo")}
+              tooltip={t("editor.undo")}
               variant="ghost"
-              icon={<History size={16} />}
-              onClick={onVersions}
+              icon={<Undo2 size={16} />}
+              disabled={!canUndo}
+              onClick={onUndo}
+            />
+            <IconButton
+              label={t("editor.redo")}
+              tooltip={t("editor.redo")}
+              variant="ghost"
+              icon={<Redo2 size={16} />}
+              disabled={!canRedo}
+              onClick={onRedo}
+            />
+            <span className="editor-actions-secondary">
+              <IconButton
+                label={t("editor.versions")}
+                tooltip={t("editor.versionsHint")}
+                variant="ghost"
+                icon={<History size={16} />}
+                onClick={onVersions}
+              />
+            </span>
+            <Divider
+              orientation="vertical"
+              className="editor-actions-divider"
+              style={{ height: "var(--spacing-5)" }}
+            />
+            <IconButton
+              label={t("editor.library")}
+              tooltip={t("editor.libraryHint")}
+              variant="ghost"
+              icon={<LayoutDashboard size={16} />}
+              onClick={() => {
+                window.location.href = "/resumes";
+              }}
+            />
+          </HStack>
+        </HStack>
+        <HStack gap={2} align="center" wrap="wrap" className="editor-actions-end">
+          <span className="editor-actions-cluster editor-actions-secondary">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Upload size={14} />}
+              label={t("editor.import")}
+              onClick={onImport}
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Minimize2 size={14} />}
+              label={t("editor.fit")}
+              onClick={onFitPage}
+            />
+          </span>
+          <Divider
+            className="editor-actions-secondary editor-actions-divider"
+            orientation="vertical"
+            style={{ height: "var(--spacing-5)" }}
+          />
+          <span className="editor-actions-cluster">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<ClipboardCheck size={14} />}
+              label={`${t("editor.check")} · ${atsScore}`}
+              onClick={onResumeCheck}
+            />
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<Target size={14} />}
+              label={t("editor.match")}
+              onClick={onJobMatch}
             />
           </span>
           <Divider
@@ -146,79 +212,26 @@ const EditorTopbar = ({
             className="editor-actions-divider"
             style={{ height: "var(--spacing-5)" }}
           />
-          <IconButton
-            label="My resumes"
-            tooltip="All my resumes"
-            variant="ghost"
-            icon={<LayoutDashboard size={16} />}
-            onClick={() => {
-              window.location.href = "/resumes";
-            }}
-          />
+          <span className="editor-actions-cluster">
+            <Button
+              variant="secondary"
+              size="sm"
+              icon={<FileDown size={14} />}
+              label="DOCX"
+              onClick={onDownloadDocx}
+            />
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<Download size={14} />}
+              label="PDF"
+              onClick={onDownloadPdf}
+            />
+          </span>
         </HStack>
       </HStack>
-      <HStack gap={2} align="center" wrap="wrap" className="editor-actions-end">
-        <span className="editor-actions-cluster editor-actions-secondary">
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Upload size={14} />}
-            label="Import"
-            onClick={onImport}
-          />
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Minimize2 size={14} />}
-            label="Fit 1 page"
-            onClick={onFitPage}
-          />
-        </span>
-        <Divider
-          className="editor-actions-secondary editor-actions-divider"
-          orientation="vertical"
-          style={{ height: "var(--spacing-5)" }}
-        />
-        <span className="editor-actions-cluster">
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<ClipboardCheck size={14} />}
-            label={`Check · ${atsScore}`}
-            onClick={onResumeCheck}
-          />
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<Target size={14} />}
-            label="Job match"
-            onClick={onJobMatch}
-          />
-        </span>
-        <Divider
-          orientation="vertical"
-          className="editor-actions-divider"
-          style={{ height: "var(--spacing-5)" }}
-        />
-        <span className="editor-actions-cluster">
-          <Button
-            variant="secondary"
-            size="sm"
-            icon={<FileDown size={14} />}
-            label="DOCX"
-            onClick={onDownloadDocx}
-          />
-          <Button
-            variant="primary"
-            size="sm"
-            icon={<Download size={14} />}
-            label="PDF"
-            onClick={onDownloadPdf}
-          />
-        </span>
-      </HStack>
-    </HStack>
-  </VStack>
-);
+    </VStack>
+  );
+};
 
 export default EditorTopbar;

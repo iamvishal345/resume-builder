@@ -8,6 +8,8 @@
 // numeric model so preview and export cannot drift, and section-level
 // overrides (settings.sectionStyles) recompute the scale per section.
 
+import { paperCssVars } from "./paper";
+
 export const RESUME_DENSITIES = [
   { id: "normal", name: "Normal" },
   { id: "dense", name: "Dense" },
@@ -99,6 +101,7 @@ export const RESUME_STYLE_DEFAULTS = {
   sidebarTone: "light", // light | dark | accent
   showPhoto: true,
   docxLayout: "ats",
+  paperSize: "a4",
   letterTemplateId: "classic",
   primaryColor: "",
   bgColor: "",
@@ -425,6 +428,7 @@ export const buildResumeStyle = ({ palette, font, settings = {} }) => {
     "--r-surface": palette.surface,
     "--r-bg": bg,
     "--r-font": font.stack,
+    ...paperCssVars(settings.paperSize),
   };
   for (const [css, key, unit] of CSS_METRICS) {
     vars[css] = cssValue(m, key, unit);

@@ -676,6 +676,24 @@ const TemplateCustomize = ({
               </div>
             </Block>
             <Block title="Page">
+              <div className="tcx-theme-row" role="group" aria-label="Paper size">
+                {[
+                  { id: "a4", name: "A4" },
+                  { id: "letter", name: "US Letter" },
+                ].map((opt) => {
+                  const active = (settings?.paperSize || "a4") === opt.id;
+                  return (
+                    <Button
+                      key={opt.id}
+                      size="sm"
+                      variant={active ? "primary" : "secondary"}
+                      label={opt.name}
+                      aria-pressed={active}
+                      onClick={() => onSelect({ paperSize: opt.id })}
+                    />
+                  );
+                })}
+              </div>
               <div className="tcx-ranges">
                 <RangeField
                   label="Page padding"

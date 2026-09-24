@@ -13,6 +13,7 @@ import {
   Cloud,
   Sparkles,
   WifiOff,
+  Lock,
 } from "lucide-react";
 import {
   listResumes,
@@ -23,9 +24,18 @@ import {
 } from "@features/resumes/db";
 import {
   exportBackupPack,
+  buildBackupPack,
   readResumeBackupFile,
   restoreFromText,
+  triggerDownload,
 } from "@features/resumes/backup";
+import {
+  encryptBackupPack,
+  decryptBackupPack,
+  parseEncryptedBackupText,
+  ENC_FILE_EXT,
+} from "@features/resumes/encryptedBackup";
+import { useI18n } from "@features/i18n/useI18n";
 import {
   getDemoMode,
   setDemoMode,
@@ -46,6 +56,7 @@ import { listVersions } from "@features/resumes/versions";
 import { estimateLocalStorage } from "@features/resumes/storageStats";
 
 const DataOwnership = ({ open, onOpenChange, onChanged }) => {
+  const { t } = useI18n();
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
@@ -53,10 +64,13 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
   const [clientId, setClientId] = useState(getGoogleClientId);
   const [restoreMode, setRestoreMode] = useState("merge");
   const [storageInfo, setStorageInfo] = useState(null);
+  const [passphrase, setPassphrase] = useState("");
+  const [passphrase2, setPassphrase2] = useState("");
   const [online, setOnline] = useState(
     typeof navigator !== "undefined" ? navigator.onLine : true,
   );
   const packInputRef = useRef(null);
+  const encInputRef = useRef(null);
   const driveReady = isDriveConfigured();
 
   const refreshStorage = async () => {
@@ -103,6 +117,18 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
     }
   };
 
+  const collectUserPack = async () => {
+    const docs = await listResumes();
+    const versions = [];
+    for (const doc of docs) {
+      if (isDemoResumeId(doc.id)) continue;
+      const vs = await listVersions(doc.id);
+      versions.push(...vs);
+    }
+    const userDocs = docs.filter((d) => !isDemoResumeId(d.id));
+    return buildBackupPack(userDocs.length ? userDocs : docs, { versions });
+  };
+
   const exportAll = () =>
     withBusy("export", async () => {
       const docs = await listResumes();
@@ -117,9 +143,31 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
       setMessage("Backup downloaded to your computer.");
     });
 
+  const exportEncrypted = () =>
+    withBusy("enc-export", async () => {
+      if (passphrase.length < 8) throw new Error(t("backup.weak"));
+      if (passphrase !== passphrase2) throw new Error(t("backup.mismatch"));
+      const pack = await collectUserPack();
+      const envelope = await encryptBackupPack(pack, passphrase);
+      const stamp = new Date().toISOString().slice(0, 10);
+      const blob = new Blob([JSON.stringify(envelope, null, 2)], {
+        type: "application/json",
+      });
+      triggerDownload(blob, `cavren-backup-${stamp}${ENC_FILE_EXT}`);
+      setPassphrase("");
+      setPassphrase2("");
+      setMessage("Encrypted backup downloaded to your computer.");
+    });
+
   const restorePack = async (file) => {
     await withBusy("restore", async () => {
       const text = await readResumeBackupFile(file);
+      const enc = parseEncryptedBackupText(text);
+      if (enc.ok) {
+        throw new Error(
+          `${t("backup.needPassphrase")} Use “${t("backup.restoreEncrypted")}”.`,
+        );
+      }
       const result = await restoreFromText(text, {
         newResume,
         putResume,
@@ -135,6 +183,34 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
         result.kind === "pack"
           ? `Restored ${result.count} resume(s) (${restoreMode}).`
           : "Resume restored.",
+      );
+      await refresh();
+    });
+  };
+
+  const restoreEncrypted = async (file) => {
+    await withBusy("enc-restore", async () => {
+      if (!passphrase) throw new Error(t("backup.needPassphrase"));
+      const text = await readResumeBackupFile(file);
+      const parsed = parseEncryptedBackupText(text);
+      if (!parsed.ok) throw new Error(parsed.error);
+      let pack;
+      try {
+        pack = await decryptBackupPack(parsed.envelope, passphrase);
+      } catch (e) {
+        throw new Error(e?.message || t("backup.wrongPass"));
+      }
+      const result = await restoreFromText(JSON.stringify(pack), {
+        newResume,
+        putResume,
+        clearAllResumes,
+        mode: restoreMode,
+      });
+      if (!result.ok) throw new Error(result.error);
+      setPassphrase("");
+      setPassphrase2("");
+      setMessage(
+        `Restored ${result.count || 1} resume(s) from encrypted backup (${restoreMode}).`,
       );
       await refresh();
     });
@@ -321,6 +397,64 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
           <Card padding={3} width="100%">
             <VStack gap={2} width="100%">
               <Text type="inherit" size="sm" weight="semibold" color="primary">
+                {t("backup.encryptedTitle")}
+              </Text>
+              <Text type="inherit" size="sm" color="secondary">
+                {t("backup.encryptedBody")}
+              </Text>
+              <TextInput
+                label={t("backup.passphrase")}
+                type="password"
+                value={passphrase}
+                onChange={setPassphrase}
+                width="100%"
+              />
+              <TextInput
+                label={t("backup.passphraseConfirm")}
+                type="password"
+                value={passphrase2}
+                onChange={setPassphrase2}
+                width="100%"
+              />
+              <HStack gap={2} wrap>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  icon={<Lock size={14} />}
+                  label={
+                    busy === "enc-export"
+                      ? "Encrypting…"
+                      : t("backup.downloadEncrypted")
+                  }
+                  disabled={!!busy}
+                  onClick={exportEncrypted}
+                />
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  icon={<Upload size={14} />}
+                  label={t("backup.restoreEncrypted")}
+                  disabled={!!busy}
+                  onClick={() => encInputRef.current?.click()}
+                />
+              </HStack>
+              <input
+                ref={encInputRef}
+                type="file"
+                accept=".json,.enc.json,.cavren.enc.json,application/json"
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) restoreEncrypted(file);
+                  e.target.value = "";
+                }}
+              />
+            </VStack>
+          </Card>
+
+          <Card padding={3} width="100%">
+            <VStack gap={2} width="100%">
+              <Text type="inherit" size="sm" weight="semibold" color="primary">
                 Demo resumes
               </Text>
               <Text type="inherit" size="sm" color="secondary">
@@ -349,12 +483,29 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
           <Card padding={3} width="100%">
             <VStack gap={2} width="100%">
               <Text type="inherit" size="sm" weight="semibold" color="primary">
+                Portable formats
+              </Text>
+              <Text type="inherit" size="sm" color="secondary">
+                Cavren .r.json / .cavren.json keep settings and themes. Open{" "}
+                <a href="https://jsonresume.org/" target="_blank" rel="noopener noreferrer">
+                  JSON Resume
+                </a>{" "}
+                files restore into a new resume from the library drop zone.
+                Export JSON Resume from the editor command palette (⌘K).
+              </Text>
+            </VStack>
+          </Card>
+
+          <Card padding={3} width="100%">
+            <VStack gap={2} width="100%">
+              <Text type="inherit" size="sm" weight="semibold" color="primary">
                 Google Drive (optional)
               </Text>
               <Text type="inherit" size="sm" color="secondary">
                 Never required. Core edit, preview, and local backup work
                 offline without Drive. Tokens stay in this browser — Cavren has
-                no server.
+                no server. Full setup steps live in{" "}
+                <code>docs/DRIVE.md</code> in the project repo.
               </Text>
               {!driveReady ? (
                 <Text type="inherit" size="sm" color="secondary">
@@ -429,7 +580,13 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
           </Card>
 
           {message && (
-            <Text type="inherit" size="sm" color="accent">
+            <Text
+              type="inherit"
+              size="sm"
+              color="accent"
+              role="status"
+              aria-live="polite"
+            >
               {message}
             </Text>
           )}

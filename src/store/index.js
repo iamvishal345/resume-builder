@@ -114,6 +114,7 @@ export const DEFAULT_RESUME_SETTINGS = {
   density: "normal",
   showPhoto: true,
   docxLayout: "ats",
+  paperSize: "a4",
   letterTemplateId: "classic",
   primaryColor: "",
   bgColor: "",

@@ -161,6 +161,34 @@ html[data-theme="dark"] .hero-brand img {
   outline-offset: 2px;
 }
 
+.locale-picker select {
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  background: var(--color-background-surface);
+  border: 1px solid var(--color-border-emphasized);
+  border-radius: var(--radius-element);
+  padding: var(--spacing-1) var(--spacing-2);
+  cursor: pointer;
+}
+
+.locale-picker select:focus-visible {
+  outline: 2px solid var(--color-focus-ring, var(--color-accent));
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .theme-toggle svg {
   grid-area: 1 / 1;
   width: 18px;

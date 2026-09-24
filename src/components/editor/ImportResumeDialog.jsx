@@ -82,6 +82,18 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
           return;
         }
         await snapshotBeforeImport();
+        if (result.kind === "json-resume") {
+          applyResumeData({ ...defaultResumeData(), ...result.data });
+          reset();
+          return;
+        }
+        if (result.kind !== "resume" || !result.doc?.data) {
+          setFileStatus({
+            type: "error",
+            message: "This backup is a full library pack — restore it from My resumes → Data & privacy.",
+          });
+          return;
+        }
         const merged = { ...defaultResumeData(), ...result.doc.data };
         applyResumeData(merged);
         reset();
@@ -140,7 +152,7 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
     >
       <DialogHeader
         title="Import a resume"
-        subtitle="Upload a PDF, DOCX, or backup file — or paste plain text. Everything runs locally in your browser; template and colors stay untouched."
+        subtitle="Upload a PDF, DOCX, JSON Resume, or Cavren .r.json backup — or paste plain text. Everything runs locally; template and colors stay untouched unless you restore a backup."
         onOpenChange={onOpenChange}
       />
       <div className="r-gallery-scroll">
@@ -154,8 +166,8 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
             isMultiple={false}
             isDisabled={busy}
             isLoading={busy}
-            placeholder="Drop a PDF, DOCX, text file, or .r.json backup"
-            description="PDF and DOCX text is extracted locally. A .r.json backup restores the full document including template and colors."
+            placeholder="Drop a PDF, DOCX, text, JSON Resume, or .r.json backup"
+            description="PDF and DOCX text is extracted locally. JSON Resume and .r.json restore structured content on this device."
             status={fileStatus}
             width="100%"
           />

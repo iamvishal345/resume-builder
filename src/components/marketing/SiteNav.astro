@@ -1,19 +1,50 @@
 ---
 import ThemeToggle from "../ThemeToggle.astro";
 import { SITE } from "@data/site";
+import { t, listLocales, resolveRequestLocale } from "@features/i18n";
+
+const locale = resolveRequestLocale(
+  Astro.cookies.get("cavren-locale")?.value,
+);
+const locales = listLocales();
 ---
 
 <header class="site-nav">
   <div class="container">
-    <a class="brand" href="/" aria-label={`${SITE.name} home`}>
+    <a class="brand" href="/" aria-label={t("nav.home")}>
       <img src="/logo.svg" alt="" height="40" width="40" />
+      <span>{SITE.name}</span>
     </a>
     <nav aria-label="Primary">
-      <a href="/features">Features</a>
-      <a href="/about">About</a>
-      <a href="/privacy">Privacy</a>
+      <a href="/features">{t("nav.features")}</a>
+      <a href="/about">{t("nav.about")}</a>
+      <a href="/privacy">{t("nav.privacy")}</a>
+      <label class="locale-picker">
+        <span class="visually-hidden">{t("a11y.locale")}</span>
+        <select id="cavren-locale" name="locale" aria-label={t("a11y.locale")}>
+          {
+            locales.map((opt) => (
+              <option value={opt.id} selected={opt.id === locale}>
+                {opt.label}
+              </option>
+            ))
+          }
+        </select>
+      </label>
       <ThemeToggle />
-      <a class="cta" href="/resumes">Start building</a>
+      <a class="cta" href="/resumes">{t("nav.start")}</a>
     </nav>
   </div>
 </header>
+
+<script>
+  import { setLocale, applyDocumentLocale } from "@features/i18n";
+  applyDocumentLocale();
+  const select = document.getElementById("cavren-locale");
+  select?.addEventListener("change", (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) return;
+    setLocale(target.value);
+    window.location.reload();
+  });
+</script>

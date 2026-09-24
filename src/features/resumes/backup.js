@@ -1,5 +1,6 @@
 // JSON backup: single resume (.r.json) + full library pack (.cavren.json).
 import { getDemoMode } from "./prefs";
+import { isJsonResume, fromJsonResume } from "@features/import/jsonResume";
 
 const RESUME_TYPE = "resume-builder/resume";
 const PACK_TYPE = "cavren/backup-pack";
@@ -99,6 +100,13 @@ export const parseResumeBackup = (text) => {
     doc = parsed;
   }
   if (!doc) {
+    if (isJsonResume(parsed)) {
+      return {
+        ok: true,
+        kind: "json-resume",
+        data: fromJsonResume(parsed),
+      };
+    }
     return { ok: false, error: "This file does not contain resume data." };
   }
   return { ok: true, kind: "resume", doc };
@@ -147,6 +155,21 @@ export const restoreFromText = async (
       docs: created,
       prefs: parsed.pack.prefs,
     };
+  }
+
+  if (parsed.kind === "json-resume") {
+    const basicsName = parsed.data?.personalDetails
+      ? [parsed.data.personalDetails.firstName, parsed.data.personalDetails.lastName]
+          .filter(Boolean)
+          .join(" ")
+      : "";
+    const doc = newResume(basicsName || "JSON Resume", parsed.data);
+    await putResume(doc);
+    return { ok: true, kind: "json-resume", doc };
+  }
+
+  if (parsed.kind !== "resume" || !parsed.doc) {
+    return { ok: false, error: "This file does not contain resume data." };
   }
 
   const doc = newResume(parenthesizedName(parsed.doc.name), parsed.doc.data);

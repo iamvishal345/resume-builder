@@ -132,6 +132,26 @@ Out of scope for D: Cavren-hosted sync, multi-user collaboration, view-tracking 
 
 ---
 
+## Phase F — High leverage (community durability)
+
+| Track | Status |
+|-------|--------|
+| Community packaging (README, LICENSE, CONTRIBUTING, issues, ROADMAP) | Done |
+| i18n scaffolding (en + hi; nav/footer/steps; cookie locale) | Done (extend locales) |
+| Accessibility (skip link i18n, live regions, step tabs, ownership tip) | Done (ongoing) |
+| JSON Resume import / export | Done |
+| Vitest hardening (order, readingLevel, backup, jsonResume, i18n) | Done |
+| Polish (Drive docs, ownership tip, .env.example) | Done |
+
+| A4 / US Letter paper size | Done |
+| Broader i18n (editor, dashboard) | Done |
+| Encrypted backup (passphrase + AES-GCM) | Done |
+| Español locale + in-app language switcher | Done |
+
+See [ROADMAP.md](./ROADMAP.md).
+
+---
+
 ## Explicitly out of scope (for now)
 
 - Monetization, paywalled PDF, trials, ads
@@ -157,7 +177,7 @@ Out of scope for D: Cavren-hosted sync, multi-user collaboration, view-tracking 
 | 8 | C1–C5 Craft (keyboard, photo, letter, DOCX option, responsive) | Done |
 | 9 | C6–C8 Sidebar presets, theme presets, MD/txt export | Done |
 | 10 | D1 Drive backup/restore + UX hardening | Done (client OAuth; needs your client ID) |
-| 11 | Phase E (compare, spellcheck, AI rewrite, duplicate section, export page) | Done |
+| 12 | Phase F (community, i18n, a11y, JSON Resume, tests, polish) | Done (extend locales / a11y ongoing) |
 
 ---
 

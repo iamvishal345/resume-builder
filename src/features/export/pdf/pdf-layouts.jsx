@@ -12,7 +12,10 @@ import {
   columnsSplit,
   columnsWithSide,
 } from "@features/resume/order";
+import { resolvePaper } from "@features/resume/paper";
 import { round } from "./pdf-utils";
+
+const pageSizeOf = (config) => resolvePaper(config?.paperSize).pdf;
 
 /* ---------- Column helpers ---------- */
 
@@ -70,7 +73,7 @@ export const SingleLayout = ({ data, ids, t, config }) => {
   const band = isBand(config);
   const ctx = makeCtx(t, data, config);
   return (
-    <Page size="A4" style={{ fontFamily: t.fontFamily, backgroundColor: t.bg }}>
+    <Page size={pageSizeOf(config)} style={{ fontFamily: t.fontFamily, backgroundColor: t.bg }}>
       {niceHeader(config, data, t)}
       <View style={contentPad(t, band ? t.sectionSpacing : 0)}>
         {renderColumn(ids, ctx)}
@@ -131,7 +134,7 @@ const SidebarLayoutBase = ({ data, ids, t, config, reverse = false }) => {
   );
 
   return (
-    <Page size="A4" style={{ fontFamily: t.fontFamily, backgroundColor: t.bg }}>
+    <Page size={pageSizeOf(config)} style={{ fontFamily: t.fontFamily, backgroundColor: t.bg }}>
       {!darkIdentity ? niceHeader(config, data, t) : null}
       {darkIdentity ? (
         <View style={{ flexDirection: "row", flexGrow: 1, gap: t.colGap }}>
@@ -197,7 +200,7 @@ export const SplitLayout = ({ data, ids, t, config }) => {
   );
 
   return (
-    <Page size="A4" style={{ fontFamily: t.fontFamily, backgroundColor: t.bg }}>
+    <Page size={pageSizeOf(config)} style={{ fontFamily: t.fontFamily, backgroundColor: t.bg }}>
       {header}
       <View style={contentPad(t, band ? t.sectionSpacing : 0)}>
         <View style={{ flexDirection: "row", gap: t.colGap }}>

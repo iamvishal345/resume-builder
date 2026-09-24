@@ -19,17 +19,16 @@ import {
 } from "lucide-react";
 import { useStore } from "@store";
 import { resumeViewModel } from "@features/resume/viewModel";
+import { resolvePaper } from "@features/resume/paper";
 import { renderResumePdfPreview } from "@features/export/pdf/preview";
 import { downloadPdfPage } from "@features/export/pdf/pageExtract";
 
 const MIN = 0.3;
 const MAX = 1.2;
 const STEP = 0.1;
-const PAGE_W_MM = 210;
-const PAGE_H_MM = 297;
 const RENDER_DELAY = 400;
 
-const PdfPageCanvas = ({ source, zoom }) => {
+const PdfPageCanvas = ({ source, zoom, widthMm, heightMm }) => {
   const canvasRef = useRef(null);
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
@@ -43,8 +42,8 @@ const PdfPageCanvas = ({ source, zoom }) => {
     <canvas
       ref={canvasRef}
       style={{
-        width: `calc(${PAGE_W_MM}mm * ${zoom})`,
-        height: `calc(${PAGE_H_MM}mm * ${zoom})`,
+        width: `calc(${widthMm}mm * ${zoom})`,
+        height: `calc(${heightMm}mm * ${zoom})`,
         display: "block",
       }}
     />
@@ -100,6 +99,7 @@ const FullPagePreview = ({
   const templateId = resumeSettings.templateId;
   const paletteId = resumeSettings.paletteId;
   const fontId = resumeSettings.fontId;
+  const paper = resolvePaper(resumeSettings.paperSize);
   const [retryCount, setRetryCount] = useState(0);
 
   const fileBase =
@@ -225,7 +225,12 @@ const FullPagePreview = ({
             {pages.map((canvas, i) => (
               <div key={i} className="preview-page-meta">
                 <div className="preview-page-sheet">
-                  <PdfPageCanvas source={canvas} zoom={zoom} />
+                  <PdfPageCanvas
+                    source={canvas}
+                    zoom={zoom}
+                    widthMm={paper.widthMm}
+                    heightMm={paper.heightMm}
+                  />
                 </div>
                 <HStack gap={2} align="center" justify="center" wrap>
                   {pages.length > 1 ? (

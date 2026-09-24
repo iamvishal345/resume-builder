@@ -1,0 +1,32 @@
+name: Feature request
+description: Idea that fits local-first / offline Cavren
+title: "[feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check [ROADMAP.md](../../ROADMAP.md) and out-of-scope items (no monetization, no Cavren backend, no analytics).
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What is hard or missing today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: How should it work offline / on-device?
+    validations:
+      required: true
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Principles check
+      options:
+        - label: Works offline or degrades cleanly
+          required: true
+        - label: No Cavren server / analytics / paywall
+          required: true

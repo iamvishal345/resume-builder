@@ -1,0 +1,45 @@
+name: Bug report
+description: Something broken in Cavren
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. **Do not paste personal resume content.**
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: What you did
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Browser / OS
+      placeholder: "Chrome 131 · macOS 15"
+    validations:
+      required: true
+  - type: dropdown
+    id: offline
+    attributes:
+      label: Were you offline?
+      options:
+        - "No"
+        - "Yes"
+        - "Not sure"
+    validations:
+      required: true

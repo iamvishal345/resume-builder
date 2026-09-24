@@ -3,6 +3,7 @@ import { Document, Page, View, Text } from "@react-pdf/renderer";
 import { registerPdfFonts, PDF_FONTS } from "./fonts";
 import { htmlLines } from "./pdf-utils";
 import { SITE } from "@data/site";
+import { resolvePaper } from "@features/resume/paper";
 
 registerPdfFonts();
 
@@ -20,6 +21,7 @@ export const PdfLetter = ({
   socialLinks = [],
   coverLetter = { recipient: "", body: "" },
   fontId = "sans",
+  paperSize = "a4",
 }) => {
   const pd = personalDetails;
   const name = [pd.firstName, pd.lastName].filter(Boolean).join(" ") || "";
@@ -38,6 +40,7 @@ export const PdfLetter = ({
   const muted = "#374151";
   const faint = "#6b7280";
   const accent = "#1e3a8a";
+  const pageSize = resolvePaper(paperSize).pdf;
 
   return (
     <Document
@@ -48,7 +51,7 @@ export const PdfLetter = ({
       subject={name ? `Cover letter — ${name}` : "Cover letter"}
     >
       <Page
-        size="A4"
+        size={pageSize}
         style={{
           fontFamily,
           fontSize: 13.5,

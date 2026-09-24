@@ -1,5 +1,8 @@
 ---
 import { SITE } from "@data/site";
+import { t, resolveRequestLocale } from "@features/i18n";
+
+resolveRequestLocale(Astro.cookies.get("cavren-locale")?.value);
 const year = new Date().getFullYear();
 ---
 
@@ -7,39 +10,37 @@ const year = new Date().getFullYear();
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a class="brand" href="/" aria-label={`${SITE.name} home`}>
+        <a class="brand" href="/" aria-label={t("nav.home")}>
           <img src="/logo.svg" alt="" height="32" width="32" />
+          <span>{SITE.name}</span>
         </a>
-        <p>
-          Free, private resume builder — guided editing, live preview, and honest
-          exports. Your data never leaves your browser unless you choose.
-        </p>
+        <p>{t("footer.blurb")}</p>
       </div>
       <div>
-        <h3>Product</h3>
+        <h3>{t("footer.product")}</h3>
         <ul>
-          <li><a href="/features">Features</a></li>
-          <li><a href="/resumes">My resumes</a></li>
-          <li><a href="/features#export">Export</a></li>
+          <li><a href="/features">{t("footer.features")}</a></li>
+          <li><a href="/resumes">{t("footer.resumes")}</a></li>
+          <li><a href="/features#export">{t("footer.export")}</a></li>
         </ul>
       </div>
       <div>
-        <h3>Learn</h3>
+        <h3>{t("footer.learn")}</h3>
         <ul>
-          <li><a href="/about">About</a></li>
-          <li><a href="/about#support">Support</a></li>
-          <li><a href="/privacy">Privacy</a></li>
-          <li><a href="/contact">Contact</a></li>
+          <li><a href="/about">{t("footer.about")}</a></li>
+          <li><a href="/about#support">{t("footer.support")}</a></li>
+          <li><a href="/privacy">{t("footer.privacy")}</a></li>
+          <li><a href="/contact">{t("footer.contact")}</a></li>
         </ul>
       </div>
       <div>
-        <h3>Start</h3>
+        <h3>{t("footer.start")}</h3>
         <ul>
-          <li><a href="/resumes">Build a resume</a></li>
-          <li><a href="/features#ai">AI drafting</a></li>
+          <li><a href="/resumes">{t("footer.build")}</a></li>
+          <li><a href="/features#ai">{t("footer.ai")}</a></li>
           <li>
             <a href={SITE.bmcUrl} target="_blank" rel="noopener noreferrer"
-              >Buy me a coffee</a
+              >{t("footer.coffee")}</a
             >
           </li>
         </ul>
@@ -51,8 +52,8 @@ const year = new Date().getFullYear();
         {SITE.legalName} · Private by design · No trackers · No ads</span
       >
       <nav aria-label="Footer">
-        <a href="/privacy">Privacy</a>
-        <a href="/contact">Contact</a>
+        <a href="/privacy">{t("footer.privacy")}</a>
+        <a href="/contact">{t("footer.contact")}</a>
       </nav>
     </div>
   </div>

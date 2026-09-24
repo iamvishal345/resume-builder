@@ -2,6 +2,7 @@
 import Layout from "./Layout.astro";
 import SiteNav from "../components/marketing/SiteNav.astro";
 import SiteFooter from "../components/marketing/SiteFooter.astro";
+import { t, resolveRequestLocale } from "../features/i18n";
 import "../styles/marketing.css";
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const props = Astro.props as Props;
+resolveRequestLocale(Astro.cookies.get("cavren-locale")?.value);
 ---
 
 <Layout
@@ -28,7 +30,7 @@ const props = Astro.props as Props;
   noindex={props.noindex}
   ogImage={props.ogImage}
 >
-  <a class="skip-link" href="#main">Skip to content</a>
+  <a class="skip-link" href="#main">{t("a11y.skip")}</a>
   <SiteNav />
   <main id="main">
     <slot />

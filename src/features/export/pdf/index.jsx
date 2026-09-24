@@ -72,6 +72,7 @@ export const downloadCoverLetterPdf = async ({
   socialLinks = [],
   coverLetter = { recipient: "", body: "" },
   fontId = "sans",
+  paperSize = "a4",
   fileName,
 }) => {
   const [{ pdf }, { default: PdfLetter }] = await Promise.all([
@@ -84,6 +85,7 @@ export const downloadCoverLetterPdf = async ({
       socialLinks={socialLinks}
       coverLetter={coverLetter}
       fontId={fontId}
+      paperSize={paperSize}
     />
   );
   const blob = await doc.toBlob();

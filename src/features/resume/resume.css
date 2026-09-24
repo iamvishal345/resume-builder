@@ -105,6 +105,9 @@
   color-scheme: light;
   /* Isolate from app dark-theme text so body copy stays ink-on-paper. */
   isolation: isolate;
+  width: var(--r-page-width, 210mm);
+  max-width: 100%;
+  min-height: var(--r-page-height, 297mm);
 }
 
 .r-paper * {
@@ -750,7 +753,7 @@
   .r-paper {
     box-shadow: none !important;
     margin: 0 !important;
-    width: 210mm !important;
+    width: var(--r-page-width, 210mm) !important;
     min-height: auto !important;
   }
 
