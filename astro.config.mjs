@@ -149,6 +149,30 @@ export default defineConfig({
         "@hooks": path.resolve(__dirname, "./src/hooks"),
       },
     },
+    build: {
+      chunkSizeWarningLimit: 1200,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes("node_modules/pdfjs-dist")) {
+              return "vendor-pdfjs";
+            }
+            if (id.includes("node_modules/docx")) {
+              return "vendor-docx";
+            }
+            if (id.includes("node_modules/slate") || id.includes("node_modules/slate-react")) {
+              return "vendor-slate";
+            }
+            if (id.includes("node_modules/@astryxdesign")) {
+              return "vendor-astryx";
+            }
+            if (id.includes("node_modules/lucide-react")) {
+              return "vendor-lucide";
+            }
+          },
+        },
+      },
+    },
     optimizeDeps: {
       include: ["pdfjs-dist"],
     },
