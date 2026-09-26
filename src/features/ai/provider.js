@@ -17,10 +17,13 @@ export const clearAiConfig = () => {
   window.localStorage.removeItem(CONFIG_KEY);
 };
 
-export const isChromeAI = () =>
-  typeof window !== "undefined" &&
-  typeof window.ai !== "undefined" &&
-  Boolean(window.ai && window.ai.languageModel);
+export const isChromeAI = () => {
+  if (typeof window === "undefined") return false;
+  return Boolean(
+    typeof window.LanguageModel !== "undefined" ||
+    (typeof window.ai !== "undefined" && window.ai?.languageModel)
+  );
+};
 
 export const htmlToText = (html = "") =>
   (html || "")
@@ -65,44 +68,110 @@ export const textToEditorHtml = (text) => {
   return textToParagraphs(lines.join("\n"));
 };
 
+/** Redact direct contact PII (email, phone, zip) before sending text to external AI providers */
+export const sanitizeForAi = (text = "") => {
+  return text
+    .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[email]")
+    .replace(/(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g, "[phone]")
+    .replace(/\b\d{5,6}\b/g, "[zipcode]");
+};
+
 const chromeGenerate = async (system, user) => {
-  const ai = window.ai;
-  if (!ai || !ai.languageModel) throw new Error("Chrome built-in AI is not available.");
-  const session = await ai.languageModel.create({ systemPrompt: system });
-  try {
-    return await session.prompt(user);
-  } finally {
-    if (session && typeof session.destroy === "function") {
-      try { await session.destroy(); } catch { /* ignore */ }
+  if (typeof window === "undefined") throw new Error("Chrome built-in AI is not available.");
+  const lm = window.LanguageModel || window.ai?.languageModel;
+  if (!lm) throw new Error("Chrome built-in AI is not available.");
+
+  if (typeof lm.availability === "function") {
+    try {
+      const status = await lm.availability();
+      if (status === "no") {
+        throw new Error("Chrome built-in AI is not supported on this device.");
+      }
+    } catch (e) {
+      if (e.message && e.message.includes("not supported")) throw e;
     }
   }
+
+  const timeoutMs = 30000;
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error("Chrome AI request timed out after 30 seconds.")), timeoutMs)
+  );
+
+  const generatePromise = (async () => {
+    let session;
+    try {
+      if (system) {
+        try {
+          session = await lm.create({
+            initialPrompts: [{ role: "system", content: system }],
+          });
+        } catch {
+          session = await lm.create({ systemPrompt: system });
+        }
+      } else {
+        session = await lm.create();
+      }
+      return await session.prompt(user);
+    } finally {
+      if (session && typeof session.destroy === "function") {
+        try { await session.destroy(); } catch { /* ignore */ }
+      }
+    }
+  })();
+
+  return Promise.race([generatePromise, timeoutPromise]);
 };
 
 const openaiGenerate = async (config, system, user) => {
   const baseUrl = (config.baseUrl || "https://api.openai.com/v1").replace(/\/$/, "");
-  const res = await fetch(`${baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.apiKey}`,
-    },
-    body: JSON.stringify({
-      model: config.model || "gpt-4o-mini",
-      temperature: 0.7,
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-    }),
-  });
-  if (!res.ok) {
-    const detail = await res.text().catch(() => "");
-    throw new Error(`AI request failed (${res.status})${detail ? `: ${detail}` : ""}`);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+  try {
+    const res = await fetch(`${baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${config.apiKey}`,
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model: config.model || "gpt-4o-mini",
+        temperature: 0.7,
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+      }),
+    });
+
+    if (res.status === 401) {
+      throw new Error("Invalid API key. Please check your key in AI settings.");
+    }
+    if (res.status === 429) {
+      throw new Error("API rate limit exceeded. Please try again later.");
+    }
+    if (!res.ok) {
+      throw new Error(`AI provider error (${res.status}). Please check your settings.`);
+    }
+
+    const json = await res.json();
+    const content = json?.choices?.[0]?.message?.content;
+    if (!content) throw new Error("AI returned an empty response.");
+    return content;
+  } catch (e) {
+    if (e.name === "AbortError") {
+      throw new Error("AI request timed out after 30 seconds.");
+    }
+    if (e instanceof TypeError || (e.message && e.message.includes("Failed to fetch"))) {
+      throw new Error(
+        "Couldn't reach the AI provider. Please check your API key, base URL, and internet connection."
+      );
+    }
+    throw e;
+  } finally {
+    clearTimeout(timeoutId);
   }
-  const json = await res.json();
-  const content = json?.choices?.[0]?.message?.content;
-  if (!content) throw new Error("AI returned an empty response.");
-  return content;
 };
 
 export const aiGenerate = async ({ system, user }) => {

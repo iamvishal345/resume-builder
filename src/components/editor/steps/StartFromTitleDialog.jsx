@@ -13,6 +13,7 @@ import {
   textToParagraphs,
 } from "@features/ai/provider";
 import { useStore } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 import AiSettingsDialog from "../../ai/AiSettingsDialog";
 
 const parseJson = (raw) => {
@@ -36,6 +37,7 @@ const itemsHtml = (lines) => {
 };
 
 const StartFromTitleDialog = ({ isOpen, onOpenChange }) => {
+  const { t } = useI18n();
   const [title, setTitle] = useState("");
   const [context, setContext] = useState("");
   const [busy, setBusy] = useState(false);
@@ -60,7 +62,7 @@ const StartFromTitleDialog = ({ isOpen, onOpenChange }) => {
 
   const generate = async () => {
     if (!title.trim()) {
-      setError("Enter a job title to start from.");
+      setError(t("errors.enterJobTitle") || "Enter a job title to start from.");
       return;
     }
     setBusy(true);
@@ -123,7 +125,7 @@ const StartFromTitleDialog = ({ isOpen, onOpenChange }) => {
       setError(
         e && e.message && !/Failed to fetch/i.test(e.message)
           ? e.message
-          : "AI drafting failed. Check your provider and try again.",
+          : (t("errors.aiDraftFailed") || "AI drafting failed. Check your provider and try again."),
       );
     } finally {
       setBusy(false);
@@ -140,27 +142,27 @@ const StartFromTitleDialog = ({ isOpen, onOpenChange }) => {
         padding={2}
       >
         <DialogHeader
-          title="Start from a job title"
-          subtitle="The AI drafts a summary, achievements, and skills into this resume. Review and edit every field afterwards."
+          title={t("titleDraft.title") || "Start from a job title"}
+          subtitle={t("titleDraft.subtitle") || "The AI drafts a summary, achievements, and skills into this resume. Review and edit every field afterwards."}
           onOpenChange={onOpenChange}
         />
         <div className="r-gallery-scroll">
           {hasAi ? (
             <VStack gap={3} width="100%" padding={2}>
               <TextInput
-                label="Job title"
+                label={t("titleDraft.jobTitleLabel") || "Job title"}
                 value={title}
                 onChange={setTitle}
-                placeholder="e.g. Senior Frontend Engineer"
+                placeholder={t("titleDraft.jobTitlePlaceholder") || "e.g. Senior Frontend Engineer"}
                 width="100%"
                 isDisabled={busy}
               />
               <TextArea
-                label="What to emphasize? (optional)"
+                label={t("titleDraft.emphasizeLabel") || "What to emphasize? (optional)"}
                 value={context}
                 onChange={setContext}
                 rows={3}
-                placeholder="e.g. led design systems, 0→1 products, mentoring"
+                placeholder={t("titleDraft.emphasizePlaceholder") || "e.g. led design systems, 0→1 products, mentoring"}
                 width="100%"
                 isDisabled={busy}
               />
@@ -173,14 +175,14 @@ const StartFromTitleDialog = ({ isOpen, onOpenChange }) => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  label="Cancel"
+                  label={t("common.cancel") || "Cancel"}
                   onClick={() => onOpenChange(false)}
                 />
                 <Button
                   variant="primary"
                   size="sm"
                   icon={<Wand2 size={14} />}
-                  label={busy ? "Drafting…" : "Generate draft"}
+                  label={busy ? (t("titleDraft.drafting") || "Drafting…") : (t("titleDraft.generateDraft") || "Generate draft")}
                   disabled={busy || !title.trim()}
                   onClick={generate}
                 />
@@ -190,20 +192,20 @@ const StartFromTitleDialog = ({ isOpen, onOpenChange }) => {
             <VStack gap={3} width="100%" padding={4}>
               <EmptyState
                 icon={<Sparkles size={24} />}
-                title="No AI provider configured"
-                description="Add an API key in AI settings, or use a browser with built-in AI (Chrome Nano)."
+                title={t("ai.noAiTitle") || "No AI provider configured"}
+                description={t("ai.noAiDesc") || "Add an API key in AI settings, or use Chrome built-in AI."}
                 actions={
                   <HStack justify="center" gap={2}>
                     <Button
                       variant="ghost"
                       size="sm"
-                      label="Close"
+                      label={t("common.close") || "Close"}
                       onClick={() => onOpenChange(false)}
                     />
                     <Button
                       variant="primary"
                       size="sm"
-                      label="Configure AI"
+                      label={t("ai.configureAi") || "Configure AI"}
                       onClick={() => setAiSettingsOpen(true)}
                     />
                   </HStack>

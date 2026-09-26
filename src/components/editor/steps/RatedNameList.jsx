@@ -8,6 +8,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { Rating } from "@components/Rating";
 import { Circle, GripVertical, Plus, Trash2 } from "lucide-react";
 import { DraggableList } from "@components/DraggableCollapse";
+import { useI18n } from "@features/i18n/useI18n";
 import "./skills.css";
 
 const Row = ({
@@ -17,46 +18,49 @@ const Row = ({
   showLevel,
   onChange,
   onRemove,
-}) => (
-  <div className={`skill-row${showLevel ? "" : " skill-row-no-level"}`}>
-    <IconButton
-      label="Drag"
-      tooltip="Drag to reorder"
-      variant="ghost"
-      size="sm"
-      className="drag-button"
-      icon={<GripVertical size={15} />}
-    />
-    <TextInput
-      id={item.key}
-      htmlName="name"
-      width="100%"
-      label={nameLabel}
-      isLabelHidden
-      value={item.name || ""}
-      placeholder={namePlaceholder}
-      onChange={(value) => onChange("name", value)}
-    />
-    {showLevel ? (
-      <div className="skill-row-rating">
-        <Rating
-          value={item.level}
-          onValueChange={(value) => onChange("level", value)}
-          type="success"
-          icon={Circle}
-        />
-      </div>
-    ) : null}
-    <IconButton
-      label={`Remove ${nameLabel.toLowerCase()}`}
-      tooltip={`Remove ${nameLabel.toLowerCase()}`}
-      variant="ghost"
-      size="sm"
-      icon={<Trash2 size={16} />}
-      onClick={onRemove}
-    />
-  </div>
-);
+}) => {
+  const { t } = useI18n();
+  return (
+    <div className={`skill-row${showLevel ? "" : " skill-row-no-level"}`}>
+      <IconButton
+        label={t("common.drag") || "Drag"}
+        tooltip={t("common.dragToReorder") || "Drag to reorder"}
+        variant="ghost"
+        size="sm"
+        className="drag-button"
+        icon={<GripVertical size={15} />}
+      />
+      <TextInput
+        id={item.key}
+        htmlName="name"
+        width="100%"
+        label={nameLabel}
+        isLabelHidden
+        value={item.name || ""}
+        placeholder={namePlaceholder}
+        onChange={(value) => onChange("name", value)}
+      />
+      {showLevel ? (
+        <div className="skill-row-rating">
+          <Rating
+            value={item.level}
+            onValueChange={(value) => onChange("level", value)}
+            type="success"
+            icon={Circle}
+          />
+        </div>
+      ) : null}
+      <IconButton
+        label={`${t("common.delete") || "Remove"} ${nameLabel.toLowerCase()}`}
+        tooltip={`${t("common.delete") || "Remove"} ${nameLabel.toLowerCase()}`}
+        variant="ghost"
+        size="sm"
+        icon={<Trash2 size={16} />}
+        onClick={onRemove}
+      />
+    </div>
+  );
+};
 
 /**
  * Flat draggable name (+ optional level) list — shared by Skills, Languages, Interests.
@@ -72,6 +76,7 @@ export const RatedNameList = ({
   levelConfigurable = false,
   onShowLevelChange,
 }) => {
+  const { t } = useI18n();
   const setField = (key, name, value) => {
     onItemsChange(
       items.map((item) => (item.key === key ? { ...item, [name]: value } : item)),
@@ -93,7 +98,7 @@ export const RatedNameList = ({
       {levelConfigurable ? (
         <HStack justify="end" width="100%">
           <Switch
-            label="Show level"
+            label={t("skills.showLevel") || "Show level"}
             value={!!showLevel}
             onChange={(checked) => onShowLevelChange?.(!!checked)}
           />
@@ -108,7 +113,7 @@ export const RatedNameList = ({
           {showLevel ? (
             <span className="skill-list-head-level">
               <Text type="inherit" size="sm" weight="medium" color="secondary">
-                Level
+                {t("skills.level") || "Level"}
               </Text>
             </span>
           ) : null}

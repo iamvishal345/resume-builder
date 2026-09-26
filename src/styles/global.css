@@ -4,6 +4,13 @@
 @import "@astryxdesign/theme-matcha/theme.css";
 @import "./app-shell.css";
 
+/* Cross-document view transitions across all app and marketing routes */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+}
+
 /* Brand typeface — Figtree everywhere (buttons inherit via font-family: inherit) */
 :root {
   --font-family-body:
@@ -79,7 +86,7 @@ body {
   color: var(--color-selection-fg);
 }
 
-/* Keyboard focus — shared, high-contrast ring (not mouse click) */
+/* Focus handling */
 :focus {
   outline: none;
 }
@@ -91,6 +98,39 @@ body {
 
 :focus-visible:not(button):not([role="button"]):not(a):not(summary) {
   outline-offset: 1px;
+}
+
+/* Hide default black/green focus outline and box-shadow on all input fields */
+input,
+textarea,
+select,
+[contenteditable],
+[contenteditable="true"],
+.rsw-ce,
+[role="textbox"] {
+  outline: none;
+}
+
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible,
+[contenteditable]:focus,
+[contenteditable]:focus-visible,
+[contenteditable="true"]:focus,
+[contenteditable="true"]:focus-visible,
+.rsw-ce:focus,
+.rsw-ce:focus-visible,
+[role="textbox"]:focus,
+[role="textbox"]:focus-visible,
+[class*="astryx"][class*="input"]:focus,
+[class*="astryx"][class*="input"]:focus-within {
+  outline: none !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+  border-color: var(--color-border-emphasized) !important;
 }
 
 ::placeholder {
@@ -178,7 +218,7 @@ html:not([data-theme="dark"]) {
   --color-overlay: rgba(23, 28, 23, 0.42);
   --color-shadow: rgba(23, 28, 23, 0.12);
 
-  --color-focus-ring: color-mix(in srgb, var(--color-accent) 72%, #1b211d);
+  --color-focus-ring: var(--color-accent);
   --color-selection-bg: color-mix(in srgb, var(--color-accent) 28%, #ffffff);
   --color-selection-fg: #1b211d;
 }
@@ -224,7 +264,7 @@ html[data-theme="dark"] {
   --color-overlay: rgba(0, 0, 0, 0.62);
   --color-shadow: rgba(0, 0, 0, 0.55);
 
-  --color-focus-ring: color-mix(in srgb, var(--color-accent) 80%, #ffffff);
+  --color-focus-ring: var(--color-accent);
   --color-selection-bg: color-mix(in srgb, var(--color-accent) 40%, #1c201d);
   --color-selection-fg: #f2f4f0;
 
@@ -304,6 +344,7 @@ html[data-theme="dark"] .theme-toggle .icon-dark {
 .rsw-toolbar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 2px;
   padding: var(--spacing-1) var(--spacing-2);
   border: 1px solid var(--color-border);
@@ -712,6 +753,8 @@ html[data-theme="dark"] .preview-page-sheet {
   font-size: 13.5px;
   line-height: 1.65;
   color: var(--color-text-primary);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .letter-sender {
@@ -729,8 +772,38 @@ html[data-theme="dark"] .preview-page-sheet {
 }
 
 .letter-contact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-1) var(--spacing-2);
   color: var(--color-text-secondary);
   font-size: 12px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.letter-contact-sep {
+  opacity: 0.5;
+}
+
+.letter-body {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+@media (max-width: 640px) {
+  .letter-paper-wrap {
+    padding: var(--spacing-3) !important;
+  }
+
+  .letter-paper {
+    padding: var(--spacing-3) var(--spacing-2);
+    font-size: 12.5px;
+  }
+
+  .letter-name {
+    font-size: 17px;
+  }
 }
 
 .letter-date,

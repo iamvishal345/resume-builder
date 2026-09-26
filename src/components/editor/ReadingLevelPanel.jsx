@@ -7,8 +7,10 @@ import {
   formatReadingHint,
 } from "@features/ats/readingLevel";
 import { stripHtmlFlat } from "@lib/text";
+import { useI18n } from "@features/i18n/useI18n";
 
 const ReadingLevelPanel = ({ data, bare = false }) => {
+  const { t } = useI18n();
   const analysis = useMemo(() => {
     const parts = [
       stripHtmlFlat(data?.summary || ""),
@@ -27,19 +29,19 @@ const ReadingLevelPanel = ({ data, bare = false }) => {
 
   const tip =
     analysis.grade == null
-      ? "Add a summary or experience bullets to estimate reading level."
+      ? t("reading.empty")
       : analysis.grade > 12
-        ? "A bit dense for scanners — shorten sentences where you can."
+        ? t("reading.dense")
         : analysis.grade < 7
-          ? "Very plain — fine for clarity; add specifics if it feels thin."
-          : "Aim for Clear / Standard so recruiters can skim quickly.";
+          ? t("reading.plain")
+          : t("reading.standard");
 
   const body = (
     <VStack gap={2} width="100%">
       <HStack justify="between" align="center" width="100%">
         <VStack gap={0}>
           <Text type="inherit" size="xl" weight="semibold" color="primary">
-            Reading level
+            {t("reading.title")}
           </Text>
           <Text type="inherit" size="md" color="secondary">
             {formatReadingHint(analysis) || "—"}

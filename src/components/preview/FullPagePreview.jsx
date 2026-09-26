@@ -18,6 +18,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useStore } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 import { resumeViewModel } from "@features/resume/viewModel";
 import { resolvePaper } from "@features/resume/paper";
 import { renderResumePdfPreview } from "@features/export/pdf/preview";
@@ -55,6 +56,7 @@ const FullPagePreview = ({
   onDownloadDocx,
   onCustomize,
 }) => {
+  const { t } = useI18n();
   const [zoom, setZoom] = useState(0.55);
   const [pages, setPages] = useState([]);
   const [pdfBlob, setPdfBlob] = useState(null);
@@ -132,7 +134,7 @@ const FullPagePreview = ({
         setPdfBlob(result.blob || null);
       } catch (err) {
         if (renderId.current !== id) return;
-        setError(err?.message || "Could not render the PDF preview.");
+        setError(err?.message || t("errors.pdfPreviewFailed") || "Could not render the PDF preview.");
         setPdfBlob(null);
       } finally {
         if (renderId.current === id) setBusy(false);
@@ -147,7 +149,7 @@ const FullPagePreview = ({
     try {
       await downloadPdfPage(pdfBlob, pageIndex, fileBase);
     } catch (err) {
-      setError(err?.message || "Could not export that page.");
+      setError(err?.message || t("errors.pageExportFailed") || "Could not export that page.");
     } finally {
       setPageBusy(null);
     }
@@ -167,14 +169,14 @@ const FullPagePreview = ({
             variant="secondary"
             size="sm"
             icon={<Minus size={14} />}
-            label="Zoom out"
+            label={t("preview.zoomOut") || "Zoom out"}
             onClick={() => setZoom((z) => clamp(z - STEP))}
           />
           <Button
             variant="ghost"
             size="sm"
             icon={<Maximize size={14} />}
-            label="Reset view"
+            label={t("preview.resetView") || "Reset view"}
             onClick={() => setZoom(0.55)}
           />
           <Text type="inherit" size="sm" weight="medium" color="secondary">
@@ -184,12 +186,12 @@ const FullPagePreview = ({
             variant="secondary"
             size="sm"
             icon={<Plus size={14} />}
-            label="Zoom in"
+            label={t("preview.zoomIn") || "Zoom in"}
             onClick={() => setZoom((z) => clamp(z + STEP))}
           />
           {pages.length > 1 && (
             <Text type="inherit" size="sm" color="secondary">
-              · {pages.length} pages
+              · {pages.length} {t("preview.pages") || "pages"}
             </Text>
           )}
           <span className="preview-toolbar-extra">
@@ -198,14 +200,14 @@ const FullPagePreview = ({
                 variant="secondary"
                 size="sm"
                 icon={<Palette size={14} />}
-                label="Customize"
+                label={t("preview.customize") || "Customize"}
                 onClick={onCustomize}
               />
               <Button
                 variant="secondary"
                 size="sm"
                 icon={<FileDown size={14} />}
-                label="DOCX"
+                label={t("common.docx") || "DOCX"}
                 onClick={onDownloadDocx}
               />
             </HStack>
@@ -214,7 +216,7 @@ const FullPagePreview = ({
             variant="primary"
             size="sm"
             icon={<Printer size={14} />}
-            label="PDF"
+            label={t("common.pdf") || "PDF"}
             onClick={onDownloadPdf}
           />
         </HStack>

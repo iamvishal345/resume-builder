@@ -93,8 +93,6 @@ const props = Astro.props as Props;
     });
 
     applyDocumentLocale();
-    const select = document.getElementById("cavren-locale");
-    if (select instanceof HTMLSelectElement) select.value = getLocale();
   };
 
   const start = () => syncText();
@@ -105,13 +103,6 @@ const props = Astro.props as Props;
   }
   document.addEventListener("astro:page-load", start);
   subscribeLocale(start);
-
-  document.addEventListener("change", (event) => {
-    const target = event.target;
-    if (target instanceof HTMLSelectElement && target.id === "cavren-locale") {
-      setLocale(target.value);
-    }
-  });
 </script>
 
 <style>

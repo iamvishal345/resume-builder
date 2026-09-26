@@ -56,7 +56,7 @@
 
 .r-swatch-canvas {
   display: block;
-  width: 348px;
+  width: 396px;
   transform: scale(0.43);
   transform-origin: top left;
 }
@@ -139,7 +139,9 @@
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: border-color 0.12s ease, color 0.12s ease;
+  transition:
+    border-color 0.12s ease,
+    color 0.12s ease;
 }
 
 .r-opt-chip:hover {

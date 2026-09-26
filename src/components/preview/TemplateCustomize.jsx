@@ -30,14 +30,8 @@ import {
   isSidebarLayout,
   isSplitLayout,
 } from "@features/resume/style";
-import {
-  defaultSideColumn,
-  defaultSplitColumn,
-  effectiveOrder,
-  isExtra,
-  moveInOrder,
-  extraIdOf,
-} from "@features/resume/order";
+import { extraIdOf, defaultSideColumn, defaultSplitColumn, effectiveOrder, isExtra, moveInOrder } from "@features/resume/order";
+import { useI18n } from "@features/i18n/useI18n";
 import {
   listThemes,
   saveTheme,
@@ -383,17 +377,19 @@ const TemplateCustomize = ({
   const pickPalette = (palette) =>
     onSelect({ paletteId: palette.id, primaryColor: "" });
 
+  const { t } = useI18n();
+
   return (
     <aside className="tcx-panel" aria-labelledby={titleId}>
       <header className="tcx-head">
         <div className="tcx-head-copy">
           <span id={titleId}>
             <Text type="inherit" size="lg" weight="semibold" color="primary">
-              Layout & theme
+              {t("editor.layoutAndTheme")}
             </Text>
           </span>
           <Text type="inherit" size="sm" color="secondary">
-            Changes apply live to the preview.
+            {t("editor.customizeSubtitle")}
           </Text>
         </div>
         {showClose && onClose ? (
@@ -432,7 +428,7 @@ const TemplateCustomize = ({
               onClick={() => setTab(item.id)}
             >
               <Icon size={16} strokeWidth={2.25} aria-hidden />
-              {item.label}
+              {t(`customize.${item.id}`) || item.label}
             </button>
           );
         })}
@@ -766,13 +762,13 @@ const TemplateCustomize = ({
                   </div>
                 </Block>
                 {selectedSection && selectedSection !== "header" ? (
-                  <Block title="Order">
+                  <Block title={t("customize.order") || "Order"}>
                     <div className="tcx-theme-row">
                       <Button
                         size="sm"
                         variant="secondary"
                         icon={<ChevronUp size={14} />}
-                        label="Move up"
+                        label={t("customize.moveUp") || "Move up"}
                         onClick={() => {
                           const avail = sections
                             .filter((s) => s.id !== "header")
@@ -795,7 +791,7 @@ const TemplateCustomize = ({
                         size="sm"
                         variant="secondary"
                         icon={<ChevronDown size={14} />}
-                        label="Move down"
+                        label={t("customize.moveDown") || "Move down"}
                         onClick={() => {
                           const avail = sections
                             .filter((s) => s.id !== "header")
@@ -818,13 +814,13 @@ const TemplateCustomize = ({
                   </Block>
                 ) : null}
                 {isExtra(selectedSection) ? (
-                  <Block title="Extra section">
+                  <Block title={t("customize.extraSection") || "Extra section"}>
                     <div className="tcx-theme-row">
                       <Button
                         size="sm"
                         variant="secondary"
                         icon={<Copy size={14} />}
-                        label="Duplicate"
+                        label={t("common.duplicate") || "Duplicate"}
                         onClick={() => {
                           useStore
                             .getState()
@@ -837,7 +833,7 @@ const TemplateCustomize = ({
                         size="sm"
                         variant="ghost"
                         icon={<Trash2 size={14} />}
-                        label="Remove"
+                        label={t("common.delete") || "Remove"}
                         onClick={() => {
                           useStore
                             .getState()
@@ -873,10 +869,10 @@ const TemplateCustomize = ({
                   />
                   ) : null
                 ) : null}
-                <Block title="Overrides">
+                <Block title={t("customize.overrides") || "Overrides"}>
                   <div className="tcx-ranges">
                     <RangeField
-                      label="Font size"
+                      label={t("customize.fontSize") || "Font size"}
                       value={selected.fontSize ?? baseFont}
                       min={11}
                       max={18}
@@ -887,7 +883,7 @@ const TemplateCustomize = ({
                       }
                     />
                     <RangeField
-                      label="Line height"
+                      label={t("customize.lineHeight") || "Line height"}
                       value={selected.lineHeight ?? baseLine}
                       min={1.1}
                       max={2}
@@ -898,7 +894,7 @@ const TemplateCustomize = ({
                       }
                     />
                     <RangeField
-                      label="Spacing before"
+                      label={t("customize.spacingBefore") || "Spacing before"}
                       value={selected.gap ?? baseGap}
                       min={0}
                       max={28}
@@ -909,7 +905,7 @@ const TemplateCustomize = ({
                       }
                     />
                     <RangeField
-                      label="Margin top"
+                      label={t("customize.marginTop") || "Margin top"}
                       value={selected.marginTop ?? 0}
                       min={0}
                       max={48}
@@ -920,7 +916,7 @@ const TemplateCustomize = ({
                       }
                     />
                     <RangeField
-                      label="Margin bottom"
+                      label={t("customize.marginBottom") || "Margin bottom"}
                       value={selected.marginBottom ?? 0}
                       min={0}
                       max={48}
@@ -931,7 +927,7 @@ const TemplateCustomize = ({
                       }
                     />
                     <RangeField
-                      label="Heading scale"
+                      label={t("customize.headingScale") || "Heading scale"}
                       value={selected.headingScale ?? 1}
                       min={0.7}
                       max={1.3}
@@ -977,7 +973,7 @@ const TemplateCustomize = ({
             variant="ghost"
             size="sm"
             width="100%"
-            label="Reset color & type overrides"
+            label={t("customize.resetOverrides") || "Reset color & type overrides"}
             onClick={resetCustomization}
           />
         </footer>

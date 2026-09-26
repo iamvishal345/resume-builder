@@ -8,10 +8,12 @@ import { EmptyState } from "@astryxdesign/core/EmptyState";
 import { Download, Pencil, Mail } from "lucide-react";
 import { defaultResumeData } from "@store";
 import { downloadCoverLetterPdf } from "@features/export/pdf";
+import { useI18n } from "@features/i18n/useI18n";
 import CoverLetterSheet from "../preview/CoverLetterSheet";
 import { nameOf } from "./resumeMeta";
 
 const LetterDialog = ({ doc, onOpenChange }) => {
+  const { t } = useI18n();
   const sheetRef = useRef(null);
   const [error, setError] = useState("");
   const data = { ...defaultResumeData(), ...(doc?.data || {}) };
@@ -28,7 +30,7 @@ const LetterDialog = ({ doc, onOpenChange }) => {
         fontId: data.resumeSettings?.fontId,
       });
     } catch (err) {
-      setError(err?.message || "PDF download failed.");
+      setError(err?.message || t("errors.pdfDownloadFailed") || "PDF download failed.");
     }
   };
 
@@ -43,8 +45,8 @@ const LetterDialog = ({ doc, onOpenChange }) => {
       {doc && (
         <>
           <DialogHeader
-            title={`${nameOf(doc)} — cover letter`}
-            subtitle="Preview or download the cover letter saved with this resume."
+            title={t("letterDialog.title", { name: nameOf(doc) }) || `${nameOf(doc)} — cover letter`}
+            subtitle={t("letterDialog.subtitle") || "Preview or download the cover letter saved with this resume."}
             onOpenChange={() => onOpenChange(null)}
             padding={2}
           />
@@ -64,16 +66,16 @@ const LetterDialog = ({ doc, onOpenChange }) => {
               ) : (
                 <EmptyState
                   icon={<Mail size={24} />}
-                  title="No cover letter yet"
-                  description="Open this resume in the builder, switch to the Letter view, and write one to preview it here."
+                  title={t("letterDialog.emptyTitle") || "No cover letter yet"}
+                  description={t("letterDialog.emptyDesc") || "Open this resume in the builder, switch to the Letter view, and write one to preview it here."}
                   actions={
                     <Button
                       variant="primary"
                       size="sm"
                       icon={<Pencil size={14} />}
-                      label="Open in builder"
+                      label={t("letterDialog.openInBuilder") || "Open in builder"}
                       onClick={() => {
-                        window.location.href = `/editor?resume=${doc.id}&view=letter`;
+                        window.location.href = `/editor?resume=${doc.id}&activeTab=cover-latter`;
                       }}
                     />
                   }
@@ -90,16 +92,16 @@ const LetterDialog = ({ doc, onOpenChange }) => {
                     variant="primary"
                     size="sm"
                     icon={<Download size={14} />}
-                    label="Download PDF"
+                    label={t("letterDialog.downloadPdf") || "Download PDF"}
                     onClick={() => download()}
                   />
                   <Button
                     variant="secondary"
                     size="sm"
                     icon={<Pencil size={14} />}
-                    label="Edit letter"
+                    label={t("letterDialog.editLetter") || "Edit letter"}
                     onClick={() => {
-                      window.location.href = `/editor?resume=${doc.id}&view=letter`;
+                      window.location.href = `/editor?resume=${doc.id}&activeTab=cover-latter`;
                     }}
                   />
                 </HStack>

@@ -8,6 +8,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Plus, Trash2 } from "lucide-react";
 import { useStore } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 
 const getReferenceObj = () => ({
   key: crypto.randomUUID(),
@@ -19,6 +20,7 @@ const getReferenceObj = () => ({
 });
 
 const References = ({ id }) => {
+  const { t } = useI18n();
   const additionalSections = useStore((state) => state.additionalSections);
   const section = additionalSections.find((s) => s.id === id);
   const items = section?.data || [];
@@ -56,10 +58,10 @@ const References = ({ id }) => {
       <VStack gap={3} width="100%">
         <VStack gap={1} width="100%">
           <Text type="inherit" size="xl" weight="semibold" color="primary">
-            References
+            {t("extras.references") || "References"}
           </Text>
           <Text type="inherit" size="md" color="secondary">
-            Provide professional references and their contact info
+            {t("extras.referencesSubtitle") || "Provide professional references and their contact info"}
           </Text>
         </VStack>
         {items?.map((formObj) => (
@@ -74,9 +76,9 @@ const References = ({ id }) => {
                 id={`${formObj.key}-name`}
                 htmlName="name"
                 width="100%"
-                label="Full Name"
+                label={t("extras.fullName") || "Full Name"}
                 value={formObj.name}
-                placeholder="Reference Name"
+                placeholder={t("extras.referenceNamePlaceholder") || "Reference Name"}
                 onChange={(value) =>
                   setFieldValue(
                     { target: { name: "name", value } },
@@ -90,9 +92,9 @@ const References = ({ id }) => {
                 id={`${formObj.key}-role`}
                 htmlName="role"
                 width="100%"
-                label="Job Title"
+                label={t("extras.jobTitle") || "Job Title"}
                 value={formObj.role}
-                placeholder="e.g., Engineering Manager"
+                placeholder={t("extras.jobTitlePlaceholder") || "e.g., Engineering Manager"}
                 onChange={(value) =>
                   setFieldValue(
                     { target: { name: "role", value } },
@@ -106,9 +108,9 @@ const References = ({ id }) => {
                 id={`${formObj.key}-organization`}
                 htmlName="organization"
                 width="100%"
-                label="Company"
+                label={t("extras.company") || "Company"}
                 value={formObj.organization}
-                placeholder="Company Name"
+                placeholder={t("extras.companyPlaceholder") || "Company Name"}
                 onChange={(value) =>
                   setFieldValue(
                     { target: { name: "organization", value } },
@@ -122,7 +124,7 @@ const References = ({ id }) => {
                 id={`${formObj.key}-phone`}
                 htmlName="phone"
                 width="100%"
-                label="Phone"
+                label={t("extras.phone") || "Phone"}
                 value={formObj.phone}
                 placeholder="+1 555 000 0000"
                 onChange={(value) =>
@@ -138,9 +140,9 @@ const References = ({ id }) => {
                 id={`${formObj.key}-email`}
                 htmlName="email"
                 width="100%"
-                label="Email"
+                label={t("extras.email") || "Email"}
                 value={formObj.email}
-                placeholder="name@example.com"
+                placeholder={t("extras.emailPlaceholder") || "name@example.com"}
                 onChange={(value) =>
                   setFieldValue(
                     { target: { name: "email", value } },
@@ -152,8 +154,8 @@ const References = ({ id }) => {
             <GridSpan columns={1}>
               <HStack align="center" justify="start" width="100%">
                 <IconButton
-                  label="Remove reference"
-                  tooltip="Remove reference"
+                  label={t("extras.removeReference") || "Remove reference"}
+                  tooltip={t("extras.removeReference") || "Remove reference"}
                   variant="ghost"
                   icon={<Trash2 size={16} />}
                   onClick={() => handleRemove(formObj.key)}
@@ -166,7 +168,7 @@ const References = ({ id }) => {
           <Button
             variant="secondary"
             icon={<Plus size={16} />}
-            label="Add More References"
+            label={t("extras.addMoreReferences") || "Add More References"}
             onClick={handleAddMore}
           />
         </HStack>

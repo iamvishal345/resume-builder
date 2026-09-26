@@ -1,16 +1,22 @@
 import React from "react";
 import { toSkillList } from "./skillList";
+import { useI18n } from "../i18n/useI18n";
 
 export const formatDate = (value) => {
   if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
+  const str = String(value).trim();
+  if (!str) return "";
+  if (str.toLowerCase() === "present") return "Present";
+  const date = new Date(/^\d{4}-\d{2}$/.test(str) ? `${str}-01` : str);
+  if (Number.isNaN(date.getTime())) return str;
   return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 };
 
 export const Range = ({ start, end, disabledEnd }) => {
+  const { t } = useI18n();
+  const presentText = t("common.present") || "Present";
   const from = formatDate(start);
-  const to = disabledEnd || end === "Present" ? "Present" : formatDate(end);
+  const to = disabledEnd || end === "Present" ? presentText : (formatDate(end) === "Present" ? presentText : formatDate(end));
   if (!from && !to) return null;
   return (
     <span className="r-dates">
@@ -22,7 +28,13 @@ export const Range = ({ start, end, disabledEnd }) => {
 };
 
 export const contactParts = (personalDetails = {}, socialLinks = []) => {
-  const location = [personalDetails.city, personalDetails.state, personalDetails.country]
+  const location = [
+    personalDetails.address,
+    personalDetails.city,
+    personalDetails.state,
+    personalDetails.country,
+    personalDetails.pinCode,
+  ]
     .filter(Boolean)
     .join(", ");
   const socials = (socialLinks || [])
@@ -36,7 +48,11 @@ export const contactParts = (personalDetails = {}, socialLinks = []) => {
   ].filter(Boolean);
 };
 
-export const ContactLine = ({ personalDetails, socialLinks, align = "left" }) => {
+export const ContactLine = ({
+  personalDetails,
+  socialLinks,
+  align = "left",
+}) => {
   const parts = contactParts(personalDetails, socialLinks);
   if (!parts.length) return null;
   return (
@@ -78,15 +94,11 @@ const LevelBar = ({ level }) => {
   const n = Math.min(5, Math.max(0, Number(level) || 0));
   return (
     <span className="r-level-bar" aria-label={`Level ${n} of 5`}>
-      <span
-        className="r-level-bar-fill"
-        style={{ width: `${n * 20}%` }}
-      />
+      <span className="r-level-bar-fill" style={{ width: `${n * 20}%` }} />
     </span>
   );
 };
 
-/** Skills with multiple Zety-style render modes. */
 export const SkillList = ({ items, style = "chips" }) => {
   const list = toSkillList(items).filter((item) => item.name);
   if (!list.length) return null;
@@ -240,7 +252,9 @@ export const EducationItems = ({ items, style = "standard" }) => (
             <div className="r-entry-header">
               <div className="r-entry-title-block">
                 <h3 className="r-entry-title">
-                  {[entry.degree, entry.fieldOfStudy].filter(Boolean).join(", ")}
+                  {[entry.degree, entry.fieldOfStudy]
+                    .filter(Boolean)
+                    .join(", ")}
                 </h3>
                 {entry.schoolName ? (
                   <span className="r-entry-org">{entry.schoolName}</span>
@@ -316,34 +330,37 @@ export const VolunteerBlock = ({ items }) => (
   </div>
 );
 
-export const CertificationsBlock = ({ items }) => (
-  <div className="r-certifications">
-    {items?.map((item, i) => (
-      <div className="r-certification" key={item.key ?? i}>
-        <div className="r-entry-header">
-          <div className="r-entry-title-block">
-            {item.name && <h3 className="r-entry-title">{item.name}</h3>}
-            {item.issuer && <span className="r-entry-org">{item.issuer}</span>}
+export const CertificationsBlock = ({ items }) => {
+  const { t } = useI18n();
+  return (
+    <div className="r-certifications">
+      {items?.map((item, i) => (
+        <div className="r-certification" key={item.key ?? i}>
+          <div className="r-entry-header">
+            <div className="r-entry-title-block">
+              {item.name && <h3 className="r-entry-title">{item.name}</h3>}
+              {item.issuer && <span className="r-entry-org">{item.issuer}</span>}
+            </div>
+            {item.date && <span className="r-dates">{item.date}</span>}
           </div>
-          {item.date && <span className="r-dates">{item.date}</span>}
+          {item.credentialId && (
+            <span className="r-cert-credential">ID: {item.credentialId}</span>
+          )}
+          {item.url && (
+            <a
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="r-cert-url"
+            >
+              {t("extras.verify") || "Verify"}
+            </a>
+          )}
         </div>
-        {item.credentialId && (
-          <span className="r-cert-credential">ID: {item.credentialId}</span>
-        )}
-        {item.url && (
-          <a
-            href={item.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="r-cert-url"
-          >
-            Verify
-          </a>
-        )}
-      </div>
-    ))}
-  </div>
-);
+      ))}
+    </div>
+  );
+};
 
 export const ReferencesBlock = ({ items }) => (
   <div className="r-references">

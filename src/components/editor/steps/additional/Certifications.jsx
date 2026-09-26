@@ -7,6 +7,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Plus, Trash2 } from "lucide-react";
 import { useStore } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 import "./entry-list.css";
 
 const getCertificationObj = () => ({
@@ -19,6 +20,7 @@ const getCertificationObj = () => ({
 });
 
 const Certifications = ({ id }) => {
+  const { t } = useI18n();
   const additionalSections = useStore((state) => state.additionalSections);
   const section = additionalSections.find((s) => s.id === id);
   const items = section?.data || [];
@@ -43,10 +45,10 @@ const Certifications = ({ id }) => {
       <VStack gap={3} width="100%">
         <VStack gap={1} width="100%">
           <Text type="inherit" size="xl" weight="semibold" color="primary">
-            Certifications
+            {t("extras.certifications") || "Certifications"}
           </Text>
           <Text type="inherit" size="md" color="secondary">
-            Add professional certifications and licenses
+            {t("extras.certificationsSubtitle") || "Add professional certifications and licenses"}
           </Text>
         </VStack>
         <div className="entry-list">
@@ -54,11 +56,11 @@ const Certifications = ({ id }) => {
             <div className="entry-list-item" key={formObj.key}>
               <div className="entry-list-item-head">
                 <Text type="inherit" size="sm" weight="medium" color="secondary">
-                  Certification
+                  {t("certifications.certificationTitle") || "Certification"}
                 </Text>
                 <IconButton
-                  label="Remove certification"
-                  tooltip="Remove certification"
+                  label={t("certifications.removeCertification") || "Remove certification"}
+                  tooltip={t("certifications.removeCertification") || "Remove certification"}
                   variant="ghost"
                   size="sm"
                   icon={<Trash2 size={16} />}
@@ -75,18 +77,18 @@ const Certifications = ({ id }) => {
                   id={`${formObj.key}-name`}
                   htmlName="name"
                   width="100%"
-                  label="Certification name"
+                  label={t("extras.certificationName") || "Certification name"}
                   value={formObj.name}
-                  placeholder="Certification name"
+                  placeholder={t("extras.certificationNamePlaceholder") || "Certification name"}
                   onChange={(value) => setField(formObj.key, "name", value)}
                 />
                 <TextInput
                   id={`${formObj.key}-issuer`}
                   htmlName="issuer"
                   width="100%"
-                  label="Issuing organization"
+                  label={t("extras.issuingOrg") || "Issuing organization"}
                   value={formObj.issuer}
-                  placeholder="e.g. AWS, Google, PMI"
+                  placeholder={t("extras.issuingOrgPlaceholder") || "e.g. AWS, Google, PMI"}
                   onChange={(value) => setField(formObj.key, "issuer", value)}
                 />
                 <TextInput
@@ -94,7 +96,7 @@ const Certifications = ({ id }) => {
                   htmlName="date"
                   type="month"
                   width="100%"
-                  label="Date earned"
+                  label={t("extras.dateEarned") || "Date earned"}
                   value={formObj.date}
                   onChange={(value) => setField(formObj.key, "date", value)}
                 />
@@ -104,9 +106,9 @@ const Certifications = ({ id }) => {
                   id={`${formObj.key}-cred`}
                   htmlName="credentialId"
                   width="100%"
-                  label="Credential ID"
+                  label={t("extras.credentialId") || "Credential ID"}
                   value={formObj.credentialId}
-                  placeholder="Optional"
+                  placeholder={t("common.optional") || "Optional"}
                   onChange={(value) =>
                     setField(formObj.key, "credentialId", value)
                   }
@@ -116,9 +118,9 @@ const Certifications = ({ id }) => {
                   htmlName="url"
                   type="url"
                   width="100%"
-                  label="Credential URL"
+                  label={t("extras.credentialUrl") || "Credential URL"}
                   value={formObj.url}
-                  placeholder="https://verify.example.com/..."
+                  placeholder={t("certifications.urlPlaceholder") || "https://verify.example.com/..."}
                   onChange={(value) => setField(formObj.key, "url", value)}
                 />
               </div>
@@ -130,7 +132,7 @@ const Certifications = ({ id }) => {
             variant="secondary"
             size="sm"
             icon={<Plus size={16} />}
-            label="Add certification"
+            label={t("extras.addCertification") || "Add certification"}
             onClick={() =>
               setSectionData(id, [...items, getCertificationObj()])
             }

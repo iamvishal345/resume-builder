@@ -9,6 +9,7 @@ import { Plus } from "lucide-react";
 import { DraggableCollapse, Collapse } from "@components/DraggableCollapse";
 import { StepCard } from "./StepLayout";
 import { useStore } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 import RichTextEditor from "../../ui/RichTextEditor";
 
 const workHistoryFormStructure = [
@@ -47,6 +48,12 @@ const workHistoryFormStructure = [
 ];
 
 const SingleWorkHistoryForm = ({ formData, setFieldValue }) => {
+  const isChronologyError =
+    formData.startDate &&
+    formData.endDate &&
+    !formData.disabledendDate &&
+    formData.endDate < formData.startDate;
+
   return (
     <Grid columns={{ minWidth: 240, max: 2 }} gap={3} width="100%">
       {workHistoryFormStructure.map((field) => (
@@ -55,18 +62,25 @@ const SingleWorkHistoryForm = ({ formData, setFieldValue }) => {
           columns={field.gridProps.xs === 24 ? "full" : 1}
         >
           {field.type === "date" ? (
-            <DateInput
-              label={field.label}
-              width="100%"
-              placeholder={field.placeholder}
-              isDisabled={!!formData[`disabled${field.name}`]}
-              value={formData[field.name] || ""}
-              onChange={(value) =>
-                setFieldValue({
-                  target: { name: field.name, value: value || "" },
-                })
-              }
-            />
+            <VStack gap={1} width="100%">
+              <DateInput
+                label={field.label}
+                width="100%"
+                placeholder={field.placeholder}
+                isDisabled={!!formData[`disabled${field.name}`]}
+                value={formData[field.name] || ""}
+                onChange={(value) =>
+                  setFieldValue({
+                    target: { name: field.name, value: value || "" },
+                  })
+                }
+              />
+              {field.name === "endDate" && isChronologyError ? (
+                <Text type="inherit" size="xs" color="accent" role="alert">
+                  End date cannot be before start date.
+                </Text>
+              ) : null}
+            </VStack>
           ) : (
             <TextInput
               id={field.name}
@@ -86,7 +100,7 @@ const SingleWorkHistoryForm = ({ formData, setFieldValue }) => {
       <GridSpan columns="full">
         <HStack justify="end" align="center" width="100%">
           <Switch
-            label="I currently work here"
+            label={t("work.currentlyWorkHere") || "I currently work here"}
             value={!!formData.disabledendDate}
             onChange={(checked) =>
               setFieldValue({
@@ -100,7 +114,7 @@ const SingleWorkHistoryForm = ({ formData, setFieldValue }) => {
         <RichTextEditor
           value={formData.workSummary || ""}
           minHeight={200}
-          placeholder="Type your achievements and responsibilities here. For e.g. Contributed to the development of innovative software solutions, leveraging expertise in Javascript, at..."
+          placeholder={t("work.descriptionPlaceholder") || "Type your achievements and responsibilities here. For e.g. Contributed to the development of innovative software solutions, leveraging expertise in Javascript, at..."}
           onChange={(value) =>
             setFieldValue({ target: { name: "workSummary", value } })
           }
@@ -122,6 +136,7 @@ const getWorkHistoryObj = () => ({
 });
 
 const WorkHistory = ({ onNext, onPrev, nextLabel }) => {
+  const { t } = useI18n();
   const workHistoryRef = useRef(null);
   const [cardVisible, setCardVisible] = useState();
   const workHistory = useStore((state) => state.workHistory);
@@ -168,8 +183,8 @@ const WorkHistory = ({ onNext, onPrev, nextLabel }) => {
   };
   return (
     <StepCard
-      title="Professional Experience"
-      description="Start with your most recent experience and work backward."
+      title={t("steps.experience") || "Professional Experience"}
+      description={t("work.description") || "Start with your most recent experience and work backward."}
       onNext={onNext}
       onPrev={onPrev}
       nextLabel={nextLabel}
@@ -211,7 +226,7 @@ const WorkHistory = ({ onNext, onPrev, nextLabel }) => {
         <Button
           variant="secondary"
           icon={<Plus size={16} />}
-          label="Add More Experience"
+          label={t("work.addMore") || "Add More Experience"}
           onClick={handleAddMoreExperience}
         />
       </HStack>

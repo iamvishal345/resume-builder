@@ -2,11 +2,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
 
+import { useI18n } from "@features/i18n/useI18n";
+
 /**
  * Desktop command palette (⌘K / Ctrl+K).
  * actions: [{ id, label, hint?, run, keywords? }]
  */
 const CommandPalette = ({ open, onOpenChange, actions = [] }) => {
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
   const inputRef = useRef(null);
@@ -73,7 +76,7 @@ const CommandPalette = ({ open, onOpenChange, actions = [] }) => {
         <input
           ref={inputRef}
           className="cmd-palette-input"
-          placeholder="Jump to step, export, check…"
+          placeholder={t("commandPalette.placeholder") || "Jump to step, export, check…"}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           aria-autocomplete="list"
@@ -81,7 +84,7 @@ const CommandPalette = ({ open, onOpenChange, actions = [] }) => {
         <VStack gap={0} width="100%" className="cmd-palette-list">
           {filtered.length === 0 ? (
             <Text type="inherit" size="sm" color="secondary">
-              No matching actions
+              {t("commandPalette.noMatchingActions") || "No matching actions"}
             </Text>
           ) : (
             filtered.map((action, index) => (

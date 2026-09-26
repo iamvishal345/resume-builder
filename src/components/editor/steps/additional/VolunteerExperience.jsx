@@ -8,6 +8,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { Plus, Trash2 } from "lucide-react";
 import { useStore } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 import "./entry-list.css";
 
 const getVolunteerObj = () => ({
@@ -22,6 +23,7 @@ const getVolunteerObj = () => ({
 });
 
 const VolunteerExperience = ({ id }) => {
+  const { t } = useI18n();
   const additionalSections = useStore((state) => state.additionalSections);
   const section = additionalSections.find((s) => s.id === id);
   const items = section?.data || [];
@@ -46,10 +48,10 @@ const VolunteerExperience = ({ id }) => {
       <VStack gap={3} width="100%">
         <VStack gap={1} width="100%">
           <Text type="inherit" size="xl" weight="semibold" color="primary">
-            Volunteer Experience
+            {t("extras.volunteering") || "Volunteer Experience"}
           </Text>
           <Text type="inherit" size="md" color="secondary">
-            Add volunteer roles and community involvement
+            {t("extras.volunteeringSubtitle") || "Add volunteer roles and community involvement"}
           </Text>
         </VStack>
         <div className="entry-list">
@@ -57,11 +59,11 @@ const VolunteerExperience = ({ id }) => {
             <div className="entry-list-item" key={formObj.key}>
               <div className="entry-list-item-head">
                 <Text type="inherit" size="sm" weight="medium" color="secondary">
-                  Role
+                  {t("extras.role") || "Role"}
                 </Text>
                 <IconButton
-                  label="Remove volunteer role"
-                  tooltip="Remove volunteer role"
+                  label={t("extras.removeVolunteerRole") || "Remove volunteer role"}
+                  tooltip={t("extras.removeVolunteerRole") || "Remove volunteer role"}
                   variant="ghost"
                   size="sm"
                   icon={<Trash2 size={16} />}
@@ -78,9 +80,9 @@ const VolunteerExperience = ({ id }) => {
                   id={`${formObj.key}-org`}
                   htmlName="organization"
                   width="100%"
-                  label="Organization"
+                  label={t("extras.organization") || "Organization"}
                   value={formObj.organization}
-                  placeholder="Organization Name"
+                  placeholder={t("extras.organizationPlaceholder") || "Organization Name"}
                   onChange={(value) =>
                     setField(formObj.key, "organization", value)
                   }
@@ -89,18 +91,18 @@ const VolunteerExperience = ({ id }) => {
                   id={`${formObj.key}-role`}
                   htmlName="role"
                   width="100%"
-                  label="Role"
+                  label={t("extras.role") || "Role"}
                   value={formObj.role}
-                  placeholder="Your Role"
+                  placeholder={t("extras.rolePlaceholder") || "Your Role"}
                   onChange={(value) => setField(formObj.key, "role", value)}
                 />
                 <TextInput
                   id={`${formObj.key}-loc`}
                   htmlName="location"
                   width="100%"
-                  label="Location"
+                  label={t("extras.location") || "Location"}
                   value={formObj.location}
-                  placeholder="City, Country"
+                  placeholder={t("extras.locationPlaceholder") || "City, Country"}
                   onChange={(value) =>
                     setField(formObj.key, "location", value)
                   }
@@ -112,7 +114,7 @@ const VolunteerExperience = ({ id }) => {
                   htmlName="startDate"
                   type="month"
                   width="100%"
-                  label="Start Date"
+                  label={t("extras.startDate") || "Start Date"}
                   value={formObj.startDate}
                   onChange={(value) =>
                     setField(formObj.key, "startDate", value)
@@ -123,7 +125,7 @@ const VolunteerExperience = ({ id }) => {
                   htmlName="endDate"
                   type="month"
                   width="100%"
-                  label="End Date"
+                  label={t("extras.endDate") || "End Date"}
                   value={formObj.endDate}
                   isDisabled={!!formObj.current}
                   onChange={(value) => setField(formObj.key, "endDate", value)}
@@ -136,16 +138,16 @@ const VolunteerExperience = ({ id }) => {
                       setField(formObj.key, "current", e.target.checked)
                     }
                   />
-                  Current
+                  {t("extras.current") || "Current"}
                 </label>
               </div>
               <TextArea
                 id={`${formObj.key}-desc`}
                 htmlName="description"
                 width="100%"
-                label="Description"
+                label={t("common.description") || "Description"}
                 value={formObj.description}
-                placeholder="Description of your role and impact"
+                placeholder={t("extras.volunteerDescPlaceholder") || "Description of your role and impact"}
                 rows={3}
                 onChange={(value) =>
                   setField(formObj.key, "description", value)
@@ -159,7 +161,7 @@ const VolunteerExperience = ({ id }) => {
             variant="secondary"
             size="sm"
             icon={<Plus size={16} />}
-            label="Add volunteer role"
+            label={t("extras.addVolunteerRole") || "Add volunteer role"}
             onClick={() => setSectionData(id, [...items, getVolunteerObj()])}
           />
         </HStack>

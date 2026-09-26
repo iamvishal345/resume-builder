@@ -12,6 +12,7 @@ import { resumeTextOf } from "@features/jdmatch/analyze";
 import {
   aiGenerate,
   isAiAvailable,
+  sanitizeForAi,
   textToParagraphs,
 } from "@features/ai/provider";
 import { getResume, putResume, newResume } from "@features/resumes/db";
@@ -19,8 +20,10 @@ import { snapshotBefore } from "@features/resumes/snapshot";
 import { extractBullets } from "@features/ats/metrics";
 import AiSettingsDialog from "../ai/AiSettingsDialog";
 import { nameOf } from "./resumeMeta";
+import { useI18n } from "@features/i18n/useI18n";
 
 const TailorDialog = ({ doc, onOpenChange }) => {
+  const { t } = useI18n();
   const [jd, setJd] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -35,8 +38,8 @@ const TailorDialog = ({ doc, onOpenChange }) => {
     setProposal(null);
     try {
       const current = await getResume(doc.id);
-      if (!current) throw new Error("Resume no longer exists.");
-      const resumeText = resumeTextOf(resumeViewModel(current.data));
+      if (!current) throw new Error(t("errors.resumeNotFound"));
+      const resumeText = sanitizeForAi(resumeTextOf(resumeViewModel(current.data)));
       const system = `You are a professional resume-tailoring assistant. Rewrite content to match the job description. Keep every claim grounded in the original — do not invent credentials. Return STRICT JSON only:
 {"summary": string, "roles": [{"index": number, "bullets": string[]}], "skillsToAdd": string[]}
 - summary: 2-3 sentences
@@ -75,7 +78,7 @@ const TailorDialog = ({ doc, onOpenChange }) => {
         source: current,
       });
     } catch (e) {
-      setError(e?.message || "AI tailoring failed.");
+      setError(e?.message || t("errors.aiTailorFailed"));
     } finally {
       setBusy(false);
     }
@@ -134,7 +137,7 @@ const TailorDialog = ({ doc, onOpenChange }) => {
       onOpenChange(null);
       window.location.href = `/editor?resume=${copy.id}`;
     } catch (e) {
-      setError(e?.message || "Could not apply changes.");
+      setError(e?.message || t("errors.applyChangesFailed"));
     } finally {
       setBusy(false);
     }
@@ -165,8 +168,8 @@ const TailorDialog = ({ doc, onOpenChange }) => {
         {doc && (
           <>
             <DialogHeader
-              title="Tailor a copy for a job"
-              subtitle={`Duplicates "${nameOf(doc)}". Review and accept changes per section.`}
+              title={t("tailorDialog.title") || "Tailor a copy for a job"}
+              subtitle={t("tailorDialog.subtitle", { name: nameOf(doc) }) || `Duplicates "${nameOf(doc)}". Review and accept changes per section.`}
               onOpenChange={() => !busy && onOpenChange(null)}
             />
             {hasAi ? (
@@ -175,11 +178,10 @@ const TailorDialog = ({ doc, onOpenChange }) => {
                   {!proposal ? (
                     <>
                       <Text type="inherit" size="sm" color="secondary">
-                        Paste the job description. A snapshot of the original is
-                        saved locally before creating the tailored copy.
+                        {t("tailorDialog.pasteDescHint") || "Paste the job description. A snapshot of the original is saved locally before creating the tailored copy."}
                       </Text>
                       <TextArea
-                        label="Job description"
+                        label={t("tailorDialog.jobDescription") || "Job description"}
                         value={jd}
                         onChange={setJd}
                         rows={8}
@@ -189,7 +191,7 @@ const TailorDialog = ({ doc, onOpenChange }) => {
                   ) : (
                     <VStack gap={3} width="100%">
                       <CheckboxInput
-                        label="Accept summary"
+                        label={t("tailorDialog.acceptSummary") || "Accept summary"}
                         value={proposal.summary.accept}
                         onChange={(v) =>
                           setProposal((p) => ({
@@ -210,7 +212,7 @@ const TailorDialog = ({ doc, onOpenChange }) => {
                             <CheckboxInput
                               label={
                                 entry?.positionTitle ||
-                                `Role ${role.index + 1}`
+                                (t("tailorDialog.roleLabel", { num: role.index + 1 }) || `Role ${role.index + 1}`)
                               }
                               value={role.accept}
                               onChange={(v) =>
@@ -237,7 +239,7 @@ const TailorDialog = ({ doc, onOpenChange }) => {
 
                       {proposal.skills.add.length > 0 && (
                         <CheckboxInput
-                          label={`Add skills: ${proposal.skills.add.join(", ")}`}
+                          label={t("tailorDialog.addSkills", { skills: proposal.skills.add.join(", ") }) || `Add skills: ${proposal.skills.add.join(", ")}`}
                           value={proposal.skills.accept}
                           onChange={(v) =>
                             setProposal((p) => ({
@@ -260,7 +262,7 @@ const TailorDialog = ({ doc, onOpenChange }) => {
                       variant="ghost"
                       size="sm"
                       icon={<X size={14} />}
-                      label={proposal ? "Back" : "Cancel"}
+                      label={proposal ? (t("common.back") || "Back") : (t("common.cancel") || "Cancel")}
                       onClick={() =>
                         proposal ? setProposal(null) : onOpenChange(null)
                       }
@@ -270,7 +272,7 @@ const TailorDialog = ({ doc, onOpenChange }) => {
                         variant="primary"
                         size="sm"
                         icon={<Sparkles size={14} />}
-                        label={busy ? "Working…" : "Propose changes"}
+                        label={busy ? (t("common.working") || "Working…") : (t("tailorDialog.proposeChanges") || "Propose changes")}
                         disabled={busy || !jd.trim()}
                         onClick={propose}
                       />
@@ -279,7 +281,7 @@ const TailorDialog = ({ doc, onOpenChange }) => {
                         variant="primary"
                         size="sm"
                         icon={<Check size={14} />}
-                        label={busy ? "Applying…" : "Apply accepted → new copy"}
+                        label={busy ? (t("tailorDialog.applying") || "Applying…") : (t("tailorDialog.applyAccepted") || "Apply accepted → new copy")}
                         disabled={busy}
                         onClick={applyAccepted}
                       />
@@ -292,13 +294,13 @@ const TailorDialog = ({ doc, onOpenChange }) => {
                 <VStack gap={3} width="100%" padding={4}>
                   <EmptyState
                     icon={<Sparkles size={24} />}
-                    title="No AI provider configured"
-                    description="Add an API key in AI settings, or use Chrome built-in AI."
+                    title={t("ai.noAiTitle") || "No AI provider configured"}
+                    description={t("ai.noAiDesc") || "Add an API key in AI settings, or use Chrome built-in AI."}
                     actions={
                       <Button
                         variant="primary"
                         size="sm"
-                        label="Configure AI"
+                        label={t("ai.configureAi") || "Configure AI"}
                         onClick={() => setAiSettingsOpen(true)}
                       />
                     }

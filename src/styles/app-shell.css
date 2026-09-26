@@ -331,22 +331,27 @@
   }
 }
 
-/* Cover letter: side-by-side on tablet+, stack on phone */
+/* Cover letter responsive layout */
 .editor-letter-grid {
   container-type: inline-size;
   container-name: letter;
   display: grid;
-  grid-template-columns: minmax(260px, 5fr) minmax(300px, 7fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   gap: var(--spacing-4);
   width: 100%;
   align-items: start;
+}
+
+.editor-letter-grid > * {
+  min-width: 0;
 }
 
 .editor-letter-preview {
   position: sticky;
   top: var(--spacing-3);
   max-height: calc(100dvh - var(--spacing-12));
-  overflow: auto;
+  overflow-y: auto;
+  min-width: 0;
 }
 
 @container letter (max-width: 800px) {
@@ -357,14 +362,19 @@
   .editor-letter-preview {
     position: static;
     max-height: none;
+    overflow: visible;
   }
 }
 
-@supports not (container-type: inline-size) {
-  @media (max-width: 800px) {
-    .editor-letter-grid {
-      grid-template-columns: 1fr;
-    }
+@media (max-width: 800px) {
+  .editor-letter-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-letter-preview {
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
 }
 
@@ -497,22 +507,7 @@
   }
 }
 
-.locale-picker-app select {
-  font: inherit;
-  font-size: 0.8rem;
-  color: var(--color-text-secondary);
-  background: var(--color-background-surface);
-  border: 1px solid var(--color-border-emphasized);
-  border-radius: var(--radius-element);
-  padding: var(--spacing-1) var(--spacing-2);
-  cursor: pointer;
-  max-width: 8rem;
-}
 
-.locale-picker-app select:focus-visible {
-  outline: 2px solid var(--color-focus-ring, var(--color-accent));
-  outline-offset: 2px;
-}
 
 .visually-hidden {
   position: absolute;

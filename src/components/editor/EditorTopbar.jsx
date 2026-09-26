@@ -23,7 +23,6 @@ import {
   Minimize2,
   Command,
 } from "lucide-react";
-import AuthBar from "../auth/AuthBar";
 import LocaleSelect from "../LocaleSelect";
 import { useI18n } from "@features/i18n/useI18n";
 
@@ -90,9 +89,6 @@ const EditorTopbar = ({
             onClick={onToggleTheme}
           />
           <LocaleSelect />
-          <span className="editor-actions-tertiary">
-            <AuthBar />
-          </span>
         </HStack>
       </HStack>
       {exportError ? (
@@ -217,14 +213,14 @@ const EditorTopbar = ({
               variant="secondary"
               size="sm"
               icon={<FileDown size={14} />}
-              label="DOCX"
+              label={t("common.docx") || "DOCX"}
               onClick={onDownloadDocx}
             />
             <Button
               variant="primary"
               size="sm"
               icon={<Download size={14} />}
-              label="PDF"
+              label={t("common.pdf") || "PDF"}
               onClick={onDownloadPdf}
             />
           </span>

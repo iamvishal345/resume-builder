@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button } from "@astryxdesign/core/Button";
 import { Grid, GridSpan } from "@astryxdesign/core/Grid";
-import { HStack } from "@astryxdesign/core/Layout";
+import { HStack, VStack } from "@astryxdesign/core/Layout";
 import { Switch } from "@astryxdesign/core/Switch";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { DateInput } from "@astryxdesign/core/DateInput";
@@ -9,6 +9,7 @@ import { Plus } from "lucide-react";
 import { DraggableCollapse, Collapse } from "@components/DraggableCollapse";
 import { StepCard } from "./StepLayout";
 import { useStore } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 import RichTextEditor from "../../ui/RichTextEditor";
 
 const educationFormStructure = [
@@ -53,14 +54,19 @@ const educationFormStructure = [
 ];
 
 const SingleEducationForm = ({ formData, setFieldValue }) => {
+  const isChronologyError =
+    formData.startDate &&
+    formData.endDate &&
+    !formData.disabledendDate &&
+    formData.endDate < formData.startDate;
+
   return (
     <Grid columns={{ minWidth: 240, max: 2 }} gap={3} width="100%">
-        {educationFormStructure.map((field) => (
-          <React.Fragment key={field.name}>
-            {field.type === "date" ? (
-              <GridSpan
-                columns={field.gridProps.xs === 24 ? "full" : 1}
-              >
+      {educationFormStructure.map((field) => (
+        <React.Fragment key={field.name}>
+          {field.type === "date" ? (
+            <GridSpan columns={field.gridProps.xs === 24 ? "full" : 1}>
+              <VStack gap={1} width="100%">
                 <DateInput
                   label={field.label}
                   width="100%"
@@ -73,51 +79,55 @@ const SingleEducationForm = ({ formData, setFieldValue }) => {
                     })
                   }
                 />
-              </GridSpan>
-            ) : (
-              <GridSpan
-                columns={field.gridProps.xs === 24 ? "full" : 1}
-              >
-                <TextInput
-                  id={field.name}
-                  htmlName={field.name}
-                  width="100%"
-                  label={field.label}
-                  placeholder={field.placeholder}
-                  isDisabled={!!formData[`disabled${field.name}`]}
-                  value={formData[field.name] || ""}
-                  onChange={(value) =>
-                    setFieldValue({ target: { name: field.name, value } })
-                  }
-                />
-              </GridSpan>
-            )}
-          </React.Fragment>
-        ))}
-        <GridSpan columns="full">
-          <HStack justify="end" align="center" width="100%">
-            <Switch
-              label="I currently study here"
-              value={!!formData.disabledendDate}
-              onChange={(checked) =>
-                setFieldValue({
-                  target: { name: "disabledendDate", value: checked },
-                })
-              }
-            />
-          </HStack>
-        </GridSpan>
-        <GridSpan columns="full">
-          <RichTextEditor
-            value={formData.educationSummary || ""}
-            minHeight={160}
-            placeholder="Type coursework you did towards your degree."
-            onChange={(value) =>
-              setFieldValue({ target: { name: "educationSummary", value } })
+                {field.name === "endDate" && isChronologyError ? (
+                  <Text type="inherit" size="xs" color="accent" role="alert">
+                    End date cannot be before start date.
+                  </Text>
+                ) : null}
+              </VStack>
+            </GridSpan>
+          ) : (
+            <GridSpan columns={field.gridProps.xs === 24 ? "full" : 1}>
+              <TextInput
+                id={field.name}
+                htmlName={field.name}
+                width="100%"
+                label={field.label}
+                placeholder={field.placeholder}
+                isDisabled={!!formData[`disabled${field.name}`]}
+                value={formData[field.name] || ""}
+                onChange={(value) =>
+                  setFieldValue({ target: { name: field.name, value } })
+                }
+              />
+            </GridSpan>
+          )}
+        </React.Fragment>
+      ))}
+      <GridSpan columns="full">
+        <HStack justify="end" align="center" width="100%">
+          <Switch
+            label={t("education.currentlyStudyHere") || "I currently study here"}
+            value={!!formData.disabledendDate}
+            onChange={(checked) =>
+              setFieldValue({
+                target: { name: "disabledendDate", value: checked },
+              })
             }
           />
-        </GridSpan>
-      </Grid>
+        </HStack>
+      </GridSpan>
+      <GridSpan columns="full">
+        <RichTextEditor
+          value={formData.educationSummary || ""}
+          minHeight={160}
+          placeholder={t("education.descriptionPlaceholder") || "Type coursework you did towards your degree."}
+          onChange={(value) =>
+            setFieldValue({ target: { name: "educationSummary", value } })
+          }
+        />
+      </GridSpan>
+    </Grid>
   );
 };
 
@@ -133,6 +143,7 @@ const getEductionObj = () => ({
 });
 
 const EducationDetails = ({ onNext, onPrev, nextLabel }) => {
+  const { t } = useI18n();
   const educationRef = useRef(null);
   const [cardVisible, setCardVisible] = useState();
   const education = useStore((state) => state.education);
@@ -174,14 +185,17 @@ const EducationDetails = ({ onNext, onPrev, nextLabel }) => {
     updatedEducation.splice(
       newIndex,
       0,
-      updatedEducation.splice(oldIndex, 1)[0]
+      updatedEducation.splice(oldIndex, 1)[0],
     );
     setEducation(updatedEducation);
   };
   return (
     <StepCard
-      title="Education"
-      description="Add your most relevant education, including programs you're currently enrolled in."
+      title={t("steps.education") || "Education"}
+      description={
+        t("edu.description") ||
+        "Add your most relevant education, including programs you're currently enrolled in."
+      }
       onNext={onNext}
       onPrev={onPrev}
       nextLabel={nextLabel}
@@ -225,7 +239,7 @@ const EducationDetails = ({ onNext, onPrev, nextLabel }) => {
         <Button
           variant="secondary"
           icon={<Plus size={16} />}
-          label="Add More Education"
+          label={t("edu.addMore") || "Add More Education"}
           onClick={handleAddMoreEducation}
         />
       </HStack>

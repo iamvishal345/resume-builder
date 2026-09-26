@@ -12,19 +12,20 @@ import {
 } from "@features/resumes/versions";
 import { formatDiffLines, diffVersions } from "@features/resumes/versionDiff";
 import { useStore, resumeDataOf } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 
-const DiffVsCurrent = ({ lines }) => {
+const DiffVsCurrent = ({ lines, t }) => {
   if (!lines.length) {
     return (
       <Text type="inherit" size="sm" color="secondary">
-        Matches current
+        {t("versions.matchesCurrent") || "Matches current"}
       </Text>
     );
   }
   return (
     <VStack gap={0} width="100%">
       <Text type="inherit" size="sm" color="secondary">
-        vs current
+        {t("versions.vsCurrent") || "vs current"}
       </Text>
       <ul className="ver-diff-list">
         {lines.map((line) => (
@@ -40,6 +41,7 @@ const DiffVsCurrent = ({ lines }) => {
 };
 
 const VersionsPanel = ({ open, onOpenChange, resumeId }) => {
+  const { t } = useI18n();
   const [items, setItems] = useState([]);
   const [busy, setBusy] = useState(false);
 
@@ -76,7 +78,7 @@ const VersionsPanel = ({ open, onOpenChange, resumeId }) => {
   const restore = async (id) => {
     if (
       !window.confirm(
-        "Restore this snapshot? Current editor content will be replaced.",
+        t("versions.restoreConfirm") || "Restore this snapshot? Current editor content will be replaced.",
       )
     ) {
       return;
@@ -107,8 +109,8 @@ const VersionsPanel = ({ open, onOpenChange, resumeId }) => {
       padding={2}
     >
       <DialogHeader
-        title="Versions"
-        subtitle="Local snapshots stored in this browser. Max 20 per resume."
+        title={t("versions.title") || "Versions"}
+        subtitle={t("versions.subtitle") || "Local snapshots stored in this browser. Max 20 per resume."}
         onOpenChange={onOpenChange}
       />
       <VStack gap={3} width="100%" padding={2}>
@@ -116,7 +118,7 @@ const VersionsPanel = ({ open, onOpenChange, resumeId }) => {
           size="sm"
           variant="primary"
           icon={<History size={14} />}
-          label={busy ? "Working…" : "Save snapshot now"}
+          label={busy ? (t("common.working") || "Working…") : (t("versions.saveSnapshot") || "Save snapshot now")}
           disabled={busy || !resumeId}
           onClick={snapshot}
         />
@@ -124,7 +126,7 @@ const VersionsPanel = ({ open, onOpenChange, resumeId }) => {
           <VStack gap={2} width="100%">
             {items.length === 0 ? (
               <Text type="inherit" size="sm" color="secondary">
-                No snapshots yet. Save one before a big tailor or import.
+                {t("versions.noSnapshots") || "No snapshots yet. Save one before a big tailor or import."}
               </Text>
             ) : (
               items.map((v) => (
@@ -153,7 +155,7 @@ const VersionsPanel = ({ open, onOpenChange, resumeId }) => {
                         size="sm"
                         variant="secondary"
                         icon={<RotateCcw size={14} />}
-                        label="Restore"
+                        label={t("common.restore") || "Restore"}
                         disabled={busy}
                         onClick={() => restore(v.id)}
                       />
@@ -161,12 +163,12 @@ const VersionsPanel = ({ open, onOpenChange, resumeId }) => {
                         size="sm"
                         variant="ghost"
                         icon={<Trash2 size={14} />}
-                        label="Delete"
+                        label={t("common.delete") || "Delete"}
                         onClick={() => remove(v.id)}
                       />
                     </HStack>
                   </HStack>
-                  <DiffVsCurrent lines={diffsById[v.id] || []} />
+                  <DiffVsCurrent lines={diffsById[v.id] || []} t={t} />
                 </VStack>
               ))
             )}

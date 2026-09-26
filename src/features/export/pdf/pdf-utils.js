@@ -33,8 +33,11 @@ export const htmlLines = (html) => {
 
 export const formatDate = (value) => {
   if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
+  const str = String(value).trim();
+  if (!str) return "";
+  if (str.toLowerCase() === "present") return "Present";
+  const date = new Date(/^\d{4}-\d{2}$/.test(str) ? `${str}-01` : str);
+  if (Number.isNaN(date.getTime())) return str;
   return date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
 };
 

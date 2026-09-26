@@ -1,4 +1,5 @@
 import React from "react";
+import { useI18n } from "../i18n/useI18n";
 import {
   ContactLine,
   EducationItems,
@@ -27,6 +28,7 @@ const sectionStyle = (sectionVars, id) => sectionVars?.[id] || undefined;
 
 /** Ordered section nodes for the resume paper. */
 export const BuildSections = ({ data, styles = {}, sectionVars = {} }) => {
+  const { t } = useI18n();
   const skillStyle = styles.skillStyle || STYLE_DEFAULTS.skillStyle;
   const languageStyle = styles.languageStyle || STYLE_DEFAULTS.languageStyle;
   const experienceStyle =
@@ -44,7 +46,7 @@ export const BuildSections = ({ data, styles = {}, sectionVars = {} }) => {
               data-section="summary"
               style={sectionStyle(sectionVars, "summary")}
             >
-              <SectionHeading title="Summary" />
+              <SectionHeading title={t("sections.summary") || "Summary"} />
               <RichText html={data.summary} />
             </section>
           ),
@@ -59,7 +61,7 @@ export const BuildSections = ({ data, styles = {}, sectionVars = {} }) => {
               data-section="experience"
               style={sectionStyle(sectionVars, "experience")}
             >
-              <SectionHeading title="Experience" />
+              <SectionHeading title={t("sections.experience") || "Experience"} />
               <ExperienceItems
                 items={data.experience}
                 style={experienceStyle}
@@ -77,7 +79,7 @@ export const BuildSections = ({ data, styles = {}, sectionVars = {} }) => {
               data-section="education"
               style={sectionStyle(sectionVars, "education")}
             >
-              <SectionHeading title="Education" />
+              <SectionHeading title={t("sections.education") || "Education"} />
               <EducationItems items={data.education} style={experienceStyle} />
             </section>
           ),
@@ -92,7 +94,7 @@ export const BuildSections = ({ data, styles = {}, sectionVars = {} }) => {
               data-section="skills"
               style={sectionStyle(sectionVars, "skills")}
             >
-              <SectionHeading title="Skills" />
+              <SectionHeading title={t("sections.skills") || "Skills"} />
               <SkillList items={data.skills} style={skillStyle} />
             </section>
           ),

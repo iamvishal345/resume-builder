@@ -3,9 +3,11 @@ import { HStack, VStack } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
 import { AlertTriangle, ShieldCheck } from "lucide-react";
 import { computeCoherenceIssues } from "@features/coherence/lint";
+import { useI18n } from "@features/i18n/useI18n";
 import { CheckList } from "./CheckList";
 
 const CoherencePanel = ({ data, onJumpStep, bare = false }) => {
+  const { t } = useI18n();
   const { issues } = useMemo(() => computeCoherenceIssues(data), [data]);
 
   const visible = issues.slice(0, 12);
@@ -35,12 +37,12 @@ const CoherencePanel = ({ data, onJumpStep, bare = false }) => {
       <HStack justify="between" align="center" width="100%">
         <VStack gap={0}>
           <Text type="inherit" size="xl" weight="semibold" color="primary">
-            Coherence
+            {t("coherence.title")}
           </Text>
           <Text type="inherit" size="md" color="secondary">
             {issues.length === 0
-              ? "No internal contradictions found"
-              : `${issues.length} issue${issues.length === 1 ? "" : "s"} to review`}
+              ? t("coherence.noIssues")
+              : t("coherence.issuesFound", { count: issues.length })}
           </Text>
         </VStack>
         {issues.length === 0 ? (
@@ -53,8 +55,7 @@ const CoherencePanel = ({ data, onJumpStep, bare = false }) => {
       </HStack>
       {issues.length === 0 ? (
         <Text type="inherit" size="sm" color="secondary">
-          Overlapping dates, duplicated contacts, and summary-vs-skills
-          mismatches are checked automatically.
+          {t("coherence.cleanNote")}
         </Text>
       ) : (
         <CheckList
@@ -63,7 +64,7 @@ const CoherencePanel = ({ data, onJumpStep, bare = false }) => {
           footer={
             hidden > 0 ? (
               <Text type="inherit" size="sm" color="secondary">
-                +{hidden} more — review your roles and dates.
+                {t("coherence.moreIssues", { count: hidden })}
               </Text>
             ) : null
           }

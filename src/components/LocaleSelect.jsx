@@ -1,30 +1,36 @@
+import { DropdownMenu } from "@astryxdesign/core/DropdownMenu";
 import { useI18n } from "@features/i18n/useI18n";
+import { Languages } from "lucide-react";
 
 /**
- * Compact language select for React surfaces (dashboard, editor).
- * Reloads so Astro marketing pages pick up the cookie too.
+ * Compact language selector using Astryx DropdownMenu.
+ * Reloads on change so Astro pages pick up the cookie as well.
  */
 const LocaleSelect = ({ className = "" }) => {
   const { locale, setLocale, locales, t } = useI18n();
 
+  const currentOpt = locales.find((o) => o.id === locale) || locales[0];
+
+  const items = locales.map((opt) => ({
+    label: opt.label,
+    onClick: () => {
+      setLocale(opt.id);
+      window.location.reload();
+    },
+  }));
+
   return (
-    <label className={`locale-picker locale-picker-app ${className}`.trim()}>
-      <span className="visually-hidden">{t("a11y.locale")}</span>
-      <select
-        aria-label={t("a11y.locale")}
-        value={locale}
-        onChange={(event) => {
-          setLocale(event.target.value);
-          window.location.reload();
+    <div className={`locale-picker-app ${className}`.trim()}>
+      <DropdownMenu
+        button={{
+          variant: "ghost",
+          size: "sm",
+          label: currentOpt?.label || "Language",
+          icon: <Languages size={15} />,
         }}
-      >
-        {locales.map((opt) => (
-          <option key={opt.id} value={opt.id}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-    </label>
+        items={items}
+      />
+    </div>
   );
 };
 

@@ -5,6 +5,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { Card } from "@astryxdesign/core/Card";
 import { TextInput } from "@astryxdesign/core/TextInput";
 import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
+import { AlertDialog } from "@astryxdesign/core/AlertDialog";
 import {
   Download,
   Upload,
@@ -51,7 +52,9 @@ import {
   isDriveConfigured,
   uploadBackupToDrive,
   downloadBackupFromDrive,
+  signOutDrive,
 } from "@features/resumes/drive";
+import { clearAiConfig } from "@features/ai/provider";
 import { listVersions } from "@features/resumes/versions";
 import { estimateLocalStorage } from "@features/resumes/storageStats";
 
@@ -66,6 +69,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
   const [storageInfo, setStorageInfo] = useState(null);
   const [passphrase, setPassphrase] = useState("");
   const [passphrase2, setPassphrase2] = useState("");
+  const [clearConfirmOpen, setClearConfirmOpen] = useState(false);
   const [online, setOnline] = useState(
     typeof navigator !== "undefined" ? navigator.onLine : true,
   );
@@ -111,7 +115,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
     try {
       await fn();
     } catch (e) {
-      setError(e?.message || "Something went wrong.");
+      setError(e?.message || t("errors.somethingWentWrong"));
     } finally {
       setBusy("");
     }
@@ -140,7 +144,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
       }
       const userDocs = docs.filter((d) => !isDemoResumeId(d.id));
       exportBackupPack(userDocs.length ? userDocs : docs, { versions });
-      setMessage("Backup downloaded to your computer.");
+      setMessage(t("ownership.backupDownloadedMsg") || "Backup downloaded to your computer.");
     });
 
   const exportEncrypted = () =>
@@ -156,7 +160,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
       triggerDownload(blob, `cavren-backup-${stamp}${ENC_FILE_EXT}`);
       setPassphrase("");
       setPassphrase2("");
-      setMessage("Encrypted backup downloaded to your computer.");
+      setMessage(t("ownership.encBackupDownloadedMsg") || "Encrypted backup downloaded to your computer.");
     });
 
   const restorePack = async (file) => {
@@ -181,8 +185,8 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
       }
       setMessage(
         result.kind === "pack"
-          ? `Restored ${result.count} resume(s) (${restoreMode}).`
-          : "Resume restored.",
+          ? (t("ownership.restoredCountMsg", { count: result.count, mode: restoreMode }) || `Restored ${result.count} resume(s) (${restoreMode}).`)
+          : (t("ownership.resumeRestoredMsg") || "Resume restored."),
       );
       await refresh();
     });
@@ -210,7 +214,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
       setPassphrase("");
       setPassphrase2("");
       setMessage(
-        `Restored ${result.count || 1} resume(s) from encrypted backup (${restoreMode}).`,
+        t("ownership.restoredEncCountMsg", { count: result.count || 1, mode: restoreMode }) || `Restored ${result.count || 1} resume(s) from encrypted backup (${restoreMode}).`,
       );
       await refresh();
     });
@@ -218,24 +222,23 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
 
   const clearEverything = () =>
     withBusy("clear", async () => {
-      if (
-        !window.confirm(
-          "Delete ALL resumes and snapshots from this browser? This cannot be undone.",
-        )
-      ) {
-        return;
-      }
       const n = await clearAllResumes();
       clearLegacyMigrationFlag();
+      clearAiConfig();
+      signOutDrive();
+      setGoogleClientId(null);
+      setClientId("");
       try {
-        window.localStorage.removeItem("resume-data");
-        window.localStorage.removeItem("resume-data-saved-at");
+        window.localStorage.clear();
+        window.sessionStorage.clear();
       } catch {
         /* private mode */
       }
       setDemoMode("off");
       setDemoModeState("off");
-      setMessage(`Cleared ${n} resume(s) from this device.`);
+      setMessage(
+        t("ownership.clearedEverythingMsg", { count: n }) || `Cleared ${n} resume(s), saved API keys, credentials, and settings from this device.`,
+      );
       await refresh();
     });
 
@@ -244,7 +247,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
       setDemoMode("on");
       setDemoModeState("on");
       const n = await seedDemoResumes();
-      setMessage(`Loaded ${n} demo resumes.`);
+      setMessage(t("ownership.loadedDemosMsg", { count: n }) || `Loaded ${n} demo resumes.`);
       await refresh();
     });
 
@@ -253,36 +256,30 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
       const n = await clearDemoResumes();
       setDemoMode("off");
       setDemoModeState("off");
-      setMessage(`Removed ${n} demo resume(s).`);
+      setMessage(t("ownership.removedDemosMsg", { count: n }) || `Removed ${n} demo resume(s).`);
       await refresh();
     });
 
   const driveBackup = () =>
     withBusy("drive", async () => {
       if (!navigator.onLine) {
-        throw new Error(
-          "You're offline. Drive backup needs a network connection — use Download backup instead.",
-        );
+        throw new Error(t("errors.driveOfflineBackup"));
       }
       if (!isDriveConfigured()) {
-        throw new Error(
-          "Add a Google OAuth client ID below first. Drive is optional — local backup always works.",
-        );
+        throw new Error(t("errors.driveNeedsClientId"));
       }
-      const docs = (await listResumes()).filter((d) => !isDemoResumeId(d.id));
-      await uploadBackupToDrive(docs);
-      setMessage("Backup saved to your Google Drive.");
+      const pack = await collectUserPack();
+      await uploadBackupToDrive(pack);
+      setMessage(t("ownership.savedDriveMessage") || "Backup saved to your Google Drive.");
     });
 
   const driveRestore = () =>
     withBusy("drive", async () => {
       if (!navigator.onLine) {
-        throw new Error(
-          "You're offline. Drive restore needs a network connection.",
-        );
+        throw new Error(t("errors.driveOfflineRestore"));
       }
       if (!isDriveConfigured()) {
-        throw new Error("Add a Google OAuth client ID below first.");
+        throw new Error(t("errors.driveNeedsClientId"));
       }
       const text = await downloadBackupFromDrive();
       const result = await restoreFromText(text, {
@@ -292,12 +289,13 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
         mode: "merge",
       });
       if (!result.ok) throw new Error(result.error);
-      setMessage(`Restored ${result.count || 1} from Drive.`);
+      setMessage(t("ownership.restoredDriveMessage", { count: result.count || 1 }) || `Restored ${result.count || 1} from Drive.`);
       await refresh();
     });
 
   return (
-    <Dialog
+    <>
+      <Dialog
       isOpen={open}
       onOpenChange={onOpenChange}
       width={560}
@@ -305,8 +303,8 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
       padding={2}
     >
       <DialogHeader
-        title="Data & privacy"
-        subtitle="Everything stays on this device unless you export or choose Drive."
+        title={t("ownership.dialogTitle") || "Data & privacy"}
+        subtitle={t("ownership.dialogSubtitle") || "Everything stays on this device unless you export or choose Drive."}
         onOpenChange={onOpenChange}
       />
       <div className="r-gallery-scroll">
@@ -314,12 +312,10 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
           <Card padding={3} width="100%">
             <VStack gap={2} width="100%">
               <Text type="inherit" size="sm" weight="semibold" color="primary">
-                On this device
+                {t("ownership.deviceTitle") || "On this device"}
               </Text>
               <Text type="inherit" size="sm" color="secondary">
-                Resumes live in IndexedDB in your browser. Downloads (PDF, DOCX,
-                .r.json, .cavren.json) are files on your computer. Cavren has no
-                server for your content and does not harvest analytics.
+                {t("ownership.deviceDesc") || "Resumes live in IndexedDB in your browser. Downloads (PDF, DOCX, .r.json, .cavren.json) are files on your computer. Cavren has no server for your content and does not harvest analytics."}
               </Text>
               {storageInfo ? (
                 <Text type="inherit" size="sm" color="secondary">
@@ -342,18 +338,17 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
           <Card padding={3} width="100%">
             <VStack gap={2} width="100%">
               <Text type="inherit" size="sm" weight="semibold" color="primary">
-                Full backup pack
+                {t("ownership.backupTitle") || "Full backup pack"}
               </Text>
               <Text type="inherit" size="sm" color="secondary">
-                Move to another computer: download one pack, restore with merge
-                or replace. Works fully offline.
+                {t("ownership.backupDesc") || "Move to another computer: download one pack, restore with merge or replace. Works fully offline."}
               </Text>
               <HStack gap={2} wrap>
                 <Button
                   size="sm"
                   variant="primary"
                   icon={<Download size={14} />}
-                  label={busy === "export" ? "Exporting…" : "Download backup"}
+                  label={busy === "export" ? (t("ownership.exporting") || "Exporting…") : (t("ownership.downloadBackup") || "Download backup")}
                   disabled={!!busy}
                   onClick={exportAll}
                 />
@@ -361,7 +356,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
                   size="sm"
                   variant="secondary"
                   icon={<Upload size={14} />}
-                  label="Restore pack"
+                  label={t("ownership.restorePack") || "Restore pack"}
                   disabled={!!busy}
                   onClick={() => packInputRef.current?.click()}
                 />
@@ -370,13 +365,13 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
                 <Button
                   size="sm"
                   variant={restoreMode === "merge" ? "primary" : "ghost"}
-                  label="Merge"
+                  label={t("ownership.merge") || "Merge"}
                   onClick={() => setRestoreMode("merge")}
                 />
                 <Button
                   size="sm"
                   variant={restoreMode === "replace" ? "primary" : "ghost"}
-                  label="Replace all"
+                  label={t("ownership.replaceAll") || "Replace all"}
                   onClick={() => setRestoreMode("replace")}
                 />
               </HStack>
@@ -395,7 +390,8 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
           </Card>
 
           <Card padding={3} width="100%">
-            <VStack gap={2} width="100%">
+            <form onSubmit={(e) => e.preventDefault()} style={{ width: "100%" }}>
+              <VStack gap={2} width="100%">
               <Text type="inherit" size="sm" weight="semibold" color="primary">
                 {t("backup.encryptedTitle")}
               </Text>
@@ -405,6 +401,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
               <TextInput
                 label={t("backup.passphrase")}
                 type="password"
+                autoComplete="new-password"
                 value={passphrase}
                 onChange={setPassphrase}
                 width="100%"
@@ -412,6 +409,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
               <TextInput
                 label={t("backup.passphraseConfirm")}
                 type="password"
+                autoComplete="new-password"
                 value={passphrase2}
                 onChange={setPassphrase2}
                 width="100%"
@@ -450,29 +448,30 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
                 }}
               />
             </VStack>
-          </Card>
+          </form>
+        </Card>
 
           <Card padding={3} width="100%">
             <VStack gap={2} width="100%">
               <Text type="inherit" size="sm" weight="semibold" color="primary">
-                Demo resumes
+                {t("ownership.demoTitle") || "Demo resumes"}
               </Text>
               <Text type="inherit" size="sm" color="secondary">
-                Template samples are opt-in. Current: {demoMode}.
+                {t("ownership.demoDesc", { mode: demoMode }) || `Template samples are opt-in. Current: ${demoMode}.`}
               </Text>
               <HStack gap={2} wrap>
                 <Button
                   size="sm"
                   variant="secondary"
                   icon={<Sparkles size={14} />}
-                  label="Load demos"
+                  label={t("ownership.loadDemos") || "Load demos"}
                   disabled={!!busy}
                   onClick={loadDemos}
                 />
                 <Button
                   size="sm"
                   variant="ghost"
-                  label="Remove demos"
+                  label={t("ownership.removeDemos") || "Remove demos"}
                   disabled={!!busy}
                   onClick={removeDemos}
                 />
@@ -483,15 +482,14 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
           <Card padding={3} width="100%">
             <VStack gap={2} width="100%">
               <Text type="inherit" size="sm" weight="semibold" color="primary">
-                Portable formats
+                {t("ownership.portableTitle") || "Portable formats"}
               </Text>
               <Text type="inherit" size="sm" color="secondary">
-                Cavren .r.json / .cavren.json keep settings and themes. Open{" "}
+                {t("ownership.portableDescBefore") || "Cavren .r.json / .cavren.json keep settings and themes. Open "}
                 <a href="https://jsonresume.org/" target="_blank" rel="noopener noreferrer">
                   JSON Resume
-                </a>{" "}
-                files restore into a new resume from the library drop zone.
-                Export JSON Resume from the editor command palette (⌘K).
+                </a>
+                {t("ownership.portableDescAfter") || " files restore into a new resume from the library drop zone. Export JSON Resume from the editor command palette (⌘K)."}
               </Text>
             </VStack>
           </Card>
@@ -499,32 +497,26 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
           <Card padding={3} width="100%">
             <VStack gap={2} width="100%">
               <Text type="inherit" size="sm" weight="semibold" color="primary">
-                Google Drive (optional)
+                {t("ownership.driveTitle") || "Google Drive (optional)"}
               </Text>
               <Text type="inherit" size="sm" color="secondary">
-                Never required. Core edit, preview, and local backup work
-                offline without Drive. Tokens stay in this browser — Cavren has
-                no server. Full setup steps live in{" "}
-                <code>docs/DRIVE.md</code> in the project repo.
+                {t("ownership.driveDesc") || "Never required. Core edit, preview, and local backup work offline without Drive. Tokens stay in this browser — Cavren has no server. Full setup steps live in docs/DRIVE.md in the project repo."}
               </Text>
               {!driveReady ? (
                 <Text type="inherit" size="sm" color="secondary">
-                  No client ID yet. Create an OAuth client in Google Cloud
-                  Console (Web application) and paste it below, or set
-                  PUBLIC_GOOGLE_CLIENT_ID at build time.
+                  {t("ownership.driveNoClient") || "No client ID yet. Create an OAuth client in Google Cloud Console (Web application) and paste it below, or set PUBLIC_GOOGLE_CLIENT_ID at build time."}
                 </Text>
               ) : null}
               {!online ? (
                 <HStack gap={2} align="center">
                   <WifiOff size={14} />
                   <Text type="inherit" size="sm" color="secondary">
-                    You're offline — Drive buttons are disabled. Use Download
-                    backup instead.
+                    {t("ownership.driveOffline") || "You're offline — Drive buttons are disabled. Use Download backup instead."}
                   </Text>
                 </HStack>
               ) : null}
               <TextInput
-                label="Google OAuth client ID"
+                label={t("ownership.driveClientIdLabel") || "Google OAuth client ID"}
                 value={clientId}
                 onChange={setClientId}
                 width="100%"
@@ -533,13 +525,13 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
                 <Button
                   size="sm"
                   variant="secondary"
-                  label="Save client ID"
+                  label={t("ownership.saveClientId") || "Save client ID"}
                   onClick={() => {
                     setGoogleClientId(clientId);
                     setMessage(
                       clientId.trim()
-                        ? "Client ID saved in this browser."
-                        : "Client ID cleared.",
+                        ? (t("ownership.savedClientIdMessage") || "Client ID saved in this browser.")
+                        : (t("ownership.clearedClientIdMessage") || "Client ID cleared."),
                     );
                   }}
                 />
@@ -547,7 +539,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
                   size="sm"
                   variant="secondary"
                   icon={<Cloud size={14} />}
-                  label="Backup to Drive"
+                  label={t("ownership.backupDrive") || "Backup to Drive"}
                   disabled={!!busy || !driveReady || !online}
                   onClick={driveBackup}
                 />
@@ -555,7 +547,7 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
                   size="sm"
                   variant="ghost"
                   icon={<HardDrive size={14} />}
-                  label="Restore from Drive"
+                  label={t("ownership.restoreDrive") || "Restore from Drive"}
                   disabled={!!busy || !driveReady || !online}
                   onClick={driveRestore}
                 />
@@ -566,15 +558,15 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
           <Card padding={3} width="100%" variant="red">
             <VStack gap={2} width="100%">
               <Text type="inherit" size="sm" weight="semibold" color="primary">
-                Danger zone
+                {t("ownership.dangerTitle") || "Danger zone"}
               </Text>
               <Button
                 size="sm"
                 variant="destructive"
                 icon={<Trash2 size={14} />}
-                label={busy === "clear" ? "Clearing…" : "Clear all local data"}
+                label={busy === "clear" ? (t("ownership.clearing") || "Clearing…") : (t("ownership.clearLocalData") || "Clear all local data")}
                 disabled={!!busy}
-                onClick={clearEverything}
+                onClick={() => setClearConfirmOpen(true)}
               />
             </VStack>
           </Card>
@@ -598,7 +590,23 @@ const DataOwnership = ({ open, onOpenChange, onChanged }) => {
         </VStack>
       </div>
     </Dialog>
-  );
+
+    <AlertDialog
+      isOpen={clearConfirmOpen}
+      onOpenChange={setClearConfirmOpen}
+      title={t("ownership.clearConfirmTitle") || "Clear all local data?"}
+      description={t("ownership.clearConfirmDesc") || "This will permanently delete all resumes, version snapshots, saved AI API keys, Google Drive credentials, and local preferences from this device. This action cannot be undone."}
+      actionLabel={t("ownership.clearConfirmAction") || "Clear all data"}
+      actionVariant="destructive"
+      cancelLabel={t("common.cancel") || "Cancel"}
+      isActionLoading={busy === "clear"}
+      onAction={async () => {
+        await clearEverything();
+        setClearConfirmOpen(false);
+      }}
+    />
+  </>
+);
 };
 
 export default DataOwnership;

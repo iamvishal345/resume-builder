@@ -16,6 +16,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { useStore } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 import { RESUME_PALETTES } from "./palettes";
 import { isSidebarLayout, isSplitLayout } from "./style";
 import { SECTION_TITLES, moveWithinColumn, placeBefore } from "./order";
@@ -279,6 +280,7 @@ const ColorControl = ({ label, value, defaultHint, onChange }) => (
 );
 
 const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }) => {
+  const { t } = useI18n();
   const settings = canvas.resumeSettings;
   const set = (patch) => canvas.setSettings(patch);
   const sec = settings?.sectionStyles?.[sectionId] || {};
@@ -377,7 +379,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           This section · {sectionTitle}
         </Text>
         <Stepper
-          label="Font size"
+          label={t("customize.fontSize") || "Font size"}
           value={sec.fontSize ?? baseFont}
           min={11}
           max={18}
@@ -387,7 +389,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           onIncrement={() => patchSec({ fontSize: clamp((sec.fontSize ?? baseFont) + 1, 11, 18) })}
         />
         <Stepper
-          label="Line height"
+          label={t("customize.lineHeight") || "Line height"}
           value={sec.lineHeight ?? baseLine}
           min={1.1}
           max={2}
@@ -397,7 +399,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           onIncrement={() => patchSec({ lineHeight: clamp((sec.lineHeight ?? baseLine) + 0.05, 1.1, 2) })}
         />
         <Stepper
-          label="Spacing before"
+          label={t("customize.spacingBefore") || "Spacing before"}
           value={sec.gap ?? baseGap}
           min={0}
           max={28}
@@ -407,7 +409,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           onIncrement={() => patchSec({ gap: clamp((sec.gap ?? baseGap) + 1, 0, 28) })}
         />
         <Stepper
-          label="Margin top"
+          label={t("customize.marginTop") || "Margin top"}
           value={sec.marginTop ?? 0}
           min={0}
           max={48}
@@ -417,7 +419,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           onIncrement={() => patchSec({ marginTop: clamp((sec.marginTop ?? 0) + 1, 0, 48) })}
         />
         <Stepper
-          label="Margin bottom"
+          label={t("customize.marginBottom") || "Margin bottom"}
           value={sec.marginBottom ?? 0}
           min={0}
           max={48}
@@ -427,7 +429,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           onIncrement={() => patchSec({ marginBottom: clamp((sec.marginBottom ?? 0) + 1, 0, 48) })}
         />
         <Stepper
-          label="Heading scale"
+          label={t("customize.headingScale") || "Heading scale"}
           value={sec.headingScale ?? 1}
           min={0.7}
           max={1.3}
@@ -442,16 +444,16 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
             size="sm"
             width="100%"
             icon={<RotateCcw size={13} />}
-            label={`Reset "${sectionTitle}" section`}
+            label={`Reset "${sectionTitle}"`}
             onClick={clearSec}
           />
         )}
         <Divider orientation="horizontal" />
         <Text type="inherit" size="sm" weight="semibold" color="primary">
-          Whole resume
+          {t("customize.wholeResume") || "Whole resume"}
         </Text>
         <Stepper
-          label="Font size"
+          label={t("customize.fontSize") || "Font size"}
           value={settings.fontSize ?? 14}
           min={11}
           max={18}
@@ -461,7 +463,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           onIncrement={() => set({ fontSize: clamp((settings.fontSize ?? 14) + 1, 11, 18) })}
         />
         <Stepper
-          label="Line height"
+          label={t("customize.lineHeight") || "Line height"}
           value={settings.lineHeight ?? 1.5}
           min={1.15}
           max={1.9}
@@ -471,7 +473,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           onIncrement={() => set({ lineHeight: clamp((settings.lineHeight ?? 1.5) + 0.05, 1.15, 1.9) })}
         />
         <Stepper
-          label="Section spacing"
+          label={t("customize.sectionSpacing") || "Section spacing"}
           value={settings.sectionSpacing ?? 16}
           min={8}
           max={28}
@@ -481,7 +483,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           onIncrement={() => set({ sectionSpacing: clamp((settings.sectionSpacing ?? 16) + 1, 8, 28) })}
         />
         <Stepper
-          label="Page padding"
+          label={t("customize.pagePadding") || "Page padding"}
           value={settings.pagePadX ?? 26}
           min={10}
           max={60}
@@ -493,7 +495,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
         {isSidebarLayout(settings) && (
           <>
             <Stepper
-              label="Sidebar width"
+              label={t("customize.sidebarWidth") || "Sidebar width"}
               value={settings.sidebarWidth ?? 32}
               min={20}
               max={46}
@@ -503,7 +505,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
               onIncrement={() => set({ sidebarWidth: clamp((settings.sidebarWidth ?? 32) + 1, 20, 46) })}
             />
             <Stepper
-              label="Sidebar gap"
+              label={t("customize.sidebarGap") || "Sidebar gap"}
               value={settings.colGap ?? 24}
               min={0}
               max={48}
@@ -516,7 +518,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
         )}
         {isSplitLayout(settings) && (
           <Stepper
-            label="Column gap"
+            label={t("customize.columnGap") || "Column gap"}
             value={settings.colGap ?? 24}
             min={4}
             max={48}
@@ -549,7 +551,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           })}
         </div>
         <ColorControl
-          label="Accent"
+          label={t("customize.accent") || "Accent"}
           value={
             settings.primaryColor ||
             RESUME_PALETTES.find((p) => p.id === settings.paletteId)?.accent ||
@@ -559,12 +561,12 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           onChange={(c) => set({ primaryColor: c })}
         />
         <ColorControl
-          label="Background"
+          label={t("customize.background") || "Background"}
           value={settings.bgColor}
           onChange={(c) => set({ bgColor: c })}
         />
         <ColorControl
-          label="Text"
+          label={t("customize.text") || "Text"}
           value={settings.textColor}
           onChange={(c) => set({ textColor: c })}
         />
@@ -574,13 +576,13 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
             size="sm"
             width="100%"
             icon={<RotateCcw size={13} />}
-            label="Clear colors & spacing"
+            label={t("customize.clearColorsAndSpacing") || "Clear colors & spacing"}
             onClick={() =>
               set({ primaryColor: "", bgColor: "", textColor: "", fontSize: 14, lineHeight: 1.5, sectionSpacing: 16, pagePadX: 26, pagePadY: 30, colGap: 24, nameSize: 27, photoSize: 72, radiusSm: 4, sidebarWidth: 32, sectionStyles: {} })
             }
           />
         )}
-        <Button variant="secondary" size="sm" width="100%" label="Done" onClick={onClose} />
+        <Button variant="secondary" size="sm" width="100%" label={t("common.done") || "Done"} onClick={onClose} />
       </VStack>
     </div>
   );
@@ -590,6 +592,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
 };
 
 export const SectionShell = ({ id, title, node, kind = "section", canvas }) => {
+  const { t } = useI18n();
   const [panelOpen, setPanelOpen] = useState(false);
   const toolbarRef = useRef(null);
   const interactive = Boolean(canvas?.interactive);
@@ -635,8 +638,8 @@ export const SectionShell = ({ id, title, node, kind = "section", canvas }) => {
               <IconButton
                 size="sm"
                 variant="ghost"
-                label="Drag to reorder"
-                tooltip="Drag to reorder"
+                label={t("customize.dragToReorder") || "Drag to reorder"}
+                tooltip={t("customize.dragToReorder") || "Drag to reorder"}
                 className="rcs-icon rcs-grip"
                 icon={<GripVertical size={13} />}
                 onPointerDown={(e) => canvas.startDrag(id, e)}
@@ -644,8 +647,8 @@ export const SectionShell = ({ id, title, node, kind = "section", canvas }) => {
               <IconButton
                 size="sm"
                 variant="ghost"
-                label="Move up"
-                tooltip="Move up"
+                label={t("customize.moveUp") || "Move up"}
+                tooltip={t("customize.moveUp") || "Move up"}
                 className="rcs-icon"
                 icon={<ArrowUp size={13} />}
                 isDisabled={!canvas.canMoveUp(id)}
@@ -654,8 +657,8 @@ export const SectionShell = ({ id, title, node, kind = "section", canvas }) => {
               <IconButton
                 size="sm"
                 variant="ghost"
-                label="Move down"
-                tooltip="Move down"
+                label={t("customize.moveDown") || "Move down"}
+                tooltip={t("customize.moveDown") || "Move down"}
                 className="rcs-icon"
                 icon={<ArrowDown size={13} />}
                 isDisabled={!canvas.canMoveDown(id)}
@@ -665,7 +668,7 @@ export const SectionShell = ({ id, title, node, kind = "section", canvas }) => {
             </>
           )}
           <Stepper
-            label="Font size"
+            label={t("customize.fontSize") || "Font size"}
             value={
               canvas.resumeSettings.sectionStyles?.[id]?.fontSize ??
               canvas.resumeSettings.fontSize ??
@@ -711,8 +714,8 @@ export const SectionShell = ({ id, title, node, kind = "section", canvas }) => {
           <IconButton
             size="sm"
             variant="ghost"
-            label="Colors & spacing"
-            tooltip="Colors & spacing"
+            label={t("customize.colorsAndSpacing") || "Colors & spacing"}
+            tooltip={t("customize.colorsAndSpacing") || "Colors & spacing"}
             className="rcs-icon"
             icon={<Palette size={13} />}
             onClick={() => setPanelOpen((open) => !open)}
@@ -722,8 +725,8 @@ export const SectionShell = ({ id, title, node, kind = "section", canvas }) => {
             <IconButton
               size="sm"
               variant="ghost"
-              label="Edit this section"
-              tooltip="Edit this section"
+              label={t("customize.editThisSection") || "Edit this section"}
+              tooltip={t("customize.editThisSection") || "Edit this section"}
               className="rcs-icon"
               icon={<Pencil size={13} />}
               onClick={() => canvas.onEditSection(id)}

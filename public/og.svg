@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#142c1b"/>
+      <stop offset="100%" stop-color="#24482d"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4b7a57"/>
+      <stop offset="100%" stop-color="#73a981"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  
+  <!-- Subtle decorative grid / shapes -->
+  <circle cx="1050" cy="120" r="320" fill="#2d5837" opacity="0.4"/>
+  <circle cx="150" cy="550" r="250" fill="#1b3922" opacity="0.6"/>
+
+  <g transform="translate(100, 100)">
+    <!-- Badge -->
+    <rect x="0" y="0" width="230" height="42" rx="21" fill="#2a4e32"/>
+    <text x="20" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="16" font-weight="600" fill="#a4d4ae" letter-spacing="1">100% LOCAL &amp; PRIVATE</text>
+
+    <!-- Main Title -->
+    <text x="0" y="140" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="72" font-weight="800" fill="#f6f5f1" letter-spacing="-1.5">Cavren</text>
+    <text x="0" y="210" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="700" fill="#d4e5d7">Offline-First Resume Builder</text>
+
+    <!-- Tagline & Description -->
+    <text x="0" y="280" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="400" fill="#b3cbba">Build polished resumes with guided sections, live preview, ATS check &amp; local export.</text>
+    <text x="0" y="320" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="24" font-weight="400" fill="#b3cbba">No accounts, no analytics, no server storage — data stays in your browser.</text>
+
+    <!-- Feature Pills -->
+    <g transform="translate(0, 375)">
+      <!-- Pill 1 -->
+      <rect x="0" y="0" width="180" height="48" rx="12" fill="#2a4e32"/>
+      <text x="24" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="600" fill="#f6f5f1">📄 PDF &amp; DOCX</text>
+
+      <!-- Pill 2 -->
+      <rect x="196" y="0" width="170" height="48" rx="12" fill="#2a4e32"/>
+      <text x="220" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="600" fill="#f6f5f1">⚡ Works Offline</text>
+
+      <!-- Pill 3 -->
+      <rect x="382" y="0" width="180" height="48" rx="12" fill="#2a4e32"/>
+      <text x="406" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="600" fill="#f6f5f1">🔒 100% Private</text>
+
+      <!-- Pill 4 -->
+      <rect x="578" y="0" width="180" height="48" rx="12" fill="#2a4e32"/>
+      <text x="602" y="30" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="600" fill="#f6f5f1">🤖 Optional AI</text>
+    </g>
+  </g>
+</svg>

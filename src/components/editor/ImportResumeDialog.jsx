@@ -15,6 +15,7 @@ import {
 } from "@features/import/extract";
 import { parseResumeBackup } from "@features/resumes/backup";
 import { snapshotBefore } from "@features/resumes/snapshot";
+import { useI18n } from "@features/i18n/useI18n";
 
 const snapshotBeforeImport = async () => {
   const params = new URLSearchParams(window.location.search);
@@ -28,6 +29,7 @@ const snapshotBeforeImport = async () => {
 };
 
 const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
+  const { t } = useI18n();
   const [text, setText] = useState("");
   const [fileValue, setFileValue] = useState(null);
   const [fileStatus, setFileStatus] = useState(null);
@@ -90,7 +92,7 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
         if (result.kind !== "resume" || !result.doc?.data) {
           setFileStatus({
             type: "error",
-            message: "This backup is a full library pack — restore it from My resumes → Data & privacy.",
+            message: t("import.backupPackError") || "This backup is a full library pack — restore it from My resumes → Data & privacy.",
           });
           return;
         }
@@ -100,12 +102,12 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
       } catch {
         setFileStatus({
           type: "error",
-          message: "Could not import that JSON backup.",
+          message: t("import.importJsonError") || "Could not import that JSON backup.",
         });
       }
     };
     reader.onerror = () =>
-      setFileStatus({ type: "error", message: "Could not read that file." });
+      setFileStatus({ type: "error", message: t("import.readError") || "Could not read that file." });
     reader.readAsText(file);
   };
 
@@ -117,23 +119,23 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
     }
     setFileValue(file);
     if (isJsonBackupFile(file)) {
-      setFileStatus({ type: "success", message: "Importing backup…" });
+      setFileStatus({ type: "success", message: t("import.importingBackup") || "Importing backup…" });
       restoreJsonBackup(file);
       return;
     }
     setBusy(true);
-    setFileStatus({ type: "success", message: "Extracting text…" });
+    setFileStatus({ type: "success", message: t("import.extractingText") || "Extracting text…" });
     try {
       const extracted = await extractTextFromFile(file);
       setText(extracted);
       setFileStatus({
         type: "success",
-        message: `Read ${extracted.length.toLocaleString()} characters — review the preview below, then import.`,
+        message: t("import.readCharSuccess", { count: extracted.length.toLocaleString() }) || `Read ${extracted.length.toLocaleString()} characters — review the preview below, then import.`,
       });
     } catch (e) {
       setFileStatus({
         type: "error",
-        message: e && e.message ? e.message : "Could not read that file.",
+        message: e && e.message ? e.message : (t("import.readError") || "Could not read that file."),
       });
     } finally {
       setBusy(false);
@@ -151,14 +153,14 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
       padding={2}
     >
       <DialogHeader
-        title="Import a resume"
-        subtitle="Upload a PDF, DOCX, JSON Resume, or Cavren .r.json backup — or paste plain text. Everything runs locally; template and colors stay untouched unless you restore a backup."
+        title={t("import.title") || "Import a resume"}
+        subtitle={t("import.subtitle") || "Upload a PDF, DOCX, JSON Resume, or Cavren .r.json backup — or paste plain text. Everything runs locally; template and colors stay untouched unless you restore a backup."}
         onOpenChange={onOpenChange}
       />
       <div className="r-gallery-scroll">
         <VStack gap={3} width="100%" padding={2}>
           <FileInput
-            label="Existing resume"
+            label={t("import.existingLabel") || "Existing resume"}
             mode="dropzone"
             value={fileValue}
             onChange={onFileChange}
@@ -166,8 +168,8 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
             isMultiple={false}
             isDisabled={busy}
             isLoading={busy}
-            placeholder="Drop a PDF, DOCX, text, JSON Resume, or .r.json backup"
-            description="PDF and DOCX text is extracted locally. JSON Resume and .r.json restore structured content on this device."
+            placeholder={t("import.placeholder") || "Drop a PDF, DOCX, text, JSON Resume, or .r.json backup"}
+            description={t("import.dropzoneDesc") || "PDF and DOCX text is extracted locally. JSON Resume and .r.json restore structured content on this device."}
             status={fileStatus}
             width="100%"
           />
@@ -176,20 +178,18 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
             <HStack gap={1} align="center">
               <FileText size={15} color="var(--color-secondary)" />
               <Text type="inherit" size="sm" color="secondary">
-                or paste the text of an existing resume below.
+                {t("import.pasteOption") || "or paste the text of an existing resume below."}
               </Text>
             </HStack>
           )}
 
           <TextArea
-            label="…or paste resume text"
+            label={t("import.pasteLabel") || "…or paste resume text"}
             value={text}
             onChange={(v) => setText(v)}
             rows={9}
             width="100%"
-            placeholder={
-              "Ada Lovelace\nEngineer\nada@example.com · +1 555 010 9999\n\nSUMMARY\n...\n\nEXPERIENCE\nEngineer at Acme — 2020 - Present\n- Shipped ...\n\nEDUCATION\nB.Sc. Computer Science — MIT, 2016\n\nSKILLS\nPython, SQL, React"
-            }
+            placeholder={t("import.pastePlaceholder") || "Ada Lovelace\nEngineer\nada@example.com · +1 555 010 9999\n\nSUMMARY\n...\n\nEXPERIENCE\nEngineer at Acme — 2020 - Present\n- Shipped ...\n\nEDUCATION\nB.Sc. Computer Science — MIT, 2016\n\nSKILLS\nPython, SQL, React"}
           />
 
           {text.trim() ? (
@@ -208,7 +208,7 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
                 variant="primary"
                 size="sm"
                 icon={<FileUp size={14} />}
-                label="Import & replace"
+                label={t("import.importReplace") || "Import & replace"}
                 disabled={!hasContent}
                 onClick={apply}
               />
@@ -217,15 +217,14 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
             <HStack gap={1} align="center">
               <Upload size={15} color="var(--color-secondary)" />
               <Text type="inherit" size="sm" color="secondary">
-                Nothing is uploaded — all parsing happens in your browser.
+                {t("import.noUploadsNote") || "Nothing is uploaded — all parsing happens in your browser."}
               </Text>
             </HStack>
           )}
 
           {text.trim() && !hasContent && (
             <Text type="inherit" size="sm" color="secondary">
-              No recognizable sections yet — add headers like SUMMARY,
-              EXPERIENCE, EDUCATION and SKILLS.
+              {t("import.noSectionsNote") || "No recognizable sections yet — add headers like SUMMARY, EXPERIENCE, EDUCATION and SKILLS."}
             </Text>
           )}
         </VStack>

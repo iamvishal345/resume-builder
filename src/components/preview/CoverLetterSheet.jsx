@@ -41,9 +41,14 @@ export const CoverLetterSheet = ({
             <span>{personalDetails.designation}</span>
           )}
           {(contact.length > 0 || social.length > 0) && (
-            <span className="letter-contact">
-              {[...contact, ...social].join("  ·  ")}
-            </span>
+            <div className="letter-contact">
+              {[...contact, ...social].map((item, idx) => (
+                <React.Fragment key={idx}>
+                  {idx > 0 && <span className="letter-contact-sep" aria-hidden="true">·</span>}
+                  <span className="letter-contact-item">{item}</span>
+                </React.Fragment>
+              ))}
+            </div>
           )}
         </div>
       )}

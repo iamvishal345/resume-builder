@@ -9,6 +9,7 @@ import { Plus, Sparkles, Trash2 } from "lucide-react";
 import { StepCard } from "./StepLayout";
 import StartFromTitleDialog from "./StartFromTitleDialog";
 import { useStore } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 
 const formStructure = [
   {
@@ -77,6 +78,7 @@ const formStructure = [
 ];
 
 function PersonalDetails({ onNext, onPrev, nextLabel }) {
+  const { t } = useI18n();
   const personalDetails = useStore((state) => state.personalDetails);
   const socialLinks = useStore((state) => state.socialLinks);
   const setPersonalDetails = useStore((state) => state.setPersonalDetails);
@@ -111,11 +113,11 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
 
   return (
     <StepCard
-      title="Personal Details"
+      title={t("steps.details") || "Personal Details"}
       description={
         <>
-          Get started with the basics:{" "}
-          <b>We suggest including an email and phone number.</b>
+          {t("details.intro") || "Get started with the basics:"}{" "}
+          <b>{t("details.contactTip") || "We suggest including an email and phone number."}</b>
         </>
       }
       onNext={onNext}
@@ -139,7 +141,7 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
         <Button
           variant="secondary"
           size="sm"
-          label={personalDetails.photoDataUrl ? "Change photo" : "Add photo"}
+          label={personalDetails.photoDataUrl ? t("editor.changePhoto") : t("editor.addPhoto")}
           onClick={() => {
             const input = document.createElement("input");
             input.type = "file";
@@ -147,7 +149,7 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
             input.onchange = () => {
               const file = input.files?.[0];
               if (!file || file.size > 800_000) {
-                window.alert("Use a JPG/PNG under 800KB (stored only on this device).");
+                window.alert(t("editor.photoSizeAlert"));
                 return;
               }
               const reader = new FileReader();
@@ -162,23 +164,23 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
           <Button
             variant="ghost"
             size="sm"
-            label="Remove photo"
+            label={t("editor.removePhoto")}
             onClick={() => setPersonalDetails("photoDataUrl", "")}
           />
         ) : null}
         <Text type="inherit" size="sm" color="secondary">
-          Optional · stays in this browser · hide on ATS layouts via theme
+          {t("editor.photoHint")}
         </Text>
       </HStack>
       <HStack gap={2} align="center" wrap="wrap">
         <Button
           variant="secondary"
           icon={<Sparkles size={15} />}
-          label="Start from a job title"
+          label={t("titleDraft.title")}
           onClick={() => setAiDraftOpen(true)}
         />
         <Text type="inherit" size="sm" color="secondary">
-          New here? Let AI draft a believable starting point.
+          {t("titleDraft.bannerHint")}
         </Text>
       </HStack>
       <Grid columns={{ minWidth: 240, max: 2 }} gap={4} width="100%">
@@ -197,6 +199,13 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
               value={personalDetails[field.name] || ""}
               onChange={(value) => setPersonalDetails(field.name, value)}
             />
+            {field.name === "email" &&
+            personalDetails.email &&
+            !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personalDetails.email.trim()) ? (
+              <Text type="inherit" size="xs" color="accent" role="alert" style={{ marginTop: "4px" }}>
+                Please enter a valid email address (e.g. name@example.com).
+              </Text>
+            ) : null}
           </GridSpan>
         ))}
       </Grid>
@@ -204,7 +213,7 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
         <Button
           variant="secondary"
           icon={<Plus size={16} />}
-          label="Add Social Links"
+          label={t("editor.addSocialLinks")}
           onClick={handleAddSocialLink}
         />
       </HStack>
@@ -221,9 +230,9 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
                 id={link.descriptionKey}
                 htmlName={link.descriptionKey}
                 width="100%"
-                label="Description"
+                label={t("personal.customFieldLabel") || "Description"}
                 isLabelHidden
-                placeholder="Description"
+                placeholder={t("personal.customFieldLabel") || "Description"}
                 value={link.descriptionValue || ""}
                 onChange={(value) =>
                   handleSocialLinksValueChange(value, "description", link)
@@ -235,9 +244,9 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
                 id={link.valueKey}
                 htmlName={link.valueKey}
                 width="100%"
-                label="Value"
+                label={t("personal.customFieldValue") || "Value"}
                 isLabelHidden
-                placeholder="Link/Text"
+                placeholder={t("personal.customFieldValuePlaceholder") || "Link/Text"}
                 value={link.value || ""}
                 onChange={(value) =>
                   handleSocialLinksValueChange(value, "value", link)
@@ -247,8 +256,8 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
             <GridSpan columns={1}>
               <HStack align="center" justify="start" width="100%">
                 <IconButton
-                  label="Remove social link"
-                  tooltip="Remove social link"
+                  label={t("personal.removeSocialLink") || "Remove social link"}
+                  tooltip={t("personal.removeSocialLink") || "Remove social link"}
                   variant="ghost"
                   icon={<Trash2 size={16} />}
                   onClick={() => handleRemoveSocialLink(link)}

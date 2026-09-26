@@ -89,9 +89,11 @@ export default defineConfig({
         globPatterns: [
           "**/*.{js,mjs,css,svg,png,ico,woff2,woff,ttf,json,webmanifest}",
         ],
-        // Precache the offline fallback shell specifically
+        // Precache the offline fallback shell and editor shell specifically
         additionalManifestEntries: [
           { url: "/offline/index.html", revision: "1" },
+          { url: "/editor/index.html", revision: "1" },
+          { url: "/resumes/index.html", revision: "1" },
         ],
         // pdf.worker.min.mjs is ~1.2MB; keep headroom for future assets
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
@@ -103,12 +105,20 @@ export default defineConfig({
             handler: "NetworkFirst",
             options: {
               cacheName: "pages",
+              matchOptions: { ignoreSearch: true },
               plugins: [
                 {
-                  handlerDidError: async () => {
+                  handlerDidError: async ({ request }) => {
+                    const matchOpts = { ignoreSearch: true };
                     return (
-                      (await caches.match("/offline/index.html")) ||
-                      (await caches.match("/offline")) ||
+                      (await caches.match(request.url, matchOpts)) ||
+                      (await caches.match("/editor/index.html", matchOpts)) ||
+                      (await caches.match("/editor/", matchOpts)) ||
+                      (await caches.match("/editor", matchOpts)) ||
+                      (await caches.match("/resumes/index.html", matchOpts)) ||
+                      (await caches.match("/offline/index.html", matchOpts)) ||
+                      (await caches.match("/offline/", matchOpts)) ||
+                      (await caches.match("/offline", matchOpts)) ||
                       Response.error()
                     );
                   },

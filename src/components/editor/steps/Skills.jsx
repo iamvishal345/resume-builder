@@ -6,6 +6,7 @@ import { Sparkles } from "lucide-react";
 import { StepCard } from "./StepLayout";
 import { RatedNameList } from "./RatedNameList";
 import { useStore } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 import { normalizeSkill } from "@features/resume/skillList";
 import { isAiAvailable } from "@features/ai/provider";
 import { suggestSkillsFromExperience } from "@features/ai/skillsFromExperience";
@@ -13,6 +14,7 @@ import { suggestSkillsFromExperience } from "@features/ai/skillsFromExperience";
 const getSkillObj = () => normalizeSkill({});
 
 const Skills = ({ onNext, onPrev, nextLabel }) => {
+  const { t } = useI18n();
   const skills = useStore((state) => state.skills);
   const setSkills = useStore((state) => state.setSkills);
   const workHistory = useStore((state) => state.workHistory);
@@ -46,8 +48,8 @@ const Skills = ({ onNext, onPrev, nextLabel }) => {
 
   return (
     <StepCard
-      title="Key Skills"
-      description="One flat list — add, rate, drag to reorder, or remove."
+      title={t("steps.skills") || "Key Skills"}
+      description={t("skills.description") || "One flat list — add, rate, drag to reorder, or remove."}
       onNext={onNext}
       onPrev={onPrev}
       nextLabel={nextLabel}
@@ -58,13 +60,13 @@ const Skills = ({ onNext, onPrev, nextLabel }) => {
             size="sm"
             variant="secondary"
             icon={<Sparkles size={14} />}
-            label={busy ? "Suggesting…" : "Suggest from experience"}
+            label={busy ? (t("skills.suggesting") || "Suggesting…") : (t("skills.suggestFromExperience") || "Suggest from experience")}
             disabled={busy || !isAiAvailable()}
             onClick={suggest}
           />
           {!isAiAvailable() ? (
             <Text type="inherit" size="sm" color="secondary">
-              Enable AI in preferences to suggest skills locally.
+              {t("skills.enableAiHint") || "Enable AI in preferences to suggest skills locally."}
             </Text>
           ) : null}
         </HStack>
@@ -94,7 +96,7 @@ const Skills = ({ onNext, onPrev, nextLabel }) => {
             <Button
               size="sm"
               variant="secondary"
-              label="Add all"
+              label={t("skills.addAll") || "Add all"}
               onClick={() => {
                 setSkills([...skills, ...proposed]);
                 setProposed([]);
@@ -106,9 +108,9 @@ const Skills = ({ onNext, onPrev, nextLabel }) => {
           items={skills}
           onItemsChange={setSkills}
           createItem={getSkillObj}
-          nameLabel="Skill"
-          namePlaceholder="e.g. TypeScript"
-          addLabel="Add skill"
+          nameLabel={t("skills.nameLabel") || "Skill"}
+          namePlaceholder={t("skills.skillPlaceholder") || "e.g. TypeScript"}
+          addLabel={t("skills.addLabel") || "Add skill"}
           showLevel
         />
       </VStack>

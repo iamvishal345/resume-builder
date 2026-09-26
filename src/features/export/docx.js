@@ -119,7 +119,9 @@ const headerParas = (data, ACCENT, MUTED) => {
   const contact = [
     pd.email,
     pd.contactNumber,
-    [pd.city, pd.state, pd.country].filter(Boolean).join(", "),
+    [pd.address, pd.city, pd.state, pd.country, pd.pinCode]
+      .filter(Boolean)
+      .join(", "),
   ]
     .filter(Boolean)
     .join("  |  ");

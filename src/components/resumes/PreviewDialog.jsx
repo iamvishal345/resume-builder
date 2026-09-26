@@ -9,8 +9,10 @@ import { Resume } from "@features/resume/Resume";
 import { resumeViewModel } from "@features/resume/viewModel";
 import { downloadResumePdf } from "@features/export/pdf";
 import { nameOf } from "./resumeMeta";
+import { useI18n } from "@features/i18n/useI18n";
 
 const PreviewDialog = ({ doc, autoPrint, onOpenChange }) => {
+  const { t } = useI18n();
   const sheetRef = useRef(null);
   const [error, setError] = useState("");
 
@@ -27,13 +29,13 @@ const PreviewDialog = ({ doc, autoPrint, onOpenChange }) => {
         })
           .then(() => onOpenChange(null))
           .catch((err) => {
-            setError(err?.message || "PDF download failed.");
+            setError(err?.message || t("errors.pdfDownloadFailed"));
           });
       }, 250);
       return () => window.clearTimeout(id);
     }
     return undefined;
-  }, [autoPrint, doc?.id, onOpenChange]);
+  }, [autoPrint, doc?.id, onOpenChange, t]);
 
   const raw = { ...defaultResumeData(), ...(doc?.data || {}) };
   const data = resumeViewModel(raw);
@@ -48,7 +50,7 @@ const PreviewDialog = ({ doc, autoPrint, onOpenChange }) => {
         settings: raw.resumeSettings,
       });
     } catch (err) {
-      setError(err?.message || "PDF download failed.");
+      setError(err?.message || t("errors.pdfDownloadFailed"));
     }
   };
 
@@ -62,8 +64,8 @@ const PreviewDialog = ({ doc, autoPrint, onOpenChange }) => {
       {doc && (
         <>
           <DialogHeader
-            title={`${nameOf(doc)} — preview`}
-            subtitle="What your resume looks like. Download a PDF or open the editor to tweak it."
+            title={t("previewDialog.title", { name: nameOf(doc) }) || `${nameOf(doc)} — preview`}
+            subtitle={t("previewDialog.subtitle") || "What your resume looks like. Download a PDF or open the editor to tweak it."}
             onOpenChange={() => onOpenChange(null)}
             padding={2}
           />
@@ -90,14 +92,14 @@ const PreviewDialog = ({ doc, autoPrint, onOpenChange }) => {
                   variant="primary"
                   size="sm"
                   icon={<Download size={14} />}
-                  label="Download PDF"
+                  label={t("previewDialog.downloadPdf") || "Download PDF"}
                   onClick={() => download()}
                 />
                 <Button
                   variant="secondary"
                   size="sm"
                   icon={<Pencil size={14} />}
-                  label="Edit in builder"
+                  label={t("previewDialog.editInBuilder") || "Edit in builder"}
                   onClick={() => {
                     window.location.href = `/editor?resume=${doc.id}`;
                   }}

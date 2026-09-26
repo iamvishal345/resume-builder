@@ -6,6 +6,7 @@ import { Text } from "@astryxdesign/core/Text";
 import { Copy, Trash2 } from "lucide-react";
 import { StepCard } from "./StepLayout";
 import { useStore } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 import { additionalSectionsOptions } from "./additional/options";
 import { catalogKindOf } from "@features/resume/order";
 
@@ -15,6 +16,7 @@ const mintInstanceId = () =>
   );
 
 const AdditionalSections = ({ onNext, onPrev, nextLabel }) => {
+  const { t } = useI18n();
   const additionalSections = useStore((state) => state.additionalSections);
   const setAdditionalSections = useStore(
     (state) => state.setAdditionalSections,
@@ -48,27 +50,31 @@ const AdditionalSections = ({ onNext, onPrev, nextLabel }) => {
 
   return (
     <StepCard
-      title="Add Additional Section"
+      title={t("steps.extras") || "Add Additional Section"}
+      description={t("extras.description") || "Add custom sections like certifications, languages, or projects."}
       onNext={onNext}
       onPrev={onPrev}
       nextLabel={nextLabel}
     >
       <Grid columns={{ minWidth: 480, max: 2 }} gap={3}>
-        {additionalSectionsOptions.map((section) => (
-          <GridSpan columns={1} key={section.id}>
-            <Button
-              variant="secondary"
-              width="100%"
-              icon={<section.icon size={16} />}
-              label={
-                section.id !== 1 && hasKind(section.id)
-                  ? `${section.title} ✓`
-                  : section.title
-              }
-              onClick={() => addSection(section)}
-            />
-          </GridSpan>
-        ))}
+        {additionalSectionsOptions.map((section) => {
+          const title = t(section.translationKey) || section.title;
+          return (
+            <GridSpan columns={1} key={section.id}>
+              <Button
+                variant="secondary"
+                width="100%"
+                icon={<section.icon size={16} />}
+                label={
+                  section.id !== 1 && hasKind(section.id)
+                    ? `${title} ✓`
+                    : title
+                }
+                onClick={() => addSection(section)}
+              />
+            </GridSpan>
+          );
+        })}
       </Grid>
       <VStack gap={3} width="100%">
         {additionalSections.map((section) => {
@@ -76,25 +82,28 @@ const AdditionalSections = ({ onNext, onPrev, nextLabel }) => {
           const option = additionalSectionsOptions.find((s) => s.id === kind);
           if (!option) return null;
           const Component = option.component;
+          const title = (section.title && section.title !== option.title)
+            ? section.title
+            : (t(option.translationKey) || option.title);
           return (
             <VStack key={section.id} gap={2} width="100%">
               <HStack justify="between" align="center" width="100%" gap={2}>
                 <Text type="inherit" size="sm" weight="semibold" color="primary">
-                  {section.title || option.title}
+                  {title}
                 </Text>
                 <HStack gap={1}>
                   <Button
                     size="sm"
                     variant="ghost"
                     icon={<Copy size={14} />}
-                    label="Duplicate"
+                    label={t("common.duplicate") || "Duplicate"}
                     onClick={() => duplicateAdditionalSection(section.id)}
                   />
                   <Button
                     size="sm"
                     variant="ghost"
                     icon={<Trash2 size={14} />}
-                    label="Remove"
+                    label={t("common.remove") || "Remove"}
                     onClick={() => removeAdditionalSections({ id: section.id })}
                   />
                 </HStack>

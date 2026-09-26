@@ -1,10 +1,8 @@
 ---
 import ThemeToggle from "../ThemeToggle.astro";
+import LocaleSelect from "../LocaleSelect";
 import { SITE } from "@data/site";
-import { t, listLocales } from "@features/i18n";
-
-const locale = "en";
-const locales = listLocales();
+import { t } from "@features/i18n";
 ---
 
 <header class="site-nav">
@@ -21,23 +19,7 @@ const locales = listLocales();
       <a href="/features" data-i18n="nav.features">{t("nav.features")}</a>
       <a href="/about" data-i18n="nav.about">{t("nav.about")}</a>
       <a href="/privacy" data-i18n="nav.privacy">{t("nav.privacy")}</a>
-      <label class="locale-picker">
-        <span class="visually-hidden" data-i18n="a11y.locale">{t("a11y.locale")}</span>
-        <select
-          id="cavren-locale"
-          name="locale"
-          aria-label={t("a11y.locale")}
-          data-i18n-attrs="aria-label:a11y.locale"
-        >
-          {
-            locales.map((opt) => (
-              <option value={opt.id} selected={opt.id === locale}>
-                {opt.label}
-              </option>
-            ))
-          }
-        </select>
-      </label>
+      <LocaleSelect client:load />
       <ThemeToggle />
       <a class="cta" href="/resumes" data-i18n="nav.start">{t("nav.start")}</a>
     </nav>

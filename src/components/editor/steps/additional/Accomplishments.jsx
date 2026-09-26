@@ -9,6 +9,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { TextArea } from "@astryxdesign/core/TextArea";
 import { Plus, Trash2 } from "lucide-react";
 import { useStore } from "@store";
+import { useI18n } from "@features/i18n/useI18n";
 
 const getAccomplishmentObj = () => ({
   key: crypto.randomUUID(),
@@ -17,6 +18,7 @@ const getAccomplishmentObj = () => ({
 });
 
 const Accomplishments = ({ id }) => {
+  const { t } = useI18n();
   const additionalSections = useStore((state) => state.additionalSections);
   const section = additionalSections.find((s) => s.id === id);
   const items = section?.data || [];
@@ -50,10 +52,10 @@ const Accomplishments = ({ id }) => {
       <VStack gap={3} width="100%">
         <VStack gap={1} width="100%">
           <Text type="inherit" size="xl" weight="semibold" color="primary">
-            Accomplishments
+            {t("extras.accomplishments") || "Accomplishments"}
           </Text>
           <Text type="inherit" size="md" color="secondary">
-            Highlight key achievements and awards
+            {t("extras.accomplishmentsSubtitle") || "Highlight key achievements and awards"}
           </Text>
         </VStack>
         {items?.map((formObj) => (
@@ -68,9 +70,9 @@ const Accomplishments = ({ id }) => {
                 id={formObj.key}
                 htmlName="title"
                 width="100%"
-                label="Title"
+                label={t("extras.accomplishmentTitle") || "Title"}
                 value={formObj.title}
-                placeholder="Accomplishment Title"
+                placeholder={t("extras.accomplishmentTitlePlaceholder") || "Accomplishment Title"}
                 onChange={(value) =>
                   setFieldValue(
                     { target: { name: "title", value } },
@@ -84,9 +86,9 @@ const Accomplishments = ({ id }) => {
                 id={formObj.key}
                 htmlName="description"
                 width="100%"
-                label="Description"
+                label={t("common.description") || "Description"}
                 value={formObj.description}
-                placeholder="Details"
+                placeholder={t("extras.accomplishmentDetailsPlaceholder") || "Details"}
                 rows={3}
                 onChange={(value) =>
                   setFieldValue(
@@ -99,8 +101,8 @@ const Accomplishments = ({ id }) => {
             <GridSpan columns={1}>
               <HStack align="center" justify="start" width="100%">
                 <IconButton
-                  label="Remove accomplishment"
-                  tooltip="Remove accomplishment"
+                  label={t("accomplishments.removeAccomplishment") || "Remove accomplishment"}
+                  tooltip={t("accomplishments.removeAccomplishment") || "Remove accomplishment"}
                   variant="ghost"
                   icon={<Trash2 size={16} />}
                   onClick={() => handleRemove(formObj.key)}
@@ -113,7 +115,7 @@ const Accomplishments = ({ id }) => {
           <Button
             variant="secondary"
             icon={<Plus size={16} />}
-            label="Add Accomplishment"
+            label={t("extras.addAccomplishment") || "Add Accomplishment"}
             onClick={() =>
               setSectionData(id, [
                 ...items,

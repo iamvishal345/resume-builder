@@ -35,15 +35,19 @@ import { availableSections } from "@features/resume/order";
 import { buildResumeDocx, downloadDocx } from "@features/export/docx";
 import { getPalette } from "@features/resume/palettes";
 import { resumeViewModel } from "@features/resume/viewModel";
+import { useStore, resumeDataOf, defaultResumeData } from "@store";
 import {
-  useStore,
-  resumeDataOf,
-  defaultResumeData,
-} from "@store";
-import { getResume, putResume, newResume, listResumes } from "@features/resumes/db";
+  getResume,
+  putResume,
+  newResume,
+  listResumes,
+} from "@features/resumes/db";
 import { saveVersion } from "@features/resumes/versions";
 import { snapshotBefore } from "@features/resumes/snapshot";
-import { downloadResumeMarkdown, downloadResumePlainText } from "@features/export/markdown";
+import {
+  downloadResumeMarkdown,
+  downloadResumePlainText,
+} from "@features/export/markdown";
 import { downloadJsonResume } from "@features/import/jsonResume";
 import { downloadResumePdf } from "@features/export/pdf";
 import PersonalDetails from "./steps/PersonalDetails";
@@ -52,6 +56,11 @@ import Education from "./steps/Education";
 import Skills from "./steps/Skills";
 import Summary from "./steps/Summary";
 import AdditionalSections from "./steps/AdditionalSections";
+import { useI18n } from "@features/i18n/useI18n";
+import {
+  MODE_TO_ACTIVE_TAB,
+  parseActiveTabParam,
+} from "@features/editor/activeTab";
 
 const STEP_COMPONENTS = {
   "personal-details": PersonalDetails,
@@ -71,19 +80,20 @@ const SECTION_STEP_FOR_ID = {
 };
 
 const useAutosaveLabel = () => {
-  const [label, setLabel] = useState("Saved in this browser");
+  const { t } = useI18n();
+  const [label, setLabel] = useState(t("editor.saved"));
   const timer = useRef(null);
   useEffect(() => {
     const unsubscribe = useStore.subscribe(() => {
-      setLabel("Saving…");
+      setLabel(t("common.working"));
       if (timer.current) clearTimeout(timer.current);
-      timer.current = setTimeout(() => setLabel("Saved in this browser"), 700);
+      timer.current = setTimeout(() => setLabel(t("editor.saved")), 700);
     });
     return () => {
       if (timer.current) clearTimeout(timer.current);
       unsubscribe();
     };
-  }, []);
+  }, [t]);
   return label;
 };
 
@@ -96,8 +106,8 @@ const EditorPage = () => {
   });
   const [mode, setMode] = useState(() => {
     if (typeof window === "undefined") return "editor";
-    const view = new URLSearchParams(window.location.search).get("view");
-    return view === "letter" || view === "preview" ? view : "editor";
+    const params = new URLSearchParams(window.location.search);
+    return parseActiveTabParam(params) || "editor";
   });
   const [resumeCheckOpen, setResumeCheckOpen] = useState(false);
   const [jobMatchOpen, setJobMatchOpen] = useState(false);
@@ -106,6 +116,41 @@ const EditorPage = () => {
   const createdAtRef = useRef(null);
   const docName = useRef("Untitled resume");
   const baselineName = useRef("");
+
+  // Sync mode with activeTab query parameter and popstate events
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    const currentTab = url.searchParams.get("activeTab");
+    const targetTab = MODE_TO_ACTIVE_TAB[mode] || "resume-editor";
+
+    if (
+      mode === "letter" &&
+      (currentTab === "cover-letter" || currentTab === "cover-latter")
+    ) {
+      // Retain existing valid cover letter query param variant
+    } else if (currentTab !== targetTab) {
+      url.searchParams.set("activeTab", targetTab);
+      url.searchParams.delete("view");
+      const method = currentTab ? "pushState" : "replaceState";
+      window.history[method](
+        null,
+        "",
+        `${url.pathname}?${url.searchParams.toString()}`,
+      );
+    }
+
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tabMode = parseActiveTabParam(params);
+      if (tabMode) {
+        setMode(tabMode);
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [mode]);
 
   // Load the resume this URL points at. Bare /editor opens the most recent
   // library doc (or mints one only when the library is empty).
@@ -148,13 +193,25 @@ const EditorPage = () => {
         if (cancelled) return;
         if (docs.length > 0) {
           const doc = docs[0];
-          window.history.replaceState(null, "", `/editor?resume=${doc.id}`);
+          const currentParams = new URLSearchParams(window.location.search);
+          currentParams.set("resume", doc.id);
+          window.history.replaceState(
+            null,
+            "",
+            `/editor?${currentParams.toString()}`,
+          );
           openDoc(doc);
           return;
         }
         const doc = newResume("Untitled resume", defaultResumeData());
         if (cancelled) return;
-        window.history.replaceState(null, "", `/editor?resume=${doc.id}`);
+        const currentParams = new URLSearchParams(window.location.search);
+        currentParams.set("resume", doc.id);
+        window.history.replaceState(
+          null,
+          "",
+          `/editor?${currentParams.toString()}`,
+        );
         await putResume(doc);
         if (cancelled) return;
         openDoc(doc);
@@ -287,6 +344,7 @@ const EditorPage = () => {
   const education = useStore((state) => state.education);
   const skills = useStore((state) => state.skills);
   const additionalSections = useStore((state) => state.additionalSections);
+  const { t } = useI18n();
 
   const resumeData = useMemo(
     () =>
@@ -346,7 +404,7 @@ const EditorPage = () => {
       });
     } catch (error) {
       setExportError(
-        error?.message || "PDF export failed. Try again in a moment.",
+        error?.message || t("errors.pdfExportFailed") || "PDF export failed.",
       );
     }
   };
@@ -368,7 +426,7 @@ const EditorPage = () => {
       await downloadDocx(blob, name);
     } catch (error) {
       setExportError(
-        error?.message || "DOCX export failed. Try again in a moment.",
+        error?.message || t("errors.docxExportFailed") || "DOCX export failed.",
       );
     }
   };
@@ -382,7 +440,10 @@ const EditorPage = () => {
     const next = nextFitPreset(resumeSettings);
     setResumeSettings(next);
     showToast({
-      body: `Density set to ${next.fontSize}px / ${next.lineHeight} line height. Click again to tighten further, or Customize to reset.`,
+      body: t("editor.fitDensityToast", {
+        fontSize: next.fontSize,
+        lineHeight: next.lineHeight,
+      }),
       type: "info",
       uniqueID: "fit-page-density",
       collisionBehavior: "overwrite",
@@ -409,7 +470,10 @@ const EditorPage = () => {
   };
 
   const handleDownloadTxt = () => {
-    downloadResumePlainText(resumeDataOf(useStore.getState()), exportBaseName());
+    downloadResumePlainText(
+      resumeDataOf(useStore.getState()),
+      exportBaseName(),
+    );
   };
 
   const handleDownloadJsonResume = () => {
@@ -553,7 +617,11 @@ const EditorPage = () => {
           />
         }
         content={
-          <LayoutContent isScrollable={false} padding={4} className="editor-layout-content">
+          <LayoutContent
+            isScrollable={false}
+            padding={4}
+            className="editor-layout-content"
+          >
             {mode === "letter" ? (
               <CoverLetterEditor />
             ) : mode === "editor" ? (
@@ -561,7 +629,7 @@ const EditorPage = () => {
                 <div className="editor-tools-row">
                   {customizeOpen ? (
                     <Text type="inherit" size="sm" color="secondary">
-                      Editing layout & theme — preview updates live.
+                      {t("editor.editingCustomizeBanner")}
                     </Text>
                   ) : (
                     <Stepper stepIndex={stepIndex} onJump={goToStep} />
@@ -571,14 +639,16 @@ const EditorPage = () => {
                       variant={customizeOpen ? "primary" : "secondary"}
                       size="sm"
                       icon={<Palette size={15} />}
-                      label={customizeOpen ? "Done" : "Customize"}
+                      label={
+                        customizeOpen ? t("common.done") : t("editor.customize")
+                      }
                       onClick={() => setCustomizeOpen((open) => !open)}
                     />
                     <Button
                       variant="secondary"
                       size="sm"
                       icon={<LayoutTemplate size={14} />}
-                      label="Templates"
+                      label={t("editor.templates")}
                       onClick={() => setTemplateGalleryOpen(true)}
                     />
                   </HStack>
@@ -608,15 +678,20 @@ const EditorPage = () => {
                   ) : (
                     <div className="editor-form-pane">
                       <ActiveStep
-                        onNext={
-                          isLastStep ? () => setMode("preview") : goNext
-                        }
+                        onNext={isLastStep ? () => setMode("preview") : goNext}
                         onPrev={stepIndex > 0 ? goPrev : undefined}
-                        nextLabel={isLastStep ? "Finish" : "Next"}
+                        nextLabel={
+                          isLastStep
+                            ? (t("common.finish") || "Finish")
+                            : (t("common.next") || "Next")
+                        }
                       />
                     </div>
                   )}
-                  <aside className="editor-preview-pane" aria-label="Live resume preview">
+                  <aside
+                    className="editor-preview-pane"
+                    aria-label="Live resume preview"
+                  >
                     <Card padding={0} variant="transparent">
                       <div className="preview-sheet-wrap">
                         <div className="preview-sheet-container">
@@ -653,8 +728,11 @@ const EditorPage = () => {
       <SideDrawer
         isOpen={resumeCheckOpen}
         onOpenChange={setResumeCheckOpen}
-        title="Resume check"
-        subtitle={`${ats.passed}/${ats.total} checks pass — updates as you type`}
+        title={t("ats.title")}
+        subtitle={t("ats.passedTotal", {
+          passed: ats.passed,
+          total: ats.total,
+        })}
       >
         <AtScorePanel
           bare
@@ -719,7 +797,12 @@ const EditorPage = () => {
               {findWeakBullets(workHistory)
                 .slice(0, 3)
                 .map((row) => (
-                  <Text key={row.index} type="inherit" size="sm" color="secondary">
+                  <Text
+                    key={row.index}
+                    type="inherit"
+                    size="sm"
+                    color="secondary"
+                  >
                     {row.role}
                     {row.company ? ` · ${row.company}` : ""}: {row.weak.length}{" "}
                     bullet(s) without numbers

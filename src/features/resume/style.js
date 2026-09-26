@@ -1,4 +1,3 @@
-// Resume appearance model — compositional, Zety-style.
 // A template is a named preset of structure + header + skill/language/experience
 // display options + palette/font. Users can override any knob in Customize.
 //
@@ -181,10 +180,12 @@ export const computeMetrics = (settings = {}, overrides = {}) => {
   );
 
   const fontSize = Math.round(
-    (overrides.fontSize != null ? clamp(overrides.fontSize, 11, 18) : globalFont) * s
+    (overrides.fontSize != null
+      ? clamp(overrides.fontSize, 11, 18)
+      : globalFont) * s,
   );
   const sectionSpacing = Math.round(
-    (overrides.gap != null ? clamp(overrides.gap, 0, 28) : globalSpacing) * s
+    (overrides.gap != null ? clamp(overrides.gap, 0, 28) : globalSpacing) * s,
   );
   const marginTop =
     overrides.marginTop != null
@@ -199,33 +200,46 @@ export const computeMetrics = (settings = {}, overrides = {}) => {
       ? clamp(overrides.lineHeight, 1.1, 2)
       : globalLine;
   const headingScale =
-    overrides.headingScale != null ? clamp(overrides.headingScale, 0.6, 1.5) : 1;
+    overrides.headingScale != null
+      ? clamp(overrides.headingScale, 0.6, 1.5)
+      : 1;
 
   const entryGap = Math.round(sectionSpacing * 0.72);
   const headingGap = Math.round(sectionSpacing * 0.45);
   const richGap = Math.round(sectionSpacing * 0.28);
 
   const padX =
-    (settings.pagePadX != null ? settings.pagePadX : STRUCTURE_DEFAULTS.pagePadX) * s;
+    (settings.pagePadX != null
+      ? settings.pagePadX
+      : STRUCTURE_DEFAULTS.pagePadX) * s;
   const padY =
-    (settings.pagePadY != null ? settings.pagePadY : STRUCTURE_DEFAULTS.pagePadY) * s;
+    (settings.pagePadY != null
+      ? settings.pagePadY
+      : STRUCTURE_DEFAULTS.pagePadY) * s;
   const colGap =
     (settings.colGap != null ? settings.colGap : STRUCTURE_DEFAULTS.colGap) * s;
   const nameSize = Math.round(
-    (settings.nameSize != null ? settings.nameSize : STRUCTURE_DEFAULTS.nameSize) * s
+    (settings.nameSize != null
+      ? settings.nameSize
+      : STRUCTURE_DEFAULTS.nameSize) * s,
   );
   const photoSize =
-    (settings.photoSize != null ? settings.photoSize : STRUCTURE_DEFAULTS.photoSize) * s;
+    (settings.photoSize != null
+      ? settings.photoSize
+      : STRUCTURE_DEFAULTS.photoSize) * s;
   const radiusSm =
     settings.radiusSm != null ? settings.radiusSm : STRUCTURE_DEFAULTS.radiusSm;
   const sidebarWidth = clamp(
-    settings.sidebarWidth != null ? settings.sidebarWidth : STRUCTURE_DEFAULTS.sidebarWidth,
+    settings.sidebarWidth != null
+      ? settings.sidebarWidth
+      : STRUCTURE_DEFAULTS.sidebarWidth,
     18,
-    48
+    48,
   );
 
   const r = TYPE_RATIOS;
-  const sizeOf = (ratio, scale = 1) => round2(fontSize * ratio * (scale === "heading" ? headingScale : 1));
+  const sizeOf = (ratio, scale = 1) =>
+    round2(fontSize * ratio * (scale === "heading" ? headingScale : 1));
 
   return {
     s,
@@ -600,7 +614,8 @@ export const isSidebarLayout = (settings) => {
   return id === "sidebar" || id === "sidebar-right";
 };
 
-export const isSplitLayout = (settings) => resolveLayoutId(settings) === "split";
+export const isSplitLayout = (settings) =>
+  resolveLayoutId(settings) === "split";
 
 export const resolveLayoutSettings = (settings = {}, template = {}) => {
   const rawLayout = settings.layoutId || template.layout || "single";
@@ -617,7 +632,8 @@ export const resolveLayoutSettings = (settings = {}, template = {}) => {
     return {
       ...base,
       layoutId: rawLayout,
-      headerAlign: settings.headerAlign || template.style?.headerAlign || base.headerAlign,
+      headerAlign:
+        settings.headerAlign || template.style?.headerAlign || base.headerAlign,
       headerStyle:
         // migrate old "color" / "normal" headerStyle values
         settings.headerStyle === "color"
@@ -675,8 +691,7 @@ export const contrastInk = (hex, light = "#FFFFFF", dark = "#111827") => {
   const r = parseInt(full.slice(0, 2), 16) / 255;
   const g = parseInt(full.slice(2, 4), 16) / 255;
   const b = parseInt(full.slice(4, 6), 16) / 255;
-  const lin = (v) =>
-    v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+  const lin = (v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
   const L = 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
   return L > 0.45 ? dark : light;
 };

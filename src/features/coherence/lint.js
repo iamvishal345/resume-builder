@@ -197,6 +197,40 @@ export const computeCoherenceIssues = (data) => {
     ));
   }
 
+  // Email format validation
+  if (pd.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pd.email.trim())) {
+    issues.push(issue(
+      "invalid-email", STEP_PD, "warning",
+      "Invalid email address format",
+      "Check your email address format (e.g. name@example.com).",
+    ));
+  }
+
+  // Date chronology check
+  expIntervals.forEach((item, idx) => {
+    if (item.start && item.end && item.end.year !== 9999) {
+      if (intervalStart(item) > intervalEnd(item)) {
+        issues.push(issue(
+          `exp-chronology-${idx}`, STEP_EXPERIENCE, "warning",
+          `End date before start date in “${item.label}”`,
+          "An experience entry has an end date earlier than its start date.",
+        ));
+      }
+    }
+  });
+
+  eduIntervals.forEach((item, idx) => {
+    if (item.start && item.end && item.end.year !== 9999) {
+      if (intervalStart(item) > intervalEnd(item)) {
+        issues.push(issue(
+          `edu-chronology-${idx}`, STEP_EDUCATION, "warning",
+          `End date before start date in “${item.label}”`,
+          "An education entry has an end date earlier than its start date.",
+        ));
+      }
+    }
+  });
+
   // Duplicate contacts
   const emails = [pd.email, ...socialLinks.map((l) => l.value)].filter(Boolean);
   const dupEmails = duplicateValues(emails);

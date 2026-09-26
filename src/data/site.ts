@@ -7,7 +7,7 @@ export const SITE = {
   tagline: "Build a resume that gets you hired.",
   description:
     "A fast, free, and private resume builder. Guided sections, live preview, and honest PDF or DOCX export — no sign-up, no tracking, data stays on your device.",
-  url: "https://resume-builder.example.com",
+  url: (typeof process !== "undefined" && process.env?.SITE_URL) || (import.meta.env && import.meta.env.SITE_URL) || "https://cavren.app",
   email: "findvishalsharma@gmail.com",
   ownerName: "Vishal Sharma",
   bmcUrl: "https://buymeacoffee.com/findvishal",

@@ -86,7 +86,7 @@ const ResumesDashboard = () => {
       setList(docs);
       setError("");
     } catch (e) {
-      setError(e && e.message ? e.message : "Could not load your resumes.");
+      setError(e?.message || t("errors.loadResumesFailed") || "Could not load your resumes.");
     } finally {
       setLoading(false);
     }
@@ -108,7 +108,7 @@ const ResumesDashboard = () => {
   }, []);
 
   const createNew = async () => {
-    const doc = newResume("Untitled resume");
+    const doc = newResume(t("dash.untitled") || "Untitled resume");
     await putResume(doc);
     window.location.href = `/editor?resume=${doc.id}`;
   };
@@ -146,15 +146,15 @@ const ResumesDashboard = () => {
         kind: "ok",
         text:
           result.kind === "pack"
-            ? `Restored ${result.count} resume(s) from pack.`
+            ? (t("dash.restoredPack", { count: result.count }) || `Restored ${result.count} resume(s) from pack.`)
             : result.kind === "json-resume"
-              ? `Imported JSON Resume as "${result.doc.name}".`
-              : `Restored "${result.doc.name}" from backup.`,
+              ? (t("dash.importedJsonResume", { name: result.doc.name }) || `Imported JSON Resume as "${result.doc.name}".`)
+              : (t("dash.restoredBackupDoc", { name: result.doc.name }) || `Restored "${result.doc.name}" from backup.`),
       });
     } catch (e) {
       setMessage({
         kind: "error",
-        text: e && e.message ? e.message : "Could not restore that file.",
+        text: e?.message || t("errors.restoreFileFailed") || "Could not restore that file.",
       });
     } finally {
       if (restoreInputRef.current) restoreInputRef.current.value = "";
@@ -209,7 +209,7 @@ const ResumesDashboard = () => {
   const rowMeta = (doc) => {
     const template = resolveTemplate(doc.data.resumeSettings?.templateId);
     const tmplName = template ? template.name : "Default";
-    return `${tmplName} · Updated ${relativeTime(doc.updatedAt)}`;
+    return `${tmplName} · ${t("dash.updatedPrefix")} ${relativeTime(doc.updatedAt, t)}`;
   };
 
   return (
@@ -301,28 +301,28 @@ const ResumesDashboard = () => {
           {loading ? (
             <Card padding={4} width="100%">
               <Text type="inherit" size="sm" color="secondary">
-                Loading resumes…
+                {t("dash.loading") || "Loading resumes…"}
               </Text>
             </Card>
           ) : list.length === 0 ? (
             <EmptyState
               icon={<FileText size={26} />}
-              title="No resumes yet"
-              description="Create a resume, restore a backup, or load demo templates — all stay on this device."
+              title={t("dash.noResumesTitle") || "No resumes yet"}
+              description={t("dash.noResumesDesc") || "Create a resume, restore a backup, or load demo templates — all stay on this device."}
               actions={
                 <HStack gap={2} wrap>
                   <Button
                     variant="primary"
                     size="sm"
                     icon={<Plus size={15} />}
-                    label="Create resume"
+                    label={t("dash.createResume") || "Create resume"}
                     onClick={createNew}
                   />
                   <Button
                     variant="secondary"
                     size="sm"
                     icon={<Sparkles size={15} />}
-                    label="Load demos"
+                    label={t("dash.loadDemos") || "Load demos"}
                     onClick={async () => {
                       setDemoMode("on");
                       await seedDemoResumes();
@@ -424,10 +424,10 @@ const ResumesDashboard = () => {
         padding={2}
       >
         <DialogHeader
-          title="Delete this resume?"
+          title={t("dash.deleteConfirmTitle") || "Delete this resume?"}
           subtitle={
             deleteDoc
-              ? `"${nameOf(deleteDoc)}" will be removed from this browser. This cannot be undone.`
+              ? (t("dash.deleteConfirmSubtitle", { name: nameOf(deleteDoc) }) || `"${nameOf(deleteDoc)}" will be removed from this browser. This cannot be undone.`)
               : ""
           }
           onOpenChange={(open) => !open && setDeleteDoc(null)}
@@ -437,14 +437,14 @@ const ResumesDashboard = () => {
             <Button
               variant="ghost"
               size="sm"
-              label="Cancel"
+              label={t("common.cancel") || "Cancel"}
               onClick={() => setDeleteDoc(null)}
             />
             <Button
               variant="destructive"
               size="sm"
               icon={<Trash2 size={14} />}
-              label="Delete"
+              label={t("common.delete") || "Delete"}
               onClick={() => deleteDoc && remove(deleteDoc)}
             />
           </HStack>

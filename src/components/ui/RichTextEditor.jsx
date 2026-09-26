@@ -17,6 +17,7 @@ import {
   Redo2,
   Eraser,
 } from "lucide-react";
+import { useI18n } from "@features/i18n/useI18n";
 import AiFab from "../ai/AiFab";
 import { htmlToText, textToEditorHtml } from "@features/ai/provider";
 
@@ -124,6 +125,7 @@ const renderLeaf = ({ attributes, children, leaf }) => {
 };
 
 const Toolbar = ({ onUndo, onRedo }) => {
+  const { t } = useI18n();
   const editor = useSlate();
   const marks = SlateEditor.marks(editor) || {};
 
@@ -171,17 +173,17 @@ const Toolbar = ({ onUndo, onRedo }) => {
 
   return (
     <div className="rsw-toolbar">
-      <ToolButton title="Undo" onClick={onUndo}><Undo2 size={15} /></ToolButton>
-      <ToolButton title="Redo" onClick={onRedo}><Redo2 size={15} /></ToolButton>
+      <ToolButton title={t("editor.undo") || "Undo"} onClick={onUndo}><Undo2 size={15} /></ToolButton>
+      <ToolButton title={t("editor.redo") || "Redo"} onClick={onRedo}><Redo2 size={15} /></ToolButton>
       <span className="rsw-separator" />
-      <ToolButton active={!!marks.bold} title="Bold" onClick={() => toggleMark("bold")}><Bold size={15} /></ToolButton>
-      <ToolButton active={!!marks.italic} title="Italic" onClick={() => toggleMark("italic")}><Italic size={15} /></ToolButton>
-      <ToolButton active={!!marks.underline} title="Underline" onClick={() => toggleMark("underline")}><Underline size={15} /></ToolButton>
+      <ToolButton active={!!marks.bold} title={t("editor.bold") || "Bold"} onClick={() => toggleMark("bold")}><Bold size={15} /></ToolButton>
+      <ToolButton active={!!marks.italic} title={t("editor.italic") || "Italic"} onClick={() => toggleMark("italic")}><Italic size={15} /></ToolButton>
+      <ToolButton active={!!marks.underline} title={t("editor.underline") || "Underline"} onClick={() => toggleMark("underline")}><Underline size={15} /></ToolButton>
       <span className="rsw-separator" />
-      <ToolButton active={isListActive("bulleted-list")} title="Bulleted list" onClick={() => toggleList("bulleted-list")}><List size={15} /></ToolButton>
-      <ToolButton active={isListActive("numbered-list")} title="Numbered list" onClick={() => toggleList("numbered-list")}><ListOrdered size={15} /></ToolButton>
+      <ToolButton active={isListActive("bulleted-list")} title={t("editor.bulletedList") || "Bulleted list"} onClick={() => toggleList("bulleted-list")}><List size={15} /></ToolButton>
+      <ToolButton active={isListActive("numbered-list")} title={t("editor.numberedList") || "Numbered list"} onClick={() => toggleList("numbered-list")}><ListOrdered size={15} /></ToolButton>
       <span className="rsw-separator" />
-      <ToolButton title="Clear formatting" onClick={clearFormatting}><Eraser size={15} /></ToolButton>
+      <ToolButton title={t("editor.clearFormatting") || "Clear formatting"} onClick={clearFormatting}><Eraser size={15} /></ToolButton>
     </div>
   );
 };
@@ -192,9 +194,12 @@ const RichTextEditor = ({
   value,
   onChange,
   minHeight = 240,
-  placeholder = "Write here…",
+  placeholder,
   extraContext = "",
 }) => {
+  const { t } = useI18n();
+  const defaultPlaceholder = t("editor.writeHere") || "Write here…";
+  const resolvedPlaceholder = placeholder !== undefined ? placeholder : defaultPlaceholder;
   const editorRef = useRef(null);
   if (!editorRef.current && typeof window !== "undefined") {
     editorRef.current = withReact(createEditor());
@@ -269,7 +274,7 @@ const RichTextEditor = ({
           <Editable
             className="rsw-ce"
             style={{ minHeight }}
-            placeholder={placeholder}
+            placeholder={resolvedPlaceholder}
             renderElement={renderElement}
             renderLeaf={renderLeaf}
             spellCheck

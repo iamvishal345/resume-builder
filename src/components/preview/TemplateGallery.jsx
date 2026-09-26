@@ -12,6 +12,7 @@ import {
   settingsFromTemplate,
   templatesByCategory,
 } from "@features/resume/templates";
+import { useI18n } from "@features/i18n/useI18n";
 import "./gallery.css";
 
 const Swatch = ({ templateId, active, onSelect, compareMode, slot }) => {
@@ -66,6 +67,7 @@ const ComparePane = ({ templateId, label }) => {
 };
 
 const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
+  const { t } = useI18n();
   const activeTemplate = resolveTemplate(settings?.templateId);
   const [category, setCategory] = useState(
     activeTemplate.category || RESUME_CATEGORIES[0].id,
@@ -97,11 +99,11 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
       padding={2}
     >
       <DialogHeader
-        title="Choose a template"
+        title={t("templatesGallery.title") || "Choose a template"}
         subtitle={
           compareMode
-            ? "Pick left and right templates, then apply one. Content is preserved."
-            : "Zety-style layouts — sidebar, single column, split. Content is preserved."
+            ? (t("templatesGallery.compareSubtitle") || "Pick left and right templates, then apply one. Content is preserved.")
+            : (t("templatesGallery.subtitle") || "All type of layouts — sidebar, single column, split. Content is preserved.")
         }
         onOpenChange={onOpenChange}
       />
@@ -111,7 +113,7 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
             <Button
               size="sm"
               variant={compareMode ? "primary" : "secondary"}
-              label={compareMode ? "Compare on" : "Compare side-by-side"}
+              label={compareMode ? (t("templatesGallery.compareOn") || "Compare on") : (t("templatesGallery.compareSideBySide") || "Compare side-by-side")}
               onClick={() => setCompareMode((v) => !v)}
             />
             {compareMode ? (
@@ -119,19 +121,19 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
                 <Button
                   size="sm"
                   variant={pickSlot === "left" ? "primary" : "ghost"}
-                  label="Pick left"
+                  label={t("templatesGallery.pickLeft") || "Pick left"}
                   onClick={() => setPickSlot("left")}
                 />
                 <Button
                   size="sm"
                   variant={pickSlot === "right" ? "primary" : "ghost"}
-                  label="Pick right"
+                  label={t("templatesGallery.pickRight") || "Pick right"}
                   onClick={() => setPickSlot("right")}
                 />
                 <Button
                   size="sm"
                   variant="secondary"
-                  label="Apply left"
+                  label={t("templatesGallery.applyLeft") || "Apply left"}
                   onClick={() =>
                     onSelect(settingsFromTemplate(resolveTemplate(leftId)))
                   }
@@ -139,7 +141,7 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
                 <Button
                   size="sm"
                   variant="primary"
-                  label="Apply right"
+                  label={t("templatesGallery.applyRight") || "Apply right"}
                   onClick={() =>
                     onSelect(settingsFromTemplate(resolveTemplate(rightId)))
                   }
@@ -150,8 +152,8 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
 
           {compareMode ? (
             <div className="r-compare-grid">
-              <ComparePane templateId={leftId} label="Left" />
-              <ComparePane templateId={rightId} label="Right" />
+              <ComparePane templateId={leftId} label={t("templatesGallery.pickLeft") || "Left"} />
+              <ComparePane templateId={rightId} label={t("templatesGallery.pickRight") || "Right"} />
             </div>
           ) : null}
 
@@ -161,7 +163,7 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
                 key={cat.id}
                 size="sm"
                 variant={category === cat.id ? "primary" : "ghost"}
-                label={cat.name}
+                label={t(`templatesGallery.categories.${cat.id}`) || cat.name}
                 onClick={() => setCategory(cat.id)}
               />
             ))}
@@ -193,7 +195,7 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
           </div>
 
           <Text type="inherit" size="sm" color="secondary">
-            {RESUME_TEMPLATES.length} templates · tweak any layout in Customize
+            {t("templatesGallery.countHint", { count: RESUME_TEMPLATES.length }) || `${RESUME_TEMPLATES.length} templates · tweak any layout in Customize`}
           </Text>
         </VStack>
       </div>

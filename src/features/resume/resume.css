@@ -1,4 +1,4 @@
-/* Resume paper — compositional Zety-style system.
+/* 
    All metrics come from computeMetrics() (style.js) via buildResumeStyle and
    the per-section inline vars from buildSectionStyle. The fallback block keeps
    static/(non-Resume) previews usable. No raw px/em sizing here — only vars
@@ -127,7 +127,9 @@
 
 .r-header {
   margin-block-start: var(--r-section-margin-top, 0px);
-  margin-block-end: calc(var(--r-section-gap) + var(--r-section-margin-bottom, 0px));
+  margin-block-end: calc(
+    var(--r-section-gap) + var(--r-section-margin-bottom, 0px)
+  );
   padding-block-end: var(--r-header-pad);
 }
 
@@ -178,7 +180,9 @@
   border-block-end: 0;
   margin-block-start: calc(var(--r-pad-y) * -1);
   margin-inline: calc(var(--r-pad-x) * -1);
-  margin-block-end: calc(var(--r-section-gap) + var(--r-section-margin-bottom, 0px));
+  margin-block-end: calc(
+    var(--r-section-gap) + var(--r-section-margin-bottom, 0px)
+  );
   padding: var(--r-pad-y) var(--r-pad-x);
 }
 
@@ -254,7 +258,9 @@
 /* —— Sections —— */
 
 .r-section {
-  margin-block-start: calc(var(--r-section-gap) + var(--r-section-margin-top, 0px));
+  margin-block-start: calc(
+    var(--r-section-gap) + var(--r-section-margin-top, 0px)
+  );
   margin-block-end: var(--r-section-margin-bottom, 0px);
 }
 
