@@ -4,31 +4,43 @@ import FeatureIcon from "../components/marketing/FeatureIcon.astro";
 
 const steps = [
   {
+    titleKey: "marketing.features.steps.details.title",
     title: "Personal details",
+    descriptionKey: "marketing.features.steps.details.description",
     description:
       "Name, job title, contact info, photo, and social links like GitHub or LinkedIn.",
   },
   {
+    titleKey: "marketing.features.steps.work.title",
     title: "Work history",
+    descriptionKey: "marketing.features.steps.work.description",
     description:
       "Roles with rich-text achievements — polish bullets with optional AI, drag to reorder.",
   },
   {
+    titleKey: "marketing.features.steps.education.title",
     title: "Education",
+    descriptionKey: "marketing.features.steps.education.description",
     description: "Degrees, schools, and field of study in the same clean editor.",
   },
   {
+    titleKey: "marketing.features.steps.skills.title",
     title: "Skills",
+    descriptionKey: "marketing.features.steps.skills.description",
     description:
       "Name what recruiters look for, rate proficiency, or suggest skills from your experience.",
   },
   {
+    titleKey: "marketing.features.steps.summary.title",
     title: "Summary",
+    descriptionKey: "marketing.features.steps.summary.description",
     description:
       "A headline summary that ties experience, skills, and goals — with browser spellcheck on.",
   },
   {
+    titleKey: "marketing.features.steps.extras.title",
     title: "Additional sections",
+    descriptionKey: "marketing.features.steps.extras.description",
     description:
       "Languages, certifications, and more — duplicate or reorder extras from Customize.",
   },
@@ -38,50 +50,66 @@ const capabilities = [
   {
     id: "export",
     icon: "download",
+    titleKey: "marketing.features.capabilities.export.title",
     title: "Export PDF & DOCX",
+    descriptionKey: "marketing.features.capabilities.export.description",
     description:
       "Print-ready PDF or Word from the layout you preview. Export the whole resume or a single page.",
   },
   {
     icon: "upload",
+    titleKey: "marketing.features.capabilities.import.title",
     title: "Import anything",
+    descriptionKey: "marketing.features.capabilities.import.description",
     description:
       "Paste text, or upload a PDF, .docx, or Cavren backup to keep your writing and reshape the rest.",
   },
   {
     id: "ai",
     icon: "sparkles",
+    titleKey: "marketing.features.capabilities.ai.title",
     title: "AI drafting & polish",
+    descriptionKey: "marketing.features.capabilities.ai.description",
     description:
       "First draft from a job title, bullet polish, and skills-from-experience — Chrome AI or your API key only.",
   },
   {
     icon: "clipboard",
+    titleKey: "marketing.features.capabilities.check.title",
     title: "Resume check",
+    descriptionKey: "marketing.features.capabilities.check.description",
     description:
       "Live completeness score, coherence lint, reading-level hint, and achievement prompts.",
   },
   {
     icon: "target",
+    titleKey: "marketing.features.capabilities.match.title",
     title: "Job match",
+    descriptionKey: "marketing.features.capabilities.match.description",
     description:
       "Paste a job description for missing keywords, tailoring suggestions, and a match score.",
   },
   {
     icon: "roadmap",
+    titleKey: "marketing.features.capabilities.compare.title",
     title: "Templates & compare",
+    descriptionKey: "marketing.features.capabilities.compare.description",
     description:
       "Layouts, palettes, and fonts — including side-by-side compare before you apply.",
   },
   {
     icon: "backup",
+    titleKey: "marketing.features.capabilities.backup.title",
     title: "Backup & versions",
+    descriptionKey: "marketing.features.capabilities.backup.description",
     description:
       "Portable .r.json backups, local version snapshots, and optional client-side Drive backup.",
   },
   {
     icon: "lock",
+    titleKey: "marketing.features.capabilities.private.title",
     title: "Private & offline",
+    descriptionKey: "marketing.features.capabilities.private.description",
     description:
       "No account, no analytics. IndexedDB on device; install the PWA and keep editing offline.",
   },
@@ -92,23 +120,27 @@ const capabilities = [
   title="Features"
   description="Everything Cavren does: guided editing, live preview, PDF/DOCX export, import, AI drafting, resume checks, job matching, and full privacy."
   ogTitle="Cavren features — an editor that checks, matches, and exports"
+  titleKey="marketing.features.metaTitle"
+  descriptionKey="marketing.features.metaDescription"
+  ogTitleKey="marketing.features.ogTitle"
+  ogDescriptionKey="marketing.features.metaDescription"
 >
   <section class="hero">
-    <h1>An editor that checks, matches, and exports</h1>
-    <p>
+    <h1 data-i18n="marketing.features.heroTitle">An editor that checks, matches, and exports</h1>
+    <p data-i18n="marketing.features.heroDescription">
       Six guided steps keep a live preview beside your forms. Export, import, AI,
       and checks turn that draft into a resume you'd send with confidence.
     </p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="/resumes">Start building free</a>
-      <a class="btn btn-secondary" href="/privacy">How privacy works</a>
+      <a class="btn btn-primary" href="/resumes" data-i18n="marketing.features.start">Start building free</a>
+      <a class="btn btn-secondary" href="/privacy" data-i18n="marketing.features.privacy">How privacy works</a>
     </div>
   </section>
 
   <section class="container section-pad reveal">
     <div class="section-title">
-      <h2>What you get</h2>
-      <p>Capabilities that make a resume easy to write and hard to mess up.</p>
+      <h2 data-i18n="marketing.features.capabilitiesTitle">What you get</h2>
+      <p data-i18n="marketing.features.capabilitiesSubtitle">Capabilities that make a resume easy to write and hard to mess up.</p>
     </div>
     <div class="grid">
       {
@@ -117,8 +149,8 @@ const capabilities = [
             <span class="icon">
               <FeatureIcon name={cap.icon} />
             </span>
-            <h3>{cap.title}</h3>
-            <p>{cap.description}</p>
+            <h3 data-i18n={cap.titleKey}>{cap.title}</h3>
+            <p data-i18n={cap.descriptionKey}>{cap.description}</p>
           </article>
         ))
       }
@@ -127,8 +159,8 @@ const capabilities = [
 
   <section class="container section-pad reveal">
     <div class="section-title">
-      <h2>How the editor works</h2>
-      <p>Six focused steps — nothing missed, everything in one place.</p>
+      <h2 data-i18n="marketing.features.stepsTitle">How the editor works</h2>
+      <p data-i18n="marketing.features.stepsSubtitle">Six focused steps — nothing missed, everything in one place.</p>
     </div>
     <div class="step-rows">
       {
@@ -138,8 +170,8 @@ const capabilities = [
               {String(index + 1).padStart(2, "0")}
             </span>
             <div>
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
+              <h3 data-i18n={step.titleKey}>{step.title}</h3>
+              <p data-i18n={step.descriptionKey}>{step.description}</p>
             </div>
           </article>
         ))
@@ -149,9 +181,9 @@ const capabilities = [
 
   <section class="cta-band reveal">
     <div class="container">
-      <h2>Try it — free and private</h2>
-      <p>No sign-up, no uploads. Just a faster way to a better resume.</p>
-      <a class="btn btn-primary" href="/resumes">Start building free</a>
+      <h2 data-i18n="marketing.features.ctaTitle">Try it — free and private</h2>
+      <p data-i18n="marketing.features.ctaBody">No sign-up, no uploads. Just a faster way to a better resume.</p>
+      <a class="btn btn-primary" href="/resumes" data-i18n="marketing.features.start">Start building free</a>
     </div>
   </section>
 </MarketingLayout>

@@ -83,24 +83,37 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Must match the precache key Astro emits ("offline"), not /offline/index.html
-        navigateFallback: "/offline",
-        navigateFallbackDenylist: [/^\/_/, /\/[^/?]+\.[^/]+$/],
+        navigateFallback: null,
         clientsClaim: true,
-        // Include .mjs so pdf.js worker is available offline for import/preview
+        // Exclude .html from globPatterns so HTML pages are not precached ahead of live network calls.
         globPatterns: [
-          "**/*.{js,mjs,css,html,svg,png,ico,woff2,woff,ttf,json,webmanifest}",
+          "**/*.{js,mjs,css,svg,png,ico,woff2,woff,ttf,json,webmanifest}",
+        ],
+        // Precache the offline fallback shell specifically
+        additionalManifestEntries: [
+          { url: "/offline/index.html", revision: "1" },
         ],
         // pdf.worker.min.mjs is ~1.2MB; keep headroom for future assets
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
-            urlPattern: ({ request }) => request.destination === "document",
+            urlPattern: ({ request }) =>
+              request.mode === "navigate" || request.destination === "document",
             handler: "NetworkFirst",
             options: {
               cacheName: "pages",
-              networkTimeoutSeconds: 3,
+              plugins: [
+                {
+                  handlerDidError: async () => {
+                    return (
+                      (await caches.match("/offline/index.html")) ||
+                      (await caches.match("/offline")) ||
+                      Response.error()
+                    );
+                  },
+                },
+              ],
             },
           },
         ],

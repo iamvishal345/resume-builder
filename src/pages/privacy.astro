@@ -8,18 +8,23 @@ import { SITE } from "../data/site";
   description="Cavren's privacy policy: your data stays on your device. No servers, no harvesting."
   ogType="article"
   canonical={`${SITE.url}/privacy`}
+  titleKey="marketing.privacy.metaTitle"
+  descriptionKey="marketing.privacy.metaDescription"
+  ogTitleKey="marketing.privacy.metaTitle"
+  ogDescriptionKey="marketing.privacy.metaDescription"
+  i18nVars={{ email: SITE.email }}
 >
   <section class="page">
-    <h1>Privacy</h1>
-    <p class="lede">
+    <h1 data-i18n="marketing.privacy.title">Privacy</h1>
+    <p class="lede" data-i18n="marketing.privacy.lede">
       Short version: Cavren is a community, local-first tool. Your resumes stay on
       your device. We don't run an app server for your content, we don't require
       accounts, and we don't embed analytics or advertising trackers.
     </p>
 
     <div class="prose">
-      <h2>Where your data lives</h2>
-      <p>
+      <h2 data-i18n="marketing.privacy.dataTitle">Where your data lives</h2>
+      <p data-i18n="marketing.privacy.dataBody">
         Resumes are stored in this browser's IndexedDB. Backups you download
         (.r.json, PDF, DOCX, or an optional passphrase-encrypted pack) are
         ordinary files on your computer. Encryption for that pack runs only in
@@ -27,48 +32,58 @@ import { SITE } from "../data/site";
         snapshots also stay in IndexedDB on this device.
       </p>
 
-      <h2>What we collect</h2>
+      <h2 data-i18n="marketing.privacy.collectTitle">What we collect</h2>
       <ul>
-        <li>No account, no name, no email required to build or export.</li>
-        <li>No analytics, advertising, or session-replay scripts.</li>
-        <li>
+        <li data-i18n="marketing.privacy.collectAccount">No account, no name, no email required to build or export.</li>
+        <li data-i18n="marketing.privacy.collectAnalytics">No analytics, advertising, or session-replay scripts.</li>
+        <li data-i18n="marketing.privacy.collectFonts">
           Hosted fonts ship with the app — we do not load third-party tracking
           domains.
         </li>
       </ul>
 
-      <h2>Optional AI</h2>
-      <p>
+      <h2 data-i18n="marketing.privacy.aiTitle">Optional AI</h2>
+      <p data-i18n="marketing.privacy.aiBody">
         AI features are off until you configure them. You can use on-device
         Chrome AI or supply your own API key. Text you explicitly send goes only
         to that provider — never to a Cavren-hosted model. You can clear the key
         anytime in AI settings.
       </p>
 
-      <h2>Optional Google Drive backup</h2>
+      <h2 data-i18n="marketing.privacy.driveTitle">Optional Google Drive backup</h2>
       <p>
-        If you enable Drive backup, OAuth runs in your browser against Google.
-        The backup file is written to <em>your</em> Drive. Cavren does not
-        operate a sync server. Tokens stay in this browser.
+        <span data-i18n="marketing.privacy.driveBodyBefore">If you enable Drive backup, OAuth runs in your browser against Google. The backup file is written to </span><em
+          data-i18n="marketing.privacy.driveBodyEmphasis">your</em
+        ><span data-i18n="marketing.privacy.driveBodyAfter">
+          Drive. Cavren does not operate a sync server. Tokens stay in this browser.
+        </span>
       </p>
 
-      <h2>Exports &amp; offline</h2>
+      <h2 data-i18n="marketing.privacy.exportsTitle">Exports &amp; offline</h2>
       <p>
-        PDF and DOCX are generated locally. You can also export Markdown, plain
-        text, or a{" "}
-        <a href="https://jsonresume.org/" target="_blank" rel="noopener noreferrer"
-          >JSON Resume</a
-        >{" "}
-        file for use in other tools. Once installed as a PWA (or after a visit),
-        the app shell can work offline for editing and export. Network is only
-        needed for optional AI APIs and Drive.
+        <span data-i18n="marketing.privacy.exportsBeforeLink">PDF and DOCX are generated locally. You can also export Markdown, plain text, or a </span><a
+          href="https://jsonresume.org/"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-i18n="marketing.privacy.jsonResume">JSON Resume</a
+        ><span data-i18n="marketing.privacy.exportsAfterLink">
+          file for use in other tools. Once installed as a PWA (or after a visit),
+          the app shell can work offline for editing and export. Network is only
+          needed for optional AI APIs and Drive.
+        </span>
       </p>
 
-      <h2>Contact</h2>
+      <h2 data-i18n="marketing.privacy.contactTitle">Contact</h2>
       <p>
-        Questions? Reach us at{" "}
-        <a href={`mailto:${SITE.email}`}>{SITE.email}</a> or visit{" "}
-        <a href="/contact">contact</a>.
+        <span data-i18n="marketing.privacy.contactBeforeEmail">Questions? Reach us at </span><a
+          href={`mailto:${SITE.email}`}
+          data-i18n="marketing.privacy.email"
+          data-i18n-vars={JSON.stringify({ email: SITE.email })}
+          >{SITE.email}</a
+        ><span data-i18n="marketing.privacy.contactBetween"> or visit </span><a
+          href="/contact"
+          data-i18n="marketing.privacy.contactLink">contact</a
+        ><span data-i18n="marketing.privacy.contactAfter">.</span>
       </p>
     </div>
   </section>

@@ -2,7 +2,7 @@
 import Layout from "./Layout.astro";
 import SiteNav from "../components/marketing/SiteNav.astro";
 import SiteFooter from "../components/marketing/SiteFooter.astro";
-import { t, resolveRequestLocale } from "../features/i18n";
+import { t } from "../features/i18n";
 import "../styles/marketing.css";
 
 interface Props {
@@ -14,10 +14,14 @@ interface Props {
   canonical?: string;
   noindex?: boolean;
   ogImage?: string;
+  titleKey?: string;
+  descriptionKey?: string;
+  ogTitleKey?: string;
+  ogDescriptionKey?: string;
+  i18nVars?: Record<string, string>;
 }
 
 const props = Astro.props as Props;
-resolveRequestLocale(Astro.cookies.get("cavren-locale")?.value);
 ---
 
 <Layout
@@ -29,14 +33,86 @@ resolveRequestLocale(Astro.cookies.get("cavren-locale")?.value);
   canonical={props.canonical}
   noindex={props.noindex}
   ogImage={props.ogImage}
+  titleKey={props.titleKey}
+  descriptionKey={props.descriptionKey}
+  ogTitleKey={props.ogTitleKey}
+  ogDescriptionKey={props.ogDescriptionKey}
+  i18nVars={props.i18nVars}
 >
-  <a class="skip-link" href="#main">{t("a11y.skip")}</a>
+  <a
+    class="skip-link"
+    href="#main"
+    data-i18n="a11y.skip"
+  >{t("a11y.skip")}</a>
   <SiteNav />
   <main id="main">
     <slot />
   </main>
   <SiteFooter />
 </Layout>
+
+<script>
+  import {
+    applyDocumentLocale,
+    getLocale,
+    setLocale,
+    subscribeLocale,
+    t,
+  } from "@features/i18n";
+
+  const varsFor = (element) => {
+    const value = element.getAttribute("data-i18n-vars");
+    if (!value) return undefined;
+    try {
+      return JSON.parse(value);
+    } catch {
+      return undefined;
+    }
+  };
+
+  const syncText = () => {
+    document.querySelectorAll("[data-i18n]").forEach((element) => {
+      const key = element.getAttribute("data-i18n");
+      if (!key) return;
+      const suffix = element.getAttribute("data-i18n-suffix") || "";
+      element.textContent = `${t(key, varsFor(element))}${suffix}`;
+    });
+
+    document.querySelectorAll("[data-i18n-attrs]").forEach((element) => {
+      const value = element.getAttribute("data-i18n-attrs");
+      if (!value) return;
+      value.split(";").forEach((entry) => {
+        const separator = entry.indexOf(":");
+        if (separator < 1) return;
+        const attribute = entry.slice(0, separator).trim();
+        const key = entry.slice(separator + 1).trim();
+        if (attribute && key) {
+          element.setAttribute(attribute, t(key, varsFor(element)));
+        }
+      });
+    });
+
+    applyDocumentLocale();
+    const select = document.getElementById("cavren-locale");
+    if (select instanceof HTMLSelectElement) select.value = getLocale();
+  };
+
+  const start = () => syncText();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start, { once: true });
+  } else {
+    start();
+  }
+  document.addEventListener("astro:page-load", start);
+  subscribeLocale(start);
+
+  document.addEventListener("change", (event) => {
+    const target = event.target;
+    if (target instanceof HTMLSelectElement && target.id === "cavren-locale") {
+      setLocale(target.value);
+    }
+  });
+</script>
 
 <style>
   .skip-link {

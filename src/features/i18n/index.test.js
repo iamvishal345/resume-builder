@@ -16,6 +16,16 @@ describe("i18n", () => {
     setLocale("en");
   });
 
+  it("translates the marketing features CTA", () => {
+    setLocale("en");
+    expect(t("marketing.home.featuresCta")).toBe("See features");
+    setLocale("es");
+    expect(t("marketing.home.featuresCta")).toBe("Ver funciones");
+    setLocale("hi");
+    expect(t("marketing.home.featuresCta")).toBe("विशेषताएँ देखें");
+    setLocale("en");
+  });
+
   it("supports Spanish", () => {
     setLocale("es");
     expect(t("nav.features")).toBe("Funciones");

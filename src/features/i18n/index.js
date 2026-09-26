@@ -1,8 +1,16 @@
 import en from "./locales/en.js";
 import hi from "./locales/hi.js";
 import es from "./locales/es.js";
+import fr from "./locales/fr.js";
+import de from "./locales/de.js";
+import nl from "./locales/nl.js";
+import pl from "./locales/pl.js";
+import ja from "./locales/ja.js";
+import ko from "./locales/ko.js";
+import zh from "./locales/zh.js";
+import th from "./locales/th.js";
 
-const LOCALES = { en, hi, es };
+const LOCALES = { en, hi, es, fr, de, nl, pl, ja, ko, zh, th };
 const STORAGE_KEY = "cavren-locale";
 const COOKIE = "cavren-locale";
 
@@ -10,13 +18,31 @@ export const LOCALE_OPTIONS = [
   { id: "en", label: "English" },
   { id: "es", label: "Español" },
   { id: "hi", label: "हिन्दी" },
+  { id: "fr", label: "Français" },
+  { id: "de", label: "Deutsch" },
+  { id: "nl", label: "Nederlands" },
+  { id: "pl", label: "Polski" },
+  { id: "ja", label: "日本語" },
+  { id: "ko", label: "한국어" },
+  { id: "zh", label: "简体中文" },
+  { id: "th", label: "ไทย" },
 ];
 
-const htmlLang = (code) => {
-  if (code === "hi") return "hi";
-  if (code === "es") return "es";
-  return "en";
+const HTML_LANGS = {
+  en: "en",
+  es: "es",
+  hi: "hi",
+  fr: "fr",
+  de: "de",
+  nl: "nl",
+  pl: "pl",
+  ja: "ja",
+  ko: "ko",
+  zh: "zh-CN",
+  th: "th",
 };
+
+const htmlLang = (code) => HTML_LANGS[code] || "en";
 
 const readCookie = () => {
   if (typeof document === "undefined") return null;
@@ -104,6 +130,8 @@ export const applyDocumentLocale = () => {
   if (typeof document === "undefined") return;
   document.documentElement.lang = htmlLang(current);
 };
+
+if (typeof document !== "undefined") applyDocumentLocale();
 
 /** Resolve locale from Astro cookies / request. */
 export const resolveRequestLocale = (cookieValue) => {

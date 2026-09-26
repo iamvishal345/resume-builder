@@ -6,19 +6,23 @@ import MarketingLayout from "../layouts/MarketingLayout.astro";
   title="Offline"
   description="Cavren is offline. Open a cached page or reconnect to continue."
   noindex={true}
+  titleKey="marketing.offline.metaTitle"
+  descriptionKey="marketing.offline.metaDescription"
+  ogTitleKey="marketing.offline.metaTitle"
+  ogDescriptionKey="marketing.offline.metaDescription"
 >
   <section class="hero">
-    <h1>You're offline</h1>
-    <p>
+    <h1 data-i18n="marketing.offline.title">You're offline</h1>
+    <p data-i18n="marketing.offline.body">
       Cavren keeps working without a network once you've visited before. Open My
       resumes from your install or history — editing and exports stay on this
       device.
     </p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="/resumes">My resumes</a>
-      <a class="btn btn-secondary" href="/">Home</a>
+      <a class="btn btn-primary" href="/resumes" data-i18n="marketing.offline.resumes">My resumes</a>
+      <a class="btn btn-secondary" href="/" data-i18n="marketing.offline.home">Home</a>
     </div>
-    <p class="offline-note">
+    <p class="offline-note" data-i18n="marketing.offline.note">
       Optional AI APIs and Google Drive backup wait until you're back online.
     </p>
   </section>

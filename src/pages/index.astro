@@ -7,37 +7,49 @@ import { SITE } from "../data/site";
 const features = [
   {
     icon: "download",
+    titleKey: "marketing.home.features.export.title",
     title: "PDF & DOCX export",
+    descriptionKey: "marketing.home.features.export.description",
     description:
       "Print-ready PDF or Word from the same layout you preview — including a single page when you only need one.",
   },
   {
     icon: "upload",
+    titleKey: "marketing.home.features.import.title",
     title: "Import what you have",
+    descriptionKey: "marketing.home.features.import.description",
     description:
       "Bring a PDF, Word file, or Cavren backup and keep writing from your own content.",
   },
   {
     icon: "roadmap",
+    titleKey: "marketing.home.features.templates.title",
     title: "Templates you can compare",
+    descriptionKey: "marketing.home.features.templates.description",
     description:
       "Swap layouts, accents, and type — or put two templates side by side before you commit.",
   },
   {
     icon: "sparkles",
+    titleKey: "marketing.home.features.ai.title",
     title: "AI that stays yours",
+    descriptionKey: "marketing.home.features.ai.description",
     description:
       "Optional first drafts and bullet polish via Chrome AI or your own API key — never a Cavren proxy.",
   },
   {
     icon: "clipboard",
+    titleKey: "marketing.home.features.check.title",
     title: "Resume check",
+    descriptionKey: "marketing.home.features.check.description",
     description:
       "Live score, coherence pass, reading-level hint, and achievement prompts before you hit send.",
   },
   {
     icon: "lock",
+    titleKey: "marketing.home.features.private.title",
     title: "Private by default",
+    descriptionKey: "marketing.home.features.private.description",
     description:
       "IndexedDB on your device. No account, no analytics SDKs. Install as a PWA and keep editing offline.",
   },
@@ -45,17 +57,23 @@ const features = [
 
 const steps = [
   {
+    titleKey: "marketing.home.steps.guided.title",
     title: "Write guided",
+    descriptionKey: "marketing.home.steps.guided.description",
     description:
       "Details, experience, education, skills, summary, extras — with rich text and drag-to-reorder.",
   },
   {
+    titleKey: "marketing.home.steps.check.title",
     title: "Check & polish",
+    descriptionKey: "marketing.home.steps.check.description",
     description:
       "Score, coherence, and soft prompts catch overlaps and thin bullets before a recruiter does.",
   },
   {
+    titleKey: "marketing.home.steps.export.title",
     title: "Export & send",
+    descriptionKey: "marketing.home.steps.export.description",
     description:
       "Download PDF or DOCX that matches the preview, or tailor against a pasted job description.",
   },
@@ -66,6 +84,10 @@ const steps = [
   title={SITE.tagline}
   description={SITE.description}
   ogTitle="Cavren — offline, free, private resume builder with PDF & DOCX export"
+  titleKey="marketing.home.metaTitle"
+  descriptionKey="marketing.home.metaDescription"
+  ogTitleKey="marketing.home.ogTitle"
+  ogDescriptionKey="marketing.home.metaDescription"
 >
   <section class="hero-plane">
     <div class="hero-copy">
@@ -73,15 +95,21 @@ const steps = [
         <img src="/logo.svg" alt="" width="72" height="72" />
       </p>
       <h1>
-        Build a resume that gets <span class="grad">you hired</span>
+        <span data-i18n="marketing.home.heroPrefix">Build a resume that gets </span><span
+          class="grad"
+          data-i18n="marketing.home.heroHighlight">you hired</span
+        >
       </h1>
-      <p class="lede">
+      <p
+        class="lede"
+        data-i18n="marketing.home.lede"
+      >
         Guided sections, a live preview, and free PDF or DOCX — on your device.
         No sign-up, no uploads, no tracking.
       </p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="/resumes">Start building free</a>
-        <a class="btn btn-secondary" href="/features">See features</a>
+        <a class="btn btn-primary" href="/resumes" data-i18n="marketing.home.start">Start building free</a>
+        <a class="btn btn-secondary" href="/features" data-i18n="marketing.home.featuresCta">See features</a>
       </div>
     </div>
     <div class="hero-stage" aria-hidden="true">
@@ -91,15 +119,15 @@ const steps = [
   </section>
 
   <p class="trust-line reveal">
-    <span>Works offline</span>
-    <span>Data stays local</span>
-    <span>Honest free exports</span>
+    <span data-i18n="marketing.home.offline">Works offline</span>
+    <span data-i18n="marketing.home.local">Data stays local</span>
+    <span data-i18n="marketing.home.exports">Honest free exports</span>
   </p>
 
   <section class="container section-pad reveal">
     <div class="section-title">
-      <h2>From blank page to PDF in minutes</h2>
-      <p>One path. A polished preview beside every step.</p>
+      <h2 data-i18n="marketing.home.journeyTitle">From blank page to PDF in minutes</h2>
+      <p data-i18n="marketing.home.journeySubtitle">One path. A polished preview beside every step.</p>
     </div>
     <div class="step-rows">
       {
@@ -109,8 +137,8 @@ const steps = [
               {String(index + 1).padStart(2, "0")}
             </span>
             <div>
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
+              <h3 data-i18n={step.titleKey}>{step.title}</h3>
+              <p data-i18n={step.descriptionKey}>{step.description}</p>
             </div>
           </article>
         ))
@@ -120,8 +148,8 @@ const steps = [
 
   <section class="container section-pad reveal">
     <div class="section-title">
-      <h2>Built for how resumes get made</h2>
-      <p>Craft, check, and export — without giving up privacy.</p>
+      <h2 data-i18n="marketing.home.featuresTitle">Built for how resumes get made</h2>
+      <p data-i18n="marketing.home.featuresSubtitle">Craft, check, and export — without giving up privacy.</p>
     </div>
     <div class="grid">
       {
@@ -130,8 +158,8 @@ const steps = [
             <span class="icon">
               <FeatureIcon name={feature.icon} />
             </span>
-            <h3>{feature.title}</h3>
-            <p>{feature.description}</p>
+            <h3 data-i18n={feature.titleKey}>{feature.title}</h3>
+            <p data-i18n={feature.descriptionKey}>{feature.description}</p>
           </article>
         ))
       }
@@ -140,9 +168,9 @@ const steps = [
 
   <section class="cta-band reveal">
     <div class="container">
-      <h2>Ready when you are</h2>
-      <p>Your data stays here. Your next resume is a few minutes away.</p>
-      <a class="btn btn-primary" href="/resumes">Build your resume now</a>
+      <h2 data-i18n="marketing.home.ctaTitle">Ready when you are</h2>
+      <p data-i18n="marketing.home.ctaBody">Your data stays here. Your next resume is a few minutes away.</p>
+      <a class="btn btn-primary" href="/resumes" data-i18n="marketing.home.ctaButton">Build your resume now</a>
     </div>
   </section>
 </MarketingLayout>

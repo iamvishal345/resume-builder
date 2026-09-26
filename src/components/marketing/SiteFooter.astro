@@ -1,8 +1,7 @@
 ---
 import { SITE } from "@data/site";
-import { t, resolveRequestLocale } from "@features/i18n";
+import { t } from "@features/i18n";
 
-resolveRequestLocale(Astro.cookies.get("cavren-locale")?.value);
 const year = new Date().getFullYear();
 ---
 
@@ -10,35 +9,44 @@ const year = new Date().getFullYear();
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a class="brand" href="/" aria-label={t("nav.home")}>
+        <a
+          class="brand"
+          href="/"
+          aria-label={t("nav.home")}
+          data-i18n-attrs="aria-label:nav.home"
+        >
           <img src="/logo.svg" alt="" height="32" width="32" />
         </a>
-        <p>{t("footer.blurb")}</p>
+        <p data-i18n="footer.blurb">{t("footer.blurb")}</p>
       </div>
       <div>
-        <h3>{t("footer.product")}</h3>
+        <h3 data-i18n="footer.product">{t("footer.product")}</h3>
         <ul>
-          <li><a href="/features">{t("footer.features")}</a></li>
-          <li><a href="/resumes">{t("footer.resumes")}</a></li>
-          <li><a href="/features#export">{t("footer.export")}</a></li>
+          <li><a href="/features" data-i18n="footer.features">{t("footer.features")}</a></li>
+          <li><a href="/resumes" data-i18n="footer.resumes">{t("footer.resumes")}</a></li>
+          <li><a href="/features#export" data-i18n="footer.export">{t("footer.export")}</a></li>
         </ul>
       </div>
       <div>
-        <h3>{t("footer.learn")}</h3>
+        <h3 data-i18n="footer.learn">{t("footer.learn")}</h3>
         <ul>
-          <li><a href="/about">{t("footer.about")}</a></li>
-          <li><a href="/about#support">{t("footer.support")}</a></li>
-          <li><a href="/privacy">{t("footer.privacy")}</a></li>
-          <li><a href="/contact">{t("footer.contact")}</a></li>
+          <li><a href="/about" data-i18n="footer.about">{t("footer.about")}</a></li>
+          <li><a href="/about#support" data-i18n="footer.support">{t("footer.support")}</a></li>
+          <li><a href="/privacy" data-i18n="footer.privacy">{t("footer.privacy")}</a></li>
+          <li><a href="/contact" data-i18n="footer.contact">{t("footer.contact")}</a></li>
         </ul>
       </div>
       <div>
-        <h3>{t("footer.start")}</h3>
+        <h3 data-i18n="footer.start">{t("footer.start")}</h3>
         <ul>
-          <li><a href="/resumes">{t("footer.build")}</a></li>
-          <li><a href="/features#ai">{t("footer.ai")}</a></li>
+          <li><a href="/resumes" data-i18n="footer.build">{t("footer.build")}</a></li>
+          <li><a href="/features#ai" data-i18n="footer.ai">{t("footer.ai")}</a></li>
           <li>
-            <a href={SITE.bmcUrl} target="_blank" rel="noopener noreferrer"
+            <a
+              href={SITE.bmcUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-i18n="footer.coffee"
               >{t("footer.coffee")}</a
             >
           </li>
@@ -46,13 +54,13 @@ const year = new Date().getFullYear();
       </div>
     </div>
     <div class="footer-bottom">
-      <span
-        >© {year}
-        {SITE.legalName} · Private by design · No trackers · No ads</span
-      >
-      <nav aria-label="Footer">
-        <a href="/privacy">{t("footer.privacy")}</a>
-        <a href="/contact">{t("footer.contact")}</a>
+      <span>
+        © {year} {SITE.legalName} ·
+        <span data-i18n="marketing.footer.legal">Private by design · No trackers · No ads</span>
+      </span>
+      <nav aria-label="Footer" data-i18n-attrs="aria-label:marketing.nav.footer">
+        <a href="/privacy" data-i18n="footer.privacy">{t("footer.privacy")}</a>
+        <a href="/contact" data-i18n="footer.contact">{t("footer.contact")}</a>
       </nav>
     </div>
   </div>

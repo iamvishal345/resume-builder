@@ -8,40 +8,50 @@ import { SITE } from "../data/site";
   description={`Get in touch with ${SITE.name}. Bugs, ideas, or a hello — email works best.`}
   ogType="article"
   canonical={`${SITE.url}/contact`}
+  titleKey="marketing.contact.metaTitle"
+  descriptionKey="marketing.contact.metaDescription"
+  ogTitleKey="marketing.contact.metaTitle"
+  ogDescriptionKey="marketing.contact.metaDescription"
+  i18nVars={{ name: SITE.name }}
 >
   <section class="page">
-    <h1>Contact</h1>
-    <p class="lede">
+    <h1 data-i18n="marketing.contact.title">Contact</h1>
+    <p class="lede" data-i18n="marketing.contact.lede">
       Found a bug, have an idea, or just want to say hi? I'd love to hear from
       you.
     </p>
 
     <div class="prose">
-      <h2>Best way to reach me</h2>
+      <h2 data-i18n="marketing.contact.bestTitle">Best way to reach me</h2>
       <ul>
         <li>
-          Email: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+          <span data-i18n="marketing.contact.emailLabel">Email: </span><a href={`mailto:${SITE.email}`}>{SITE.email}</a>
         </li>
-        <li>
+        <li data-i18n="marketing.contact.bugs">
           Bugs &amp; feature requests: same address — include steps to reproduce
           and what you expected.
         </li>
       </ul>
 
-      <h2>Before you write</h2>
-      <p>
+      <h2 data-i18n="marketing.contact.beforeTitle">Before you write</h2>
+      <p data-i18n="marketing.contact.beforeBody">
         Because everything runs locally, I can't see your resumes or browser
         data. Share steps and expected behavior rather than pasting personal
         resume content.
       </p>
       <p>
-        Prefer browsing first? See <a href="/about#support">support</a> or{" "}
-        <a href="/privacy">privacy</a>.
+        <span data-i18n="marketing.contact.browsePrefix">Prefer browsing first? See </span><a
+          href="/about#support"
+          data-i18n="marketing.contact.supportLink">support</a
+        ><span data-i18n="marketing.contact.browseMiddle"> or </span><a
+          href="/privacy"
+          data-i18n="marketing.contact.privacyLink">privacy</a
+        ><span data-i18n="marketing.contact.browseEnd">.</span>
       </p>
     </div>
 
     <p class="contact-cta">
-      <a class="btn btn-primary" href={`mailto:${SITE.email}`}>Send an email</a>
+      <a class="btn btn-primary" href={`mailto:${SITE.email}`} data-i18n="marketing.contact.cta">Send an email</a>
     </p>
   </section>
 </MarketingLayout>

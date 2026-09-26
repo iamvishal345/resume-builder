@@ -6,16 +6,20 @@ import MarketingLayout from "../layouts/MarketingLayout.astro";
   title="Page not found"
   description="The page you were looking for doesn't exist or has moved."
   noindex
+  titleKey="marketing.notFound.metaTitle"
+  descriptionKey="marketing.notFound.metaDescription"
+  ogTitleKey="marketing.notFound.metaTitle"
+  ogDescriptionKey="marketing.notFound.metaDescription"
 >
   <section class="hero">
-    <h1>404 — page not found</h1>
-    <p>
+    <h1 data-i18n="marketing.notFound.title">404 — page not found</h1>
+    <p data-i18n="marketing.notFound.body">
       That URL doesn't exist, or it moved. Your resumes are still exactly where
       you left them — on this device.
     </p>
     <div class="hero-actions">
-      <a class="btn btn-primary" href="/resumes">Go to my resumes</a>
-      <a class="btn btn-secondary" href="/">Back to home</a>
+      <a class="btn btn-primary" href="/resumes" data-i18n="marketing.notFound.resumes">Go to my resumes</a>
+      <a class="btn btn-secondary" href="/" data-i18n="marketing.notFound.home">Back to home</a>
     </div>
   </section>
 </MarketingLayout>

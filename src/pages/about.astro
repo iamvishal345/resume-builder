@@ -3,11 +3,11 @@ import MarketingLayout from "../layouts/MarketingLayout.astro";
 import { SITE } from "../data/site";
 
 const values = [
-  "Offline first",
-  "No ads",
-  "No trackers",
-  "No account",
-  "No paid exports",
+  { key: "marketing.about.values.offline", label: "Offline first" },
+  { key: "marketing.about.values.ads", label: "No ads" },
+  { key: "marketing.about.values.trackers", label: "No trackers" },
+  { key: "marketing.about.values.account", label: "No account" },
+  { key: "marketing.about.values.exports", label: "No paid exports" },
 ];
 ---
 
@@ -15,39 +15,58 @@ const values = [
   title="About & Support"
   description={`About and support for ${SITE.name} — Offline Resume Builder built by ${SITE.ownerName}. Offline-first, no ads, no trackers, and your data stays on your device.`}
   ogType="article"
+  titleKey="marketing.about.metaTitle"
+  descriptionKey="marketing.about.metaDescription"
+  ogTitleKey="marketing.about.metaTitle"
+  ogDescriptionKey="marketing.about.metaDescription"
+  i18nVars={{ name: SITE.name, owner: SITE.ownerName }}
 >
   <section class="page">
-    <h1>About &amp; Support</h1>
-    <p class="lede">
+    <h1 data-i18n="marketing.about.title">About &amp; Support</h1>
+    <p
+      class="lede"
+      data-i18n="marketing.about.lede"
+      data-i18n-vars={JSON.stringify({ owner: SITE.ownerName, name: SITE.name })}
+    >
       Hi, I'm {SITE.ownerName} — I built {SITE.name} to be the tool I wanted:
       fast, free, and private. Everything runs in your browser. Your data stays on
       your device. Exports are generated on your machine.
     </p>
 
-    <ul class="value-list" aria-label="Product principles">
-      {values.map((v) => <li>{v}</li>)}
+    <ul
+      class="value-list"
+      aria-label="Product principles"
+      data-i18n-attrs="aria-label:marketing.about.principles"
+    >
+      {values.map((v) => <li data-i18n={v.key}>{v.label}</li>)}
     </ul>
 
     <div class="prose">
-      <h2>The short version</h2>
-      <p>
+      <h2 data-i18n="marketing.about.shortTitle">The short version</h2>
+      <p data-i18n="marketing.about.shortBody">
         No account. No uploads. No tracking, no ads, no paywalls — and nothing
         gated behind “free until you export.” Offered as-is, because a resume
         tool should respect your time and your privacy.
       </p>
       <p>
-        The <a href="/privacy">privacy page</a> covers where every byte goes
-        (nowhere, unless you ask). <a href="/features">Features</a> shows what
-        it can do — including optional AI, which only talks to a provider you
-        configure yourself.
+        <span data-i18n="marketing.about.privacyPrefix">The </span><a
+          href="/privacy"
+          data-i18n="marketing.about.privacyLink">privacy page</a
+        ><span data-i18n="marketing.about.privacyMiddle">
+          covers where every byte goes (nowhere, unless you ask).
+        </span> <a href="/features" data-i18n="marketing.about.featuresLink">Features</a
+        ><span data-i18n="marketing.about.featuresMiddle">
+          shows what it can do — including optional AI, which only talks to a
+          provider you configure yourself.
+        </span>
       </p>
     </div>
 
-    <h2 class="page-section" id="support">Get support</h2>
+    <h2 class="page-section" id="support" data-i18n="marketing.about.supportTitle">Get support</h2>
     <div class="grid support-grid">
       <article class="card">
-        <h3>Questions &amp; feedback</h3>
-        <p>
+        <h3 data-i18n="marketing.about.questionsTitle">Questions &amp; feedback</h3>
+        <p data-i18n="marketing.about.questionsBody">
           Something unclear, or you have an idea? Email me directly — I read
           everything.
         </p>
@@ -56,21 +75,21 @@ const values = [
         </a>
       </article>
       <article class="card">
-        <h3>Bugs &amp; issues</h3>
-        <p>
+        <h3 data-i18n="marketing.about.bugsTitle">Bugs &amp; issues</h3>
+        <p data-i18n="marketing.about.bugsBody">
           When something breaks, include steps to reproduce and what you
           expected. Everything runs locally — I can't see your resumes.
         </p>
         <a class="btn btn-secondary" href={`mailto:${SITE.email}`}>
-          Report an issue
+          <span data-i18n="marketing.about.reportIssue">Report an issue</span>
         </a>
       </article>
     </div>
 
     <div class="coffee">
       <div class="coffee-copy">
-        <h2>Liked it? Buy me a coffee</h2>
-        <p>
+        <h2 data-i18n="marketing.about.coffeeTitle">Liked it? Buy me a coffee</h2>
+        <p data-i18n="marketing.about.coffeeBody">
           {SITE.name} is free forever — no ads, no paid exports, nothing gated.
           If it saved you time, a coffee is an optional way to say thanks.
         </p>
@@ -80,7 +99,7 @@ const values = [
           target="_blank"
           rel="noopener noreferrer"
         >
-          Buy me a coffee
+          <span data-i18n="marketing.about.coffeeButton">Buy me a coffee</span>
         </a>
       </div>
       <a
@@ -89,10 +108,12 @@ const values = [
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Scan the QR code to buy me a coffee"
+        data-i18n-attrs="aria-label:marketing.about.qrLabel"
       >
         <img
           src={SITE.bmcQr}
           alt={`QR code to ${SITE.bmcUrl}`}
+          data-i18n-attrs="alt:marketing.about.qrAlt"
           width="200"
           height="200"
           loading="lazy"
@@ -103,9 +124,9 @@ const values = [
 
   <section class="cta-band reveal">
     <div class="container">
-      <h2>Give it a spin</h2>
-      <p>Free, local, and yours — your first resume is minutes away.</p>
-      <a class="btn btn-primary" href="/resumes">Start building free</a>
+      <h2 data-i18n="marketing.about.ctaTitle">Give it a spin</h2>
+      <p data-i18n="marketing.about.ctaBody">Free, local, and yours — your first resume is minutes away.</p>
+      <a class="btn btn-primary" href="/resumes" data-i18n="marketing.about.ctaButton">Start building free</a>
     </div>
   </section>
 </MarketingLayout>
