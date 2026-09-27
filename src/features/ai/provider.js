@@ -21,7 +21,7 @@ export const isChromeAI = () => {
   if (typeof window === "undefined") return false;
   return Boolean(
     typeof window.LanguageModel !== "undefined" ||
-    (typeof window.ai !== "undefined" && window.ai?.languageModel)
+    (typeof window.ai !== "undefined" && window.ai?.languageModel),
   );
 };
 
@@ -72,12 +72,16 @@ export const textToEditorHtml = (text) => {
 export const sanitizeForAi = (text = "") => {
   return text
     .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[email]")
-    .replace(/(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g, "[phone]")
+    .replace(
+      /(?:\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/g,
+      "[phone]",
+    )
     .replace(/\b\d{5,6}\b/g, "[zipcode]");
 };
 
 const chromeGenerate = async (system, user) => {
-  if (typeof window === "undefined") throw new Error("Chrome built-in AI is not available.");
+  if (typeof window === "undefined")
+    throw new Error("Chrome built-in AI is not available.");
   const lm = window.LanguageModel || window.ai?.languageModel;
   if (!lm) throw new Error("Chrome built-in AI is not available.");
 
@@ -94,7 +98,10 @@ const chromeGenerate = async (system, user) => {
 
   const timeoutMs = 30000;
   const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error("Chrome AI request timed out after 30 seconds.")), timeoutMs)
+    setTimeout(
+      () => reject(new Error("Chrome AI request timed out after 30 seconds.")),
+      timeoutMs,
+    ),
   );
 
   const generatePromise = (async () => {
@@ -114,7 +121,11 @@ const chromeGenerate = async (system, user) => {
       return await session.prompt(user);
     } finally {
       if (session && typeof session.destroy === "function") {
-        try { await session.destroy(); } catch { /* ignore */ }
+        try {
+          await session.destroy();
+        } catch {
+          /* ignore */
+        }
       }
     }
   })();
@@ -123,7 +134,9 @@ const chromeGenerate = async (system, user) => {
 };
 
 const openaiGenerate = async (config, system, user) => {
-  const baseUrl = (config.baseUrl || "https://api.openai.com/v1").replace(/\/$/, "");
+  const baseUrl = URL.canParse(config.baseUrl)
+    ? config.baseUrl
+    : "https://api.openai.com/v1";
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 30000);
 
@@ -152,7 +165,9 @@ const openaiGenerate = async (config, system, user) => {
       throw new Error("API rate limit exceeded. Please try again later.");
     }
     if (!res.ok) {
-      throw new Error(`AI provider error (${res.status}). Please check your settings.`);
+      throw new Error(
+        `AI provider error (${res.status}). Please check your settings.`,
+      );
     }
 
     const json = await res.json();
@@ -163,9 +178,12 @@ const openaiGenerate = async (config, system, user) => {
     if (e.name === "AbortError") {
       throw new Error("AI request timed out after 30 seconds.");
     }
-    if (e instanceof TypeError || (e.message && e.message.includes("Failed to fetch"))) {
+    if (
+      e instanceof TypeError ||
+      (e.message && e.message.includes("Failed to fetch"))
+    ) {
       throw new Error(
-        "Couldn't reach the AI provider. Please check your API key, base URL, and internet connection."
+        "Couldn't reach the AI provider. Please check your API key, base URL, and internet connection.",
       );
     }
     throw e;
@@ -181,11 +199,13 @@ export const aiGenerate = async ({ system, user }) => {
   }
   if (isChromeAI()) return chromeGenerate(system, user);
   throw new Error(
-    "No AI provider is configured. Add an API key in settings or enable Chrome built-in AI."
+    "No AI provider is configured. Add an API key in settings or enable Chrome built-in AI.",
   );
 };
 
 export const isAiAvailable = () => {
   const config = getAiConfig();
-  return Boolean(isChromeAI() || (config && config.provider === "openai" && config.apiKey));
+  return Boolean(
+    isChromeAI() || (config && config.provider === "openai" && config.apiKey),
+  );
 };

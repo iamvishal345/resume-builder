@@ -12,41 +12,41 @@ import { useStore } from "@store";
 import { useI18n } from "@features/i18n/useI18n";
 import RichTextEditor from "../../ui/RichTextEditor";
 
-const educationFormStructure = [
+const educationFormStructure = (t) => [
   {
     name: "schoolName",
-    label: "School Name",
+    label: t("education.schoolName") || "School Name",
     placeholder: "eg. Indian Institute of Technology",
     gridProps: { xs: 12 },
   },
   {
     name: "location",
-    label: "School Location",
+    label: t("education.schoolLocation") || "School Location",
     placeholder: "e.g. Delhi, India",
     gridProps: { xs: 12 },
   },
   {
     name: "degree",
-    label: "Degree",
+    label: t("education.degree") || "Degree",
     placeholder: "e.g. B.Tech.",
     gridProps: { xs: 12 },
   },
   {
     name: "fieldOfStudy",
-    label: "Field Of Study",
+    label: t("education.fieldOfStudy") || "Field Of Study",
     placeholder: "e.g. Computer Science Engineering",
     gridProps: { xs: 12 },
   },
   {
     name: "startDate",
-    label: "Start Date",
+    label: t("education.startDate") || "Start Date",
     type: "date",
     placeholder: "",
     gridProps: { xs: 12 },
   },
   {
     name: "endDate",
-    label: "End Date",
+    label: t("education.endDate") || "End Date",
     type: "date",
     placeholder: "",
     gridProps: { xs: 12 },
@@ -54,6 +54,7 @@ const educationFormStructure = [
 ];
 
 const SingleEducationForm = ({ formData, setFieldValue }) => {
+  const { t } = useI18n();
   const isChronologyError =
     formData.startDate &&
     formData.endDate &&
@@ -62,7 +63,7 @@ const SingleEducationForm = ({ formData, setFieldValue }) => {
 
   return (
     <Grid columns={{ minWidth: 240, max: 2 }} gap={3} width="100%">
-      {educationFormStructure.map((field) => (
+      {educationFormStructure(t).map((field) => (
         <React.Fragment key={field.name}>
           {field.type === "date" ? (
             <GridSpan columns={field.gridProps.xs === 24 ? "full" : 1}>
@@ -107,7 +108,9 @@ const SingleEducationForm = ({ formData, setFieldValue }) => {
       <GridSpan columns="full">
         <HStack justify="end" align="center" width="100%">
           <Switch
-            label={t("education.currentlyStudyHere") || "I currently study here"}
+            label={
+              t("education.currentlyStudyHere") || "I currently study here"
+            }
             value={!!formData.disabledendDate}
             onChange={(checked) =>
               setFieldValue({
@@ -121,7 +124,10 @@ const SingleEducationForm = ({ formData, setFieldValue }) => {
         <RichTextEditor
           value={formData.educationSummary || ""}
           minHeight={160}
-          placeholder={t("education.descriptionPlaceholder") || "Type coursework you did towards your degree."}
+          placeholder={
+            t("education.descriptionPlaceholder") ||
+            "Type coursework you did towards your degree."
+          }
           onChange={(value) =>
             setFieldValue({ target: { name: "educationSummary", value } })
           }
@@ -193,7 +199,7 @@ const EducationDetails = ({ onNext, onPrev, nextLabel }) => {
     <StepCard
       title={t("steps.education") || "Education"}
       description={
-        t("edu.description") ||
+        t("education.description") ||
         "Add your most relevant education, including programs you're currently enrolled in."
       }
       onNext={onNext}
@@ -239,7 +245,7 @@ const EducationDetails = ({ onNext, onPrev, nextLabel }) => {
         <Button
           variant="secondary"
           icon={<Plus size={16} />}
-          label={t("edu.addMore") || "Add More Education"}
+          label={t("education.addMore") || "Add More Education"}
           onClick={handleAddMoreEducation}
         />
       </HStack>

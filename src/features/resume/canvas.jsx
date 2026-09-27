@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Button } from "@astryxdesign/core/Button";
 import { IconButton } from "@astryxdesign/core/IconButton";
@@ -39,12 +39,25 @@ const patchSection = (resumeSettings, setSettings, id, patch) => {
   setSettings({ sectionStyles: { ...cur, [id]: next } });
 };
 
-export const useResumeCanvas = ({ interactive, columnsOf, order, sections, onEditSection }) => {
+export const useResumeCanvas = ({
+  interactive,
+  columnsOf,
+  order,
+  sections,
+  onEditSection,
+}) => {
   const resumeSettings = useStore((state) => state.resumeSettings);
   const [selectedId, setSelectedId] = useState(null);
   const [draftOrder, setDraftOrder] = useState(null);
   const [dragState, setDragState] = useState(null);
-  const dragRef = useRef({ id: null, draft: null, rows: null, start: null, cols: null, startCols: null });
+  const dragRef = useRef({
+    id: null,
+    draft: null,
+    rows: null,
+    start: null,
+    cols: null,
+    startCols: null,
+  });
 
   const available = sections.map((entry) => entry.id);
   const displayOrder = draftOrder || order;
@@ -54,12 +67,14 @@ export const useResumeCanvas = ({ interactive, columnsOf, order, sections, onEdi
     if (selectedId && !available.includes(selectedId)) setSelectedId(null);
   }, [available.join(",")]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => () => {
-    document.body.classList.remove("rcs-dragging-global");
-  }, []);
+  useEffect(
+    () => () => {
+      document.body.classList.remove("rcs-dragging-global");
+    },
+    [],
+  );
 
-  const setSettings = (patch) =>
-    useStore.getState().setResumeSettings(patch);
+  const setSettings = (patch) => useStore.getState().setResumeSettings(patch);
 
   const columnize = (ids, sc) => columnsOf(ids, sc || baseCols);
 
@@ -71,7 +86,8 @@ export const useResumeCanvas = ({ interactive, columnsOf, order, sections, onEdi
 
   const moveTo = (currentOrder, id, dir) => {
     const next = moveWithinColumn(columnize(currentOrder), id, dir);
-    if (next.join() !== currentOrder.join()) setSettings({ sectionOrder: next });
+    if (next.join() !== currentOrder.join())
+      setSettings({ sectionOrder: next });
   };
   const move = (id, dir) => moveTo(displayOrder, id, dir);
 
@@ -185,7 +201,10 @@ export const useResumeCanvas = ({ interactive, columnsOf, order, sections, onEdi
     setDraftOrder(next);
     setDragState({
       id,
-      over: index === 0 ? others[0].id : others[Math.min(index, others.length) - 1].id,
+      over:
+        index === 0
+          ? others[0].id
+          : others[Math.min(index, others.length) - 1].id,
     });
   };
 
@@ -203,7 +222,14 @@ export const useResumeCanvas = ({ interactive, columnsOf, order, sections, onEdi
       }
       setSettings(patch);
     }
-    dragRef.current = { id: null, draft: null, rows: null, start: null, cols: null, startCols: null };
+    dragRef.current = {
+      id: null,
+      draft: null,
+      rows: null,
+      start: null,
+      cols: null,
+      startCols: null,
+    };
     setDraftOrder(null);
     setDragState(null);
     document.body.classList.remove("rcs-dragging-global");
@@ -235,7 +261,16 @@ export const useResumeCanvas = ({ interactive, columnsOf, order, sections, onEdi
   };
 };
 
-const Stepper = ({ value, min, max, step, format, onDecrement, onIncrement, label }) => (
+const Stepper = ({
+  value,
+  min,
+  max,
+  step,
+  format,
+  onDecrement,
+  onIncrement,
+  label,
+}) => (
   <div className="rcs-stepper" aria-label={label}>
     <IconButton
       size="sm"
@@ -272,14 +307,18 @@ const ColorControl = ({ label, value, defaultHint, onChange }) => (
         className="rcs-color-input"
         aria-label={`${label} color`}
       />
-      <span className="rcs-color-hex">
-        {value || defaultHint || "default"}
-      </span>
+      <span className="rcs-color-hex">{value || defaultHint || "default"}</span>
     </span>
   </label>
 );
 
-const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }) => {
+const AppearancePanel = ({
+  canvas,
+  sectionId,
+  sectionTitle,
+  onClose,
+  anchorRef,
+}) => {
   const { t } = useI18n();
   const settings = canvas.resumeSettings;
   const set = (patch) => canvas.setSettings(patch);
@@ -294,8 +333,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
-  const patchSec = (patch) =>
-    patchSection(settings, set, sectionId, patch);
+  const patchSec = (patch) => patchSection(settings, set, sectionId, patch);
   const clearSec = () => {
     const next = { ...(settings?.sectionStyles || {}) };
     delete next[sectionId];
@@ -316,8 +354,7 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
       const maxH = Math.min(vh * 0.62, PANEL_MAX_HEIGHT);
       const spaceBelow = vh - rect.bottom - PANEL_VIEW_MARGIN;
       const spaceAbove = rect.top - PANEL_VIEW_MARGIN;
-      const flip =
-        spaceBelow < Math.min(maxH, 280) && spaceAbove > spaceBelow;
+      const flip = spaceBelow < Math.min(maxH, 280) && spaceAbove > spaceBelow;
       const available = Math.max(120, flip ? spaceAbove : spaceBelow);
       const height = Math.min(maxH, available);
 
@@ -385,8 +422,16 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           max={18}
           step={1}
           format={(v) => `${Math.round(v)}px`}
-          onDecrement={() => patchSec({ fontSize: clamp((sec.fontSize ?? baseFont) - 1, 11, 18) })}
-          onIncrement={() => patchSec({ fontSize: clamp((sec.fontSize ?? baseFont) + 1, 11, 18) })}
+          onDecrement={() =>
+            patchSec({
+              fontSize: clamp((sec.fontSize ?? baseFont) - 1, 11, 18),
+            })
+          }
+          onIncrement={() =>
+            patchSec({
+              fontSize: clamp((sec.fontSize ?? baseFont) + 1, 11, 18),
+            })
+          }
         />
         <Stepper
           label={t("customize.lineHeight") || "Line height"}
@@ -395,8 +440,16 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           max={2}
           step={0.05}
           format={(v) => v.toFixed(2)}
-          onDecrement={() => patchSec({ lineHeight: clamp((sec.lineHeight ?? baseLine) - 0.05, 1.1, 2) })}
-          onIncrement={() => patchSec({ lineHeight: clamp((sec.lineHeight ?? baseLine) + 0.05, 1.1, 2) })}
+          onDecrement={() =>
+            patchSec({
+              lineHeight: clamp((sec.lineHeight ?? baseLine) - 0.05, 1.1, 2),
+            })
+          }
+          onIncrement={() =>
+            patchSec({
+              lineHeight: clamp((sec.lineHeight ?? baseLine) + 0.05, 1.1, 2),
+            })
+          }
         />
         <Stepper
           label={t("customize.spacingBefore") || "Spacing before"}
@@ -405,8 +458,12 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           max={28}
           step={1}
           format={(v) => `${Math.round(v)}px`}
-          onDecrement={() => patchSec({ gap: clamp((sec.gap ?? baseGap) - 1, 0, 28) })}
-          onIncrement={() => patchSec({ gap: clamp((sec.gap ?? baseGap) + 1, 0, 28) })}
+          onDecrement={() =>
+            patchSec({ gap: clamp((sec.gap ?? baseGap) - 1, 0, 28) })
+          }
+          onIncrement={() =>
+            patchSec({ gap: clamp((sec.gap ?? baseGap) + 1, 0, 28) })
+          }
         />
         <Stepper
           label={t("customize.marginTop") || "Margin top"}
@@ -415,8 +472,12 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           max={48}
           step={1}
           format={(v) => `${Math.round(v)}px`}
-          onDecrement={() => patchSec({ marginTop: clamp((sec.marginTop ?? 0) - 1, 0, 48) })}
-          onIncrement={() => patchSec({ marginTop: clamp((sec.marginTop ?? 0) + 1, 0, 48) })}
+          onDecrement={() =>
+            patchSec({ marginTop: clamp((sec.marginTop ?? 0) - 1, 0, 48) })
+          }
+          onIncrement={() =>
+            patchSec({ marginTop: clamp((sec.marginTop ?? 0) + 1, 0, 48) })
+          }
         />
         <Stepper
           label={t("customize.marginBottom") || "Margin bottom"}
@@ -425,8 +486,16 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           max={48}
           step={1}
           format={(v) => `${Math.round(v)}px`}
-          onDecrement={() => patchSec({ marginBottom: clamp((sec.marginBottom ?? 0) - 1, 0, 48) })}
-          onIncrement={() => patchSec({ marginBottom: clamp((sec.marginBottom ?? 0) + 1, 0, 48) })}
+          onDecrement={() =>
+            patchSec({
+              marginBottom: clamp((sec.marginBottom ?? 0) - 1, 0, 48),
+            })
+          }
+          onIncrement={() =>
+            patchSec({
+              marginBottom: clamp((sec.marginBottom ?? 0) + 1, 0, 48),
+            })
+          }
         />
         <Stepper
           label={t("customize.headingScale") || "Heading scale"}
@@ -435,8 +504,16 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           max={1.3}
           step={0.05}
           format={(v) => `${v.toFixed(2)}×`}
-          onDecrement={() => patchSec({ headingScale: clamp((sec.headingScale ?? 1) - 0.05, 0.7, 1.3) })}
-          onIncrement={() => patchSec({ headingScale: clamp((sec.headingScale ?? 1) + 0.05, 0.7, 1.3) })}
+          onDecrement={() =>
+            patchSec({
+              headingScale: clamp((sec.headingScale ?? 1) - 0.05, 0.7, 1.3),
+            })
+          }
+          onIncrement={() =>
+            patchSec({
+              headingScale: clamp((sec.headingScale ?? 1) + 0.05, 0.7, 1.3),
+            })
+          }
         />
         {hasSectionOverrides && (
           <Button
@@ -459,8 +536,12 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           max={18}
           step={1}
           format={(v) => `${Math.round(v)}px`}
-          onDecrement={() => set({ fontSize: clamp((settings.fontSize ?? 14) - 1, 11, 18) })}
-          onIncrement={() => set({ fontSize: clamp((settings.fontSize ?? 14) + 1, 11, 18) })}
+          onDecrement={() =>
+            set({ fontSize: clamp((settings.fontSize ?? 14) - 1, 11, 18) })
+          }
+          onIncrement={() =>
+            set({ fontSize: clamp((settings.fontSize ?? 14) + 1, 11, 18) })
+          }
         />
         <Stepper
           label={t("customize.lineHeight") || "Line height"}
@@ -469,8 +550,16 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           max={1.9}
           step={0.05}
           format={(v) => v.toFixed(2)}
-          onDecrement={() => set({ lineHeight: clamp((settings.lineHeight ?? 1.5) - 0.05, 1.15, 1.9) })}
-          onIncrement={() => set({ lineHeight: clamp((settings.lineHeight ?? 1.5) + 0.05, 1.15, 1.9) })}
+          onDecrement={() =>
+            set({
+              lineHeight: clamp((settings.lineHeight ?? 1.5) - 0.05, 1.15, 1.9),
+            })
+          }
+          onIncrement={() =>
+            set({
+              lineHeight: clamp((settings.lineHeight ?? 1.5) + 0.05, 1.15, 1.9),
+            })
+          }
         />
         <Stepper
           label={t("customize.sectionSpacing") || "Section spacing"}
@@ -479,8 +568,16 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           max={28}
           step={1}
           format={(v) => `${Math.round(v)}px`}
-          onDecrement={() => set({ sectionSpacing: clamp((settings.sectionSpacing ?? 16) - 1, 8, 28) })}
-          onIncrement={() => set({ sectionSpacing: clamp((settings.sectionSpacing ?? 16) + 1, 8, 28) })}
+          onDecrement={() =>
+            set({
+              sectionSpacing: clamp((settings.sectionSpacing ?? 16) - 1, 8, 28),
+            })
+          }
+          onIncrement={() =>
+            set({
+              sectionSpacing: clamp((settings.sectionSpacing ?? 16) + 1, 8, 28),
+            })
+          }
         />
         <Stepper
           label={t("customize.pagePadding") || "Page padding"}
@@ -489,8 +586,14 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           max={60}
           step={1}
           format={(v) => `${Math.round(v)}px`}
-          onDecrement={() => { const v = clamp((settings.pagePadX ?? 26) - 1, 10, 60); set({ pagePadX: v, pagePadY: v }); }}
-          onIncrement={() => { const v = clamp((settings.pagePadX ?? 26) + 1, 10, 60); set({ pagePadX: v, pagePadY: v }); }}
+          onDecrement={() => {
+            const v = clamp((settings.pagePadX ?? 26) - 1, 10, 60);
+            set({ pagePadX: v, pagePadY: v });
+          }}
+          onIncrement={() => {
+            const v = clamp((settings.pagePadX ?? 26) + 1, 10, 60);
+            set({ pagePadX: v, pagePadY: v });
+          }}
         />
         {isSidebarLayout(settings) && (
           <>
@@ -501,8 +604,24 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
               max={46}
               step={1}
               format={(v) => `${Math.round(v)}%`}
-              onDecrement={() => set({ sidebarWidth: clamp((settings.sidebarWidth ?? 32) - 1, 20, 46) })}
-              onIncrement={() => set({ sidebarWidth: clamp((settings.sidebarWidth ?? 32) + 1, 20, 46) })}
+              onDecrement={() =>
+                set({
+                  sidebarWidth: clamp(
+                    (settings.sidebarWidth ?? 32) - 1,
+                    20,
+                    46,
+                  ),
+                })
+              }
+              onIncrement={() =>
+                set({
+                  sidebarWidth: clamp(
+                    (settings.sidebarWidth ?? 32) + 1,
+                    20,
+                    46,
+                  ),
+                })
+              }
             />
             <Stepper
               label={t("customize.sidebarGap") || "Sidebar gap"}
@@ -511,8 +630,12 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
               max={48}
               step={1}
               format={(v) => `${Math.round(v)}px`}
-              onDecrement={() => set({ colGap: clamp((settings.colGap ?? 24) - 1, 0, 48) })}
-              onIncrement={() => set({ colGap: clamp((settings.colGap ?? 24) + 1, 0, 48) })}
+              onDecrement={() =>
+                set({ colGap: clamp((settings.colGap ?? 24) - 1, 0, 48) })
+              }
+              onIncrement={() =>
+                set({ colGap: clamp((settings.colGap ?? 24) + 1, 0, 48) })
+              }
             />
           </>
         )}
@@ -524,8 +647,12 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
             max={48}
             step={1}
             format={(v) => `${Math.round(v)}px`}
-            onDecrement={() => set({ colGap: clamp((settings.colGap ?? 24) - 1, 4, 48) })}
-            onIncrement={() => set({ colGap: clamp((settings.colGap ?? 24) + 1, 4, 48) })}
+            onDecrement={() =>
+              set({ colGap: clamp((settings.colGap ?? 24) - 1, 4, 48) })
+            }
+            onIncrement={() =>
+              set({ colGap: clamp((settings.colGap ?? 24) + 1, 4, 48) })
+            }
           />
         )}
         <Divider orientation="horizontal" />
@@ -538,7 +665,9 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
               <button
                 type="button"
                 key={palette.id}
-                className={active ? "rcs-swatch rcs-swatch-active" : "rcs-swatch"}
+                className={
+                  active ? "rcs-swatch rcs-swatch-active" : "rcs-swatch"
+                }
                 title={palette.name}
                 aria-label={`Accent ${palette.name}`}
                 aria-pressed={active}
@@ -570,19 +699,43 @@ const AppearancePanel = ({ canvas, sectionId, sectionTitle, onClose, anchorRef }
           value={settings.textColor}
           onChange={(c) => set({ textColor: c })}
         />
-        {(hasGlobalOverrides || Object.keys(settings?.sectionStyles || {}).length > 0) && (
+        {(hasGlobalOverrides ||
+          Object.keys(settings?.sectionStyles || {}).length > 0) && (
           <Button
             variant="ghost"
             size="sm"
             width="100%"
             icon={<RotateCcw size={13} />}
-            label={t("customize.clearColorsAndSpacing") || "Clear colors & spacing"}
+            label={
+              t("customize.clearColorsAndSpacing") || "Clear colors & spacing"
+            }
             onClick={() =>
-              set({ primaryColor: "", bgColor: "", textColor: "", fontSize: 14, lineHeight: 1.5, sectionSpacing: 16, pagePadX: 26, pagePadY: 30, colGap: 24, nameSize: 27, photoSize: 72, radiusSm: 4, sidebarWidth: 32, sectionStyles: {} })
+              set({
+                primaryColor: "",
+                bgColor: "",
+                textColor: "",
+                fontSize: 14,
+                lineHeight: 1.5,
+                sectionSpacing: 16,
+                pagePadX: 26,
+                pagePadY: 30,
+                colGap: 24,
+                nameSize: 27,
+                photoSize: 72,
+                radiusSm: 4,
+                sidebarWidth: 32,
+                sectionStyles: {},
+              })
             }
           />
         )}
-        <Button variant="secondary" size="sm" width="100%" label={t("common.done") || "Done"} onClick={onClose} />
+        <Button
+          variant="secondary"
+          size="sm"
+          width="100%"
+          label={t("common.done") || "Done"}
+          onClick={onClose}
+        />
       </VStack>
     </div>
   );
@@ -615,7 +768,9 @@ export const SectionShell = ({ id, title, node, kind = "section", canvas }) => {
         dragging ? "rcs-section-dragging" : "",
         dropTarget ? "rcs-section-drop-target" : "",
         isHeader ? "rcs-section-header" : "",
-      ].filter(Boolean).join(" ")}
+      ]
+        .filter(Boolean)
+        .join(" ")}
       data-rsection={id}
       data-rsection-title={title || SECTION_TITLES[id] || id}
       onClick={(event) => {
@@ -679,36 +834,26 @@ export const SectionShell = ({ id, title, node, kind = "section", canvas }) => {
             step={1}
             format={(v) => `${Math.round(v)}`}
             onDecrement={() =>
-              patchSection(
-                canvas.resumeSettings,
-                canvas.setSettings,
-                id,
-                {
-                  fontSize: clamp(
-                    (canvas.resumeSettings.sectionStyles?.[id]?.fontSize ??
-                      canvas.resumeSettings.fontSize ??
-                      14) - 1,
-                    11,
-                    18,
-                  ),
-                },
-              )
+              patchSection(canvas.resumeSettings, canvas.setSettings, id, {
+                fontSize: clamp(
+                  (canvas.resumeSettings.sectionStyles?.[id]?.fontSize ??
+                    canvas.resumeSettings.fontSize ??
+                    14) - 1,
+                  11,
+                  18,
+                ),
+              })
             }
             onIncrement={() =>
-              patchSection(
-                canvas.resumeSettings,
-                canvas.setSettings,
-                id,
-                {
-                  fontSize: clamp(
-                    (canvas.resumeSettings.sectionStyles?.[id]?.fontSize ??
-                      canvas.resumeSettings.fontSize ??
-                      14) + 1,
-                    11,
-                    18,
-                  ),
-                },
-              )
+              patchSection(canvas.resumeSettings, canvas.setSettings, id, {
+                fontSize: clamp(
+                  (canvas.resumeSettings.sectionStyles?.[id]?.fontSize ??
+                    canvas.resumeSettings.fontSize ??
+                    14) + 1,
+                  11,
+                  18,
+                ),
+              })
             }
           />
           <IconButton

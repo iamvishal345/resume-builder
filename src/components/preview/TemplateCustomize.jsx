@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { Button } from "@astryxdesign/core/Button";
 import { IconButton } from "@astryxdesign/core/IconButton";
 import { Selector } from "@astryxdesign/core/Selector";
@@ -30,13 +30,16 @@ import {
   isSidebarLayout,
   isSplitLayout,
 } from "@features/resume/style";
-import { extraIdOf, defaultSideColumn, defaultSplitColumn, effectiveOrder, isExtra, moveInOrder } from "@features/resume/order";
-import { useI18n } from "@features/i18n/useI18n";
 import {
-  listThemes,
-  saveTheme,
-  deleteTheme,
-} from "@features/resumes/themes";
+  extraIdOf,
+  defaultSideColumn,
+  defaultSplitColumn,
+  effectiveOrder,
+  isExtra,
+  moveInOrder,
+} from "@features/resume/order";
+import { useI18n } from "@features/i18n/useI18n";
+import { listThemes, saveTheme, deleteTheme } from "@features/resumes/themes";
 import { useStore } from "@store";
 import "./customize-panel.css";
 
@@ -74,7 +77,9 @@ const Seg = ({ label, options, value, onChange, cols }) => (
             type="button"
             role="radio"
             aria-checked={active}
-            className={active ? "tcx-seg-btn tcx-seg-btn-active" : "tcx-seg-btn"}
+            className={
+              active ? "tcx-seg-btn tcx-seg-btn-active" : "tcx-seg-btn"
+            }
             onClick={() => onChange(opt.id)}
           >
             {opt.name}
@@ -101,7 +106,9 @@ const ValueSeg = ({ label, options, value, onChange }) => (
             type="button"
             role="radio"
             aria-checked={active}
-            className={active ? "tcx-seg-btn tcx-seg-btn-active" : "tcx-seg-btn"}
+            className={
+              active ? "tcx-seg-btn tcx-seg-btn-active" : "tcx-seg-btn"
+            }
             onClick={() => onChange(opt.value)}
           >
             {opt.name}
@@ -336,7 +343,8 @@ const TemplateCustomize = ({
   const patchSection = (id, patch) => {
     const next = { ...(sectionStyles[id] || {}), ...patch };
     for (const key of Object.keys(next)) {
-      if (next[key] == null || Number.isNaN(Number(next[key]))) delete next[key];
+      if (next[key] == null || Number.isNaN(Number(next[key])))
+        delete next[key];
     }
     onSelect({ sectionStyles: { ...sectionStyles, [id]: next } });
   };
@@ -357,10 +365,13 @@ const TemplateCustomize = ({
   const baseGap = settings?.sectionSpacing ?? 16;
   const isSidebar = isSidebarLayout(settings);
   const isSplit = isSplitLayout(settings);
-  const isDarkSidebar = isSidebar && (settings?.sidebarTone || "light") === "dark";
+  const isDarkSidebar =
+    isSidebar && (settings?.sidebarTone || "light") === "dark";
   const sidebarWidth = settings?.sidebarWidth ?? 32;
   const colGap = settings?.colGap ?? 24;
-  const widthIsPreset = SIDEBAR_WIDTH_PRESETS.some((p) => p.value === sidebarWidth);
+  const widthIsPreset = SIDEBAR_WIDTH_PRESETS.some(
+    (p) => p.value === sidebarWidth,
+  );
   const gapIsPreset = SIDEBAR_GAP_PRESETS.some((p) => p.value === colGap);
   const showFineTune = !(widthIsPreset && gapIsPreset);
   const resolvedAccent =
@@ -406,10 +417,15 @@ const TemplateCustomize = ({
       {showTip ? (
         <div className="tcx-tip" role="status">
           <p>
-            Tip: switch tabs to change layout, colors, and type. In Tune, move
-            a section between sidebar and main without dragging.
+            Tip: switch tabs to change layout, colors, and type. In Tune, move a
+            section between sidebar and main without dragging.
           </p>
-          <Button size="sm" variant="ghost" label="Got it" onClick={dismissTip} />
+          <Button
+            size="sm"
+            variant="ghost"
+            label="Got it"
+            onClick={dismissTip}
+          />
         </div>
       ) : null}
 
@@ -577,7 +593,10 @@ const TemplateCustomize = ({
 
         {tab === "color" ? (
           <div className="tcx-stack">
-            <Block title="Palette" hint="Pick a preset, then override any color.">
+            <Block
+              title="Palette"
+              hint="Pick a preset, then override any color."
+            >
               <div className="tcx-palette" role="list">
                 {RESUME_PALETTES.map((palette) => {
                   const active =
@@ -672,7 +691,11 @@ const TemplateCustomize = ({
               </div>
             </Block>
             <Block title="Page">
-              <div className="tcx-theme-row" role="group" aria-label="Paper size">
+              <div
+                className="tcx-theme-row"
+                role="group"
+                aria-label="Paper size"
+              >
                 {[
                   { id: "a4", name: "A4" },
                   { id: "letter", name: "US Letter" },
@@ -776,7 +799,10 @@ const TemplateCustomize = ({
                           const order = effectiveOrder(
                             settings?.sectionOrder,
                             avail,
-                            { additionalSections: useStore.getState().additionalSections },
+                            {
+                              additionalSections:
+                                useStore.getState().additionalSections,
+                            },
                           );
                           onSelect({
                             sectionOrder: moveInOrder(
@@ -799,7 +825,10 @@ const TemplateCustomize = ({
                           const order = effectiveOrder(
                             settings?.sectionOrder,
                             avail,
-                            { additionalSections: useStore.getState().additionalSections },
+                            {
+                              additionalSections:
+                                useStore.getState().additionalSections,
+                            },
                           );
                           onSelect({
                             sectionOrder: moveInOrder(
@@ -835,11 +864,9 @@ const TemplateCustomize = ({
                         icon={<Trash2 size={14} />}
                         label={t("common.delete") || "Remove"}
                         onClick={() => {
-                          useStore
-                            .getState()
-                            .removeAdditionalSections({
-                              id: extraIdOf(selectedSection),
-                            });
+                          useStore.getState().removeAdditionalSections({
+                            id: extraIdOf(selectedSection),
+                          });
                           setSelectedSection(sections[0]?.id || "header");
                         }}
                       />
@@ -848,25 +875,25 @@ const TemplateCustomize = ({
                 ) : null}
                 {isSidebar || isSplit ? (
                   selectedSection && selectedSection !== "header" ? (
-                  <Seg
-                    label={isSplit ? "Column" : "Placement"}
-                    options={
-                      isSplit
-                        ? [
-                            { id: "0", name: "Left" },
-                            { id: "1", name: "Right" },
-                          ]
-                        : [
-                            { id: "0", name: "Sidebar" },
-                            { id: "1", name: "Main" },
-                          ]
-                    }
-                    value={String(currentCol)}
-                    cols={2}
-                    onChange={(id) =>
-                      setSectionColumn(selectedSection, Number(id))
-                    }
-                  />
+                    <Seg
+                      label={isSplit ? "Column" : "Placement"}
+                      options={
+                        isSplit
+                          ? [
+                              { id: "0", name: "Left" },
+                              { id: "1", name: "Right" },
+                            ]
+                          : [
+                              { id: "0", name: "Sidebar" },
+                              { id: "1", name: "Main" },
+                            ]
+                      }
+                      value={String(currentCol)}
+                      cols={2}
+                      onChange={(id) =>
+                        setSectionColumn(selectedSection, Number(id))
+                      }
+                    />
                   ) : null
                 ) : null}
                 <Block title={t("customize.overrides") || "Overrides"}>
@@ -973,7 +1000,9 @@ const TemplateCustomize = ({
             variant="ghost"
             size="sm"
             width="100%"
-            label={t("customize.resetOverrides") || "Reset color & type overrides"}
+            label={
+              t("customize.resetOverrides") || "Reset color & type overrides"
+            }
             onClick={resetCustomization}
           />
         </footer>

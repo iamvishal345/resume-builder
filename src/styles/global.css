@@ -453,7 +453,6 @@ html[data-theme="dark"] .theme-toggle .icon-dark {
   color: var(--color-text-primary);
 }
 
-.ai-fab-wrap:hover .ai-fab-pop,
 .ai-fab-wrap.open .ai-fab-pop {
   display: block;
 }
@@ -578,8 +577,7 @@ html[data-theme="dark"] .preview-sheet-wrap {
     transparent calc(297mm * 0.43 - 1px),
     color-mix(in srgb, var(--color-border) 70%, transparent)
       calc(297mm * 0.43 - 1px),
-    color-mix(in srgb, var(--color-border) 70%, transparent)
-      calc(297mm * 0.43)
+    color-mix(in srgb, var(--color-border) 70%, transparent) calc(297mm * 0.43)
   );
   background-size: 100% calc(297mm * 0.43);
   background-repeat: repeat-y;

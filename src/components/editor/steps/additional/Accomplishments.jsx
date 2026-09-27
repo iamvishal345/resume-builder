@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid, GridSpan } from "@astryxdesign/core/Grid";
@@ -36,14 +36,14 @@ const Accomplishments = ({ id }) => {
       items.map((form) => {
         if (form.key !== key) return form;
         return { ...form, [data.target.name]: data.target.value };
-      })
+      }),
     );
   };
 
   const handleRemove = (key) => {
     setSectionData(
       id,
-      items.filter((item) => item.key !== key)
+      items.filter((item) => item.key !== key),
     );
   };
 
@@ -55,7 +55,8 @@ const Accomplishments = ({ id }) => {
             {t("extras.accomplishments") || "Accomplishments"}
           </Text>
           <Text type="inherit" size="md" color="secondary">
-            {t("extras.accomplishmentsSubtitle") || "Highlight key achievements and awards"}
+            {t("extras.accomplishmentsSubtitle") ||
+              "Highlight key achievements and awards"}
           </Text>
         </VStack>
         {items?.map((formObj) => (
@@ -72,11 +73,14 @@ const Accomplishments = ({ id }) => {
                 width="100%"
                 label={t("extras.accomplishmentTitle") || "Title"}
                 value={formObj.title}
-                placeholder={t("extras.accomplishmentTitlePlaceholder") || "Accomplishment Title"}
+                placeholder={
+                  t("extras.accomplishmentTitlePlaceholder") ||
+                  "Accomplishment Title"
+                }
                 onChange={(value) =>
                   setFieldValue(
                     { target: { name: "title", value } },
-                    formObj.key
+                    formObj.key,
                   )
                 }
               />
@@ -88,12 +92,14 @@ const Accomplishments = ({ id }) => {
                 width="100%"
                 label={t("common.description") || "Description"}
                 value={formObj.description}
-                placeholder={t("extras.accomplishmentDetailsPlaceholder") || "Details"}
+                placeholder={
+                  t("extras.accomplishmentDetailsPlaceholder") || "Details"
+                }
                 rows={3}
                 onChange={(value) =>
                   setFieldValue(
                     { target: { name: "description", value } },
-                    formObj.key
+                    formObj.key,
                   )
                 }
               />
@@ -101,8 +107,14 @@ const Accomplishments = ({ id }) => {
             <GridSpan columns={1}>
               <HStack align="center" justify="start" width="100%">
                 <IconButton
-                  label={t("accomplishments.removeAccomplishment") || "Remove accomplishment"}
-                  tooltip={t("accomplishments.removeAccomplishment") || "Remove accomplishment"}
+                  label={
+                    t("accomplishments.removeAccomplishment") ||
+                    "Remove accomplishment"
+                  }
+                  tooltip={
+                    t("accomplishments.removeAccomplishment") ||
+                    "Remove accomplishment"
+                  }
                   variant="ghost"
                   icon={<Trash2 size={16} />}
                   onClick={() => handleRemove(formObj.key)}

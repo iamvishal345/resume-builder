@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@astryxdesign/core/Button";
 import { Grid, GridSpan } from "@astryxdesign/core/Grid";
 import { HStack, VStack } from "@astryxdesign/core/Layout";
@@ -12,35 +12,35 @@ import { useStore } from "@store";
 import { useI18n } from "@features/i18n/useI18n";
 import RichTextEditor from "../../ui/RichTextEditor";
 
-const workHistoryFormStructure = [
+const workHistoryFormStructure = (t) => [
   {
     name: "positionTitle",
-    label: "Position Title",
+    label: t("work.positionTitle") || "Position Title",
     placeholder: "Job Title that best describes the work you did.",
     gridProps: { xs: 24 },
   },
   {
     name: "companyName",
-    label: "Company Name",
+    label: t("work.companyName") || "Company Name",
     placeholder: "Company/Person/Family Business",
     gridProps: { xs: 12 },
   },
   {
     name: "location",
-    label: "Job Location",
+    label: t("work.location") || "Job Location",
     placeholder: "e.g. Gurgaon, India",
     gridProps: { xs: 12 },
   },
   {
     name: "startDate",
-    label: "Start Date",
+    label: t("work.startDate") || "Start Date",
     type: "date",
     placeholder: "",
     gridProps: { xs: 12 },
   },
   {
     name: "endDate",
-    label: "End Date",
+    label: t("work.endDate") || "End Date",
     type: "date",
     placeholder: "",
     gridProps: { xs: 12 },
@@ -48,6 +48,7 @@ const workHistoryFormStructure = [
 ];
 
 const SingleWorkHistoryForm = ({ formData, setFieldValue }) => {
+  const { t } = useI18n();
   const isChronologyError =
     formData.startDate &&
     formData.endDate &&
@@ -56,7 +57,7 @@ const SingleWorkHistoryForm = ({ formData, setFieldValue }) => {
 
   return (
     <Grid columns={{ minWidth: 240, max: 2 }} gap={3} width="100%">
-      {workHistoryFormStructure.map((field) => (
+      {workHistoryFormStructure(t).map((field) => (
         <GridSpan
           key={field.name}
           columns={field.gridProps.xs === 24 ? "full" : 1}
@@ -114,7 +115,10 @@ const SingleWorkHistoryForm = ({ formData, setFieldValue }) => {
         <RichTextEditor
           value={formData.workSummary || ""}
           minHeight={200}
-          placeholder={t("work.descriptionPlaceholder") || "Type your achievements and responsibilities here. For e.g. Contributed to the development of innovative software solutions, leveraging expertise in Javascript, at..."}
+          placeholder={
+            t("work.descriptionPlaceholder") ||
+            "Type your achievements and responsibilities here. For e.g. Contributed to the development of innovative software solutions, leveraging expertise in Javascript, at..."
+          }
           onChange={(value) =>
             setFieldValue({ target: { name: "workSummary", value } })
           }
@@ -177,14 +181,17 @@ const WorkHistory = ({ onNext, onPrev, nextLabel }) => {
     updatedWorkHistory.splice(
       newIndex,
       0,
-      updatedWorkHistory.splice(oldIndex, 1)[0]
+      updatedWorkHistory.splice(oldIndex, 1)[0],
     );
     setWorkHistory(updatedWorkHistory);
   };
   return (
     <StepCard
       title={t("steps.experience") || "Professional Experience"}
-      description={t("work.description") || "Start with your most recent experience and work backward."}
+      description={
+        t("work.description") ||
+        "Start with your most recent experience and work backward."
+      }
       onNext={onNext}
       onPrev={onPrev}
       nextLabel={nextLabel}

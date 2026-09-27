@@ -1,10 +1,4 @@
-import React, {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { HStack, VStack } from "@astryxdesign/core/Layout";
 import { Button } from "@astryxdesign/core/Button";
 import { Text } from "@astryxdesign/core/Text";
@@ -51,11 +45,7 @@ const PdfPageCanvas = ({ source, zoom, widthMm, heightMm }) => {
   );
 };
 
-const FullPagePreview = ({
-  onDownloadPdf,
-  onDownloadDocx,
-  onCustomize,
-}) => {
+const FullPagePreview = ({ onDownloadPdf, onDownloadDocx, onCustomize }) => {
   const { t } = useI18n();
   const [zoom, setZoom] = useState(0.55);
   const [pages, setPages] = useState([]);
@@ -134,7 +124,11 @@ const FullPagePreview = ({
         setPdfBlob(result.blob || null);
       } catch (err) {
         if (renderId.current !== id) return;
-        setError(err?.message || t("errors.pdfPreviewFailed") || "Could not render the PDF preview.");
+        setError(
+          err?.message ||
+            t("errors.pdfPreviewFailed") ||
+            "Could not render the PDF preview.",
+        );
         setPdfBlob(null);
       } finally {
         if (renderId.current === id) setBusy(false);
@@ -149,7 +143,11 @@ const FullPagePreview = ({
     try {
       await downloadPdfPage(pdfBlob, pageIndex, fileBase);
     } catch (err) {
-      setError(err?.message || t("errors.pageExportFailed") || "Could not export that page.");
+      setError(
+        err?.message ||
+          t("errors.pageExportFailed") ||
+          "Could not export that page.",
+      );
     } finally {
       setPageBusy(null);
     }
@@ -283,11 +281,7 @@ const FullPagePreview = ({
           </VStack>
         )}
         {busy && pages.length > 0 && (
-          <HStack
-            gap={1}
-            align="center"
-            className="preview-busy-indicator"
-          >
+          <HStack gap={1} align="center" className="preview-busy-indicator">
             <Loader2 size={14} className="preview-spinner" />
             <Text type="small" color="secondary">
               Rendering…

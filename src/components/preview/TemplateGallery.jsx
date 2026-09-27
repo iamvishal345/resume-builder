@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
 import { Button } from "@astryxdesign/core/Button";
 import { HStack, VStack } from "@astryxdesign/core/Layout";
@@ -102,8 +102,10 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
         title={t("templatesGallery.title") || "Choose a template"}
         subtitle={
           compareMode
-            ? (t("templatesGallery.compareSubtitle") || "Pick left and right templates, then apply one. Content is preserved.")
-            : (t("templatesGallery.subtitle") || "All type of layouts — sidebar, single column, split. Content is preserved.")
+            ? t("templatesGallery.compareSubtitle") ||
+              "Pick left and right templates, then apply one. Content is preserved."
+            : t("templatesGallery.subtitle") ||
+              "All type of layouts — sidebar, single column, split. Content is preserved."
         }
         onOpenChange={onOpenChange}
       />
@@ -113,7 +115,12 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
             <Button
               size="sm"
               variant={compareMode ? "primary" : "secondary"}
-              label={compareMode ? (t("templatesGallery.compareOn") || "Compare on") : (t("templatesGallery.compareSideBySide") || "Compare side-by-side")}
+              label={
+                compareMode
+                  ? t("templatesGallery.compareOn") || "Compare on"
+                  : t("templatesGallery.compareSideBySide") ||
+                    "Compare side-by-side"
+              }
               onClick={() => setCompareMode((v) => !v)}
             />
             {compareMode ? (
@@ -152,8 +159,14 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
 
           {compareMode ? (
             <div className="r-compare-grid">
-              <ComparePane templateId={leftId} label={t("templatesGallery.pickLeft") || "Left"} />
-              <ComparePane templateId={rightId} label={t("templatesGallery.pickRight") || "Right"} />
+              <ComparePane
+                templateId={leftId}
+                label={t("templatesGallery.pickLeft") || "Left"}
+              />
+              <ComparePane
+                templateId={rightId}
+                label={t("templatesGallery.pickRight") || "Right"}
+              />
             </div>
           ) : null}
 
@@ -195,7 +208,10 @@ const TemplateGallery = ({ isOpen, onOpenChange, settings, onSelect }) => {
           </div>
 
           <Text type="inherit" size="sm" color="secondary">
-            {t("templatesGallery.countHint", { count: RESUME_TEMPLATES.length }) || `${RESUME_TEMPLATES.length} templates · tweak any layout in Customize`}
+            {t("templatesGallery.countHint", {
+              count: RESUME_TEMPLATES.length,
+            }) ||
+              `${RESUME_TEMPLATES.length} templates · tweak any layout in Customize`}
           </Text>
         </VStack>
       </div>

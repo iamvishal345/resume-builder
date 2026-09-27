@@ -11,29 +11,29 @@ import StartFromTitleDialog from "./StartFromTitleDialog";
 import { useStore } from "@store";
 import { useI18n } from "@features/i18n/useI18n";
 
-const formStructure = [
+const formStructure = (t) => [
   {
     name: "firstName",
-    label: "First Name",
+    label: t("personal.firstName") || "First Name",
     placeholder: "e.g. Vishal",
     gridProps: { xs: 12 },
   },
   {
     name: "lastName",
-    label: "Last Name",
+    label: t("personal.lastName") || "Last Name",
     placeholder: "e.g. Sharma",
     gridProps: { xs: 12 },
   },
   {
     name: "designation",
-    label: "Job Title",
+    label: t("personal.designation") || "Job Title",
     placeholder: "e.g. Software Engineer",
     gridProps: { xs: 24 },
   },
   {
     name: "email",
     type: "email",
-    label: "Email",
+    label: t("personal.email") || "Email",
     placeholder: "e.g. vishal.sharma@email.com",
     gridProps: { xs: 12 },
   },
@@ -41,37 +41,37 @@ const formStructure = [
   {
     name: "contactNumber",
     type: "tel",
-    label: "Phone Number",
+    label: t("personal.phoneNumber") || "Phone Number",
     placeholder: "e.g. +91 9876543210",
     gridProps: { xs: 12 },
   },
   {
     name: "address",
-    label: "Address",
+    label: t("personal.address") || "Address",
     placeholder: "e.g. 494, Sector 12",
     gridProps: { xs: 24 },
   },
   {
     name: "city",
-    label: "City",
+    label: t("personal.city") || "City",
     placeholder: "e.g. Gurgaon",
     gridProps: { xs: 12 },
   },
   {
     name: "state",
-    label: "State",
+    label: t("personal.state") || "State",
     placeholder: "e.g. Haryana",
     gridProps: { xs: 12 },
   },
   {
     name: "country",
-    label: "Country",
+    label: t("personal.country") || "Country",
     placeholder: "e.g. India",
     gridProps: { xs: 12 },
   },
   {
     name: "pinCode",
-    label: "Pin Code",
+    label: t("personal.pinCode") || "Pin Code",
     placeholder: "e.g. 122001",
     gridProps: { xs: 12 },
   },
@@ -117,7 +117,10 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
       description={
         <>
           {t("details.intro") || "Get started with the basics:"}{" "}
-          <b>{t("details.contactTip") || "We suggest including an email and phone number."}</b>
+          <b>
+            {t("details.contactTip") ||
+              "We suggest including an email and phone number."}
+          </b>
         </>
       }
       onNext={onNext}
@@ -141,7 +144,11 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
         <Button
           variant="secondary"
           size="sm"
-          label={personalDetails.photoDataUrl ? t("editor.changePhoto") : t("editor.addPhoto")}
+          label={
+            personalDetails.photoDataUrl
+              ? t("editor.changePhoto")
+              : t("editor.addPhoto")
+          }
           onClick={() => {
             const input = document.createElement("input");
             input.type = "file";
@@ -184,7 +191,7 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
         </Text>
       </HStack>
       <Grid columns={{ minWidth: 240, max: 2 }} gap={4} width="100%">
-        {formStructure.map((field) => (
+        {formStructure(t).map((field) => (
           <GridSpan
             key={field.name}
             columns={field.gridProps.xs === 24 ? "full" : 1}
@@ -193,7 +200,7 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
               id={field.name}
               htmlName={field.name}
               width="100%"
-              label={field.label}
+              label={t(field.label) || field.label}
               placeholder={field.placeholder}
               type={field.type === "email" ? "email" : "text"}
               value={personalDetails[field.name] || ""}
@@ -202,8 +209,15 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
             {field.name === "email" &&
             personalDetails.email &&
             !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personalDetails.email.trim()) ? (
-              <Text type="inherit" size="xs" color="accent" role="alert" style={{ marginTop: "4px" }}>
-                Please enter a valid email address (e.g. name@example.com).
+              <Text
+                type="inherit"
+                size="xs"
+                color="accent"
+                role="alert"
+                style={{ marginTop: "4px" }}
+              >
+                {t("editor.validEmailAlert") ||
+                  "Please enter a valid email address (e.g. name@example.com)."}
               </Text>
             ) : null}
           </GridSpan>
@@ -246,7 +260,9 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
                 width="100%"
                 label={t("personal.customFieldValue") || "Value"}
                 isLabelHidden
-                placeholder={t("personal.customFieldValuePlaceholder") || "Link/Text"}
+                placeholder={
+                  t("personal.customFieldValuePlaceholder") || "Link/Text"
+                }
                 value={link.value || ""}
                 onChange={(value) =>
                   handleSocialLinksValueChange(value, "value", link)
@@ -257,7 +273,9 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
               <HStack align="center" justify="start" width="100%">
                 <IconButton
                   label={t("personal.removeSocialLink") || "Remove social link"}
-                  tooltip={t("personal.removeSocialLink") || "Remove social link"}
+                  tooltip={
+                    t("personal.removeSocialLink") || "Remove social link"
+                  }
                   variant="ghost"
                   icon={<Trash2 size={16} />}
                   onClick={() => handleRemoveSocialLink(link)}
@@ -267,7 +285,10 @@ function PersonalDetails({ onNext, onPrev, nextLabel }) {
           </Grid>
         ))}
       </VStack>
-      <StartFromTitleDialog isOpen={aiDraftOpen} onOpenChange={setAiDraftOpen} />
+      <StartFromTitleDialog
+        isOpen={aiDraftOpen}
+        onOpenChange={setAiDraftOpen}
+      />
     </StepCard>
   );
 }

@@ -13,7 +13,10 @@ function Summary({ onNext, onPrev, nextLabel }) {
   return (
     <StepCard
       title={t("steps.summary") || "Summary"}
-      description={t("summary.description") || "Summarize your work experience, education and skills here."}
+      description={
+        t("summary.description") ||
+        "Summarize your work experience, education and skills here."
+      }
       onNext={onNext}
       onPrev={onPrev}
       nextLabel={nextLabel}
@@ -21,8 +24,11 @@ function Summary({ onNext, onPrev, nextLabel }) {
       <VStack gap={3} width="100%">
         <RichTextEditor
           value={resumeSummary || ""}
-          minHeight={240}
-          placeholder={t("summary.placeholder") || "A good summary for a resume starts with a positive character trait and includes your job title, key skills, and the highlights of your career in just 2–5 sentences tailored to a specific position"}
+          minHeight={260}
+          placeholder={
+            t("summary.placeholder") ||
+            "A good summary for a resume starts with a positive character trait and includes your job title, key skills, and the highlights of your career in just 2–5 sentences tailored to a specific position"
+          }
           onChange={setResumeSummary}
           extraContext={`Name: ${personalDetails.firstName || ""} ${personalDetails.lastName || ""}\nJob title: ${personalDetails.designation || ""}`}
         />

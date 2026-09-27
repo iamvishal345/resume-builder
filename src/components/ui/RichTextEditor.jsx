@@ -24,7 +24,7 @@ import { htmlToText, textToEditorHtml } from "@features/ai/provider";
 const ESCAPE_RE = /[&<>"]/g;
 const escapeHtml = (str = "") =>
   str.replace(ESCAPE_RE, (c) =>
-    c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : "&quot;"
+    c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : "&quot;",
   );
 
 const serialize = (nodes) => nodes.map(serializeNode).join("");
@@ -59,7 +59,9 @@ const deserialize = (html = "") => {
     .map(deserializeNode)
     .filter(Boolean)
     .flat();
-  return nodes.length ? nodes : [{ type: "paragraph", children: [{ text: "" }] }];
+  return nodes.length
+    ? nodes
+    : [{ type: "paragraph", children: [{ text: "" }] }];
 };
 
 const markChildren = (children, mark) =>
@@ -173,17 +175,56 @@ const Toolbar = ({ onUndo, onRedo }) => {
 
   return (
     <div className="rsw-toolbar">
-      <ToolButton title={t("editor.undo") || "Undo"} onClick={onUndo}><Undo2 size={15} /></ToolButton>
-      <ToolButton title={t("editor.redo") || "Redo"} onClick={onRedo}><Redo2 size={15} /></ToolButton>
+      <ToolButton title={t("editor.undo") || "Undo"} onClick={onUndo}>
+        <Undo2 size={15} />
+      </ToolButton>
+      <ToolButton title={t("editor.redo") || "Redo"} onClick={onRedo}>
+        <Redo2 size={15} />
+      </ToolButton>
       <span className="rsw-separator" />
-      <ToolButton active={!!marks.bold} title={t("editor.bold") || "Bold"} onClick={() => toggleMark("bold")}><Bold size={15} /></ToolButton>
-      <ToolButton active={!!marks.italic} title={t("editor.italic") || "Italic"} onClick={() => toggleMark("italic")}><Italic size={15} /></ToolButton>
-      <ToolButton active={!!marks.underline} title={t("editor.underline") || "Underline"} onClick={() => toggleMark("underline")}><Underline size={15} /></ToolButton>
+      <ToolButton
+        active={!!marks.bold}
+        title={t("editor.bold") || "Bold"}
+        onClick={() => toggleMark("bold")}
+      >
+        <Bold size={15} />
+      </ToolButton>
+      <ToolButton
+        active={!!marks.italic}
+        title={t("editor.italic") || "Italic"}
+        onClick={() => toggleMark("italic")}
+      >
+        <Italic size={15} />
+      </ToolButton>
+      <ToolButton
+        active={!!marks.underline}
+        title={t("editor.underline") || "Underline"}
+        onClick={() => toggleMark("underline")}
+      >
+        <Underline size={15} />
+      </ToolButton>
       <span className="rsw-separator" />
-      <ToolButton active={isListActive("bulleted-list")} title={t("editor.bulletedList") || "Bulleted list"} onClick={() => toggleList("bulleted-list")}><List size={15} /></ToolButton>
-      <ToolButton active={isListActive("numbered-list")} title={t("editor.numberedList") || "Numbered list"} onClick={() => toggleList("numbered-list")}><ListOrdered size={15} /></ToolButton>
+      <ToolButton
+        active={isListActive("bulleted-list")}
+        title={t("editor.bulletedList") || "Bulleted list"}
+        onClick={() => toggleList("bulleted-list")}
+      >
+        <List size={15} />
+      </ToolButton>
+      <ToolButton
+        active={isListActive("numbered-list")}
+        title={t("editor.numberedList") || "Numbered list"}
+        onClick={() => toggleList("numbered-list")}
+      >
+        <ListOrdered size={15} />
+      </ToolButton>
       <span className="rsw-separator" />
-      <ToolButton title={t("editor.clearFormatting") || "Clear formatting"} onClick={clearFormatting}><Eraser size={15} /></ToolButton>
+      <ToolButton
+        title={t("editor.clearFormatting") || "Clear formatting"}
+        onClick={clearFormatting}
+      >
+        <Eraser size={15} />
+      </ToolButton>
     </div>
   );
 };
@@ -193,13 +234,14 @@ const EMPTY_DOC = [{ type: "paragraph", children: [{ text: "" }] }];
 const RichTextEditor = ({
   value,
   onChange,
-  minHeight = 240,
+  minHeight = 260,
   placeholder,
   extraContext = "",
 }) => {
   const { t } = useI18n();
   const defaultPlaceholder = t("editor.writeHere") || "Write here…";
-  const resolvedPlaceholder = placeholder !== undefined ? placeholder : defaultPlaceholder;
+  const resolvedPlaceholder =
+    placeholder !== undefined ? placeholder : defaultPlaceholder;
   const editorRef = useRef(null);
   if (!editorRef.current && typeof window !== "undefined") {
     editorRef.current = withReact(createEditor());
@@ -208,7 +250,7 @@ const RichTextEditor = ({
 
   const valueRef = useRef(value || "");
   const [doc, setDoc] = useState(() =>
-    typeof DOMParser === "undefined" ? EMPTY_DOC : deserialize(value || "")
+    typeof DOMParser === "undefined" ? EMPTY_DOC : deserialize(value || ""),
   );
   const [docKey, setDocKey] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -239,7 +281,7 @@ const RichTextEditor = ({
       }
       onChange(serialized);
     },
-    [onChange]
+    [onChange],
   );
 
   const applySnapshot = (snapshot) => {
@@ -262,7 +304,10 @@ const RichTextEditor = ({
   };
 
   return (
-    <div className="rsw-editor" style={{ "--rte-min-height": `${minHeight}px` }}>
+    <div
+      className="rsw-editor"
+      style={{ "--rte-min-height": `${minHeight}px` }}
+    >
       {mounted && editor ? (
         <Slate
           key={docKey}
@@ -280,8 +325,12 @@ const RichTextEditor = ({
             spellCheck
             autoCorrect="on"
             autoCapitalize="sentences"
-            onFocus={() => { focusedRef.current = true; }}
-            onBlur={() => { focusedRef.current = false; }}
+            onFocus={() => {
+              focusedRef.current = true;
+            }}
+            onBlur={() => {
+              focusedRef.current = false;
+            }}
           />
         </Slate>
       ) : (

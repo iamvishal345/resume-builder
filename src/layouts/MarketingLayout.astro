@@ -54,13 +54,11 @@ const props = Astro.props as Props;
 <script>
   import {
     applyDocumentLocale,
-    getLocale,
-    setLocale,
     subscribeLocale,
     t,
   } from "@features/i18n";
 
-  const varsFor = (element) => {
+  const varsFor = (element: HTMLElement) => {
     const value = element.getAttribute("data-i18n-vars");
     if (!value) return undefined;
     try {
@@ -75,19 +73,19 @@ const props = Astro.props as Props;
       const key = element.getAttribute("data-i18n");
       if (!key) return;
       const suffix = element.getAttribute("data-i18n-suffix") || "";
-      element.textContent = `${t(key, varsFor(element))}${suffix}`;
+      element.textContent = `${t(key, varsFor(element as HTMLElement))}${suffix}`;
     });
 
     document.querySelectorAll("[data-i18n-attrs]").forEach((element) => {
       const value = element.getAttribute("data-i18n-attrs");
       if (!value) return;
-      value.split(";").forEach((entry) => {
+      value?.split(";").forEach((entry) => {
         const separator = entry.indexOf(":");
         if (separator < 1) return;
         const attribute = entry.slice(0, separator).trim();
         const key = entry.slice(separator + 1).trim();
         if (attribute && key) {
-          element.setAttribute(attribute, t(key, varsFor(element)));
+          element.setAttribute(attribute, t(key, varsFor(element as HTMLElement)));
         }
       });
     });

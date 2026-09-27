@@ -9,11 +9,22 @@ const htmlOfItems = (items) => {
   if (!items.length) return "";
   const blocks = [];
   let ulOpen = false;
-  const close = () => { if (ulOpen) { blocks.push("</ul>"); ulOpen = false; } };
+  const close = () => {
+    if (ulOpen) {
+      blocks.push("</ul>");
+      ulOpen = false;
+    }
+  };
   const push = (text, bullet) => {
-    if (bullet && !ulOpen) { close(); blocks.push("<ul>"); ulOpen = true; }
+    if (bullet && !ulOpen) {
+      close();
+      blocks.push("<ul>");
+      ulOpen = true;
+    }
     if (!bullet && ulOpen) close();
-    blocks.push(bullet ? `<li>${escapeHtml(text)}</li>` : `<p>${escapeHtml(text)}</p>`);
+    blocks.push(
+      bullet ? `<li>${escapeHtml(text)}</li>` : `<p>${escapeHtml(text)}</p>`,
+    );
   };
   for (const it of items) push(it.text, it.bullet);
   close();
@@ -30,11 +41,14 @@ const MONTHS =
 const YEAR = "(?:19|20)\\d{2}";
 const DATE_RANGE_RE = new RegExp(
   `\\b((${MONTHS}\\s*)?${YEAR})\\s*(?:[-–—]|\\s+to\\s+)\\s*((present|current|now|today)|((${MONTHS}\\s*)?${YEAR}))`,
-  "i"
+  "i",
 );
 const SINGLE_YEAR_RE = new RegExp(`\\b((${MONTHS}\\s*)?${YEAR})\\b`, "i");
 
-const looksLikeDate = (text) => DATE_RANGE_RE.test(text) || /\b(19|20)\d{2}\b/.test(text) || /present\b/i.test(text);
+const looksLikeDate = (text) =>
+  DATE_RANGE_RE.test(text) ||
+  /\b(19|20)\d{2}\b/.test(text) ||
+  /present\b/i.test(text);
 
 const findRange = (text) => {
   const t = (s) => (s || "").trim();
@@ -53,9 +67,18 @@ const findRange = (text) => {
 const SECTION_KEYS = [
   [/^(professional\s+)?summary$/i, "summary"],
   [/^(profile|objective|career\s+objective)$/i, "summary"],
-  [/^(work\s+)?(experience|employment(\s+history)?|professional\s+experience|work\s+history)$/i, "experience"],
-  [/^(education|educational\s+(qualification|background)|academics)$/i, "education"],
-  [/^(technical\s+|core\s+|key\s+|computer\s+|professional\s+)?(skills|skill\s+set|competencies|expertise)$/i, "skills"],
+  [
+    /^(work\s+)?(experience|employment(\s+history)?|professional\s+experience|work\s+history)$/i,
+    "experience",
+  ],
+  [
+    /^(education|educational\s+(qualification|background)|academics)$/i,
+    "education",
+  ],
+  [
+    /^(technical\s+|core\s+|key\s+|computer\s+|professional\s+)?(skills|skill\s+set|competencies|expertise)$/i,
+    "skills",
+  ],
   [/^certifications?$/i, "certifications"],
   [/^projects?$/i, "projects"],
   [/^volunteer(ing)?(\s+experience)?$/i, "volunteer"],
@@ -64,7 +87,10 @@ const SECTION_KEYS = [
   [/^interests?$|^hobbies?$/i, "interests"],
   [/^awards?(\s+and\s+honors)?$/i, "awards"],
   [/^publications?$/i, "publications"],
-  [/^(additional|certifications? and trainings|other|extras?)($|\s*:)/i, "extra"],
+  [
+    /^(additional|certifications? and trainings|other|extras?)($|\s*:)/i,
+    "extra",
+  ],
 ];
 
 const SECTION_TITLES = {
@@ -100,19 +126,25 @@ const sectionKeyFor = (line) => {
 };
 
 const splitLines = (text) =>
-  text.replace(/\r/g, "").split("\n").map((l) => l.trim());
+  text
+    .replace(/\r/g, "")
+    .split("\n")
+    .map((l) => l.trim());
 
 const isBullet = (line) => /^[-*•·▪◦]\s?/.test(line);
 
 const isContact = (line) =>
-  EMAIL_RE.test(line) || PHONE_RE.test(line) || URL_RE.test(line) || LOC_RE.test(line);
+  EMAIL_RE.test(line) ||
+  PHONE_RE.test(line) ||
+  URL_RE.test(line) ||
+  LOC_RE.test(line);
 
 const looksLikeHeader = (line) => {
   if (isBullet(line) || isContact(line)) return false;
   if (looksLikeDate(line)) return true;
   if (line.length < 90 && /^[A-Z0-9][^.]{0,80}$/.test(line)) {
     // Title-ish line: starts uppercase, short, no sentence-ending period.
-    const words = line.split(/\s+/);
+    const words = line?.split(/\s+/);
     if (words.length <= 5) return true;
   }
   return false;
@@ -121,7 +153,10 @@ const looksLikeHeader = (line) => {
 const parseHeader = (line) => {
   let rest = line;
   const { start, end } = findRange(rest);
-  rest = rest.replace(DATE_RANGE_RE, " ").replace(SINGLE_YEAR_RE, " ").replace(/present\b/i, " ");
+  rest = rest
+    .replace(DATE_RANGE_RE, " ")
+    .replace(SINGLE_YEAR_RE, " ")
+    .replace(/present\b/i, " ");
   let company = "";
   let title = "";
   rest = rest.replace(/[|•·\-–—]\s*$/, "").trim();
@@ -153,8 +188,14 @@ const parseNameAndDetails = (headerLines) => {
   for (const line of headerLines) {
     if (!line) continue;
     const email = line.match(EMAIL_RE);
-    if (email) { pd.email = email[0]; continue; }
-    if (PHONE_RE.test(line)) { pd.contactNumber = line.match(PHONE_RE)[0]; continue; }
+    if (email) {
+      pd.email = email[0];
+      continue;
+    }
+    if (PHONE_RE.test(line)) {
+      pd.contactNumber = line.match(PHONE_RE)[0];
+      continue;
+    }
     if (URL_RE.test(line)) continue;
     const loc = line.match(LOC_RE);
     if (loc) {
@@ -163,7 +204,11 @@ const parseNameAndDetails = (headerLines) => {
       continue;
     }
     // Non-contact line → name or designation
-    if (/^[A-Z][A-Za-z' .-]{1,50}$/.test(line) && line.split(/\s+/).length <= 4 && !nameParts.length) {
+    if (
+      /^[A-Z][A-Za-z' .-]{1,50}$/.test(line) &&
+      line.split(/\s+/).length <= 4 &&
+      !nameParts.length
+    ) {
       nameParts.push(line);
     } else if (!pd.designation && line.length < 90 && !nameParts.length) {
       nameParts.push(line);
@@ -218,8 +263,18 @@ export const parseResumeText = (text) => {
     const line = stripBullet(raw);
     if (!entry) {
       const h = parseHeader(line);
-      entry = { positionTitle: h.title, companyName: h.company, startDate: h.start || "", endDate: h.end || "", workSummary: "", items: [] };
-      if (h.start || h.end) { entry.startDate = h.start; entry.endDate = h.end; }
+      entry = {
+        positionTitle: h.title,
+        companyName: h.company,
+        startDate: h.start || "",
+        endDate: h.end || "",
+        workSummary: "",
+        items: [],
+      };
+      if (h.start || h.end) {
+        entry.startDate = h.start;
+        entry.endDate = h.end;
+      }
       experience.push(entry);
       continue;
     }
@@ -227,7 +282,14 @@ export const parseResumeText = (text) => {
       entry.items.push({ bullet: isBullet(raw), text: line });
     } else {
       const h = parseHeader(line);
-      entry = { positionTitle: h.title, companyName: h.company, startDate: h.start, endDate: h.end, workSummary: "", items: [] };
+      entry = {
+        positionTitle: h.title,
+        companyName: h.company,
+        startDate: h.start,
+        endDate: h.end,
+        workSummary: "",
+        items: [],
+      };
       experience.push(entry);
     }
   }
@@ -244,13 +306,23 @@ export const parseResumeText = (text) => {
     const line = stripBullet(raw);
     if (!edu) {
       const h = parseHeader(line);
-      edu = { degree: h.title, schoolName: h.company, startDate: h.start, endDate: h.end };
+      edu = {
+        degree: h.title,
+        schoolName: h.company,
+        startDate: h.start,
+        endDate: h.end,
+      };
       education.push(edu);
       continue;
     }
     if (isBullet(raw) || !looksLikeHeader(line)) continue;
     const h = parseHeader(line);
-    edu = { degree: h.title, schoolName: h.company, startDate: h.start, endDate: h.end };
+    edu = {
+      degree: h.title,
+      schoolName: h.company,
+      startDate: h.start,
+      endDate: h.end,
+    };
     education.push(edu);
   }
 
@@ -262,9 +334,13 @@ export const parseResumeText = (text) => {
       .map((s) => s.replace(/\s+/g, " ").trim())
       .filter((s) => s && s.length <= 40);
     for (const name of names) {
-      const ratingMatch = name.match(/(\d{1,2})\s*\/\s*10|\b(\d{1,3})\s*%|(●+|[○●]\s*[○●]*)$/);
+      const ratingMatch = name.match(
+        /(\d{1,2})\s*\/\s*10|\b(\d{1,3})\s*%|(●+|[○●]\s*[○●]*)$/,
+      );
       if (ratingMatch) {
-        const rate = ratingMatch[1] ? Math.max(1, Math.min(5, Math.round(Number(ratingMatch[1]) / 2))) : 6 - (ratingMatch[3] ? ratingMatch[3].length : 3);
+        const rate = ratingMatch[1]
+          ? Math.max(1, Math.min(5, Math.round(Number(ratingMatch[1]) / 2)))
+          : 6 - (ratingMatch[3] ? ratingMatch[3].length : 3);
         skills.push({
           name: name
             .replace(/(\d{1,2}\s*\/\s*10|\b\d{1,3}\s*%|●+\s*[○●]*)/g, "")
@@ -279,14 +355,24 @@ export const parseResumeText = (text) => {
 
   const extras = [];
   for (const key of order) {
-    if (key === "summary" || key === "experience" || key === "education" || key === "skills") continue;
+    if (
+      key === "summary" ||
+      key === "experience" ||
+      key === "education" ||
+      key === "skills"
+    )
+      continue;
     const items = (sections[key] || [])
       .map((l) => l.replace(/^[-*•·▪◦]\s?/, "").trim())
       .filter(Boolean);
     if (!items.length) continue;
     const mapped = EXTRA_SECTION_ID[key];
     if (mapped) {
-      extras.push({ id: mapped.id, title: mapped.title, data: items.slice(0, 20).map((name) => ({ name })) });
+      extras.push({
+        id: mapped.id,
+        title: mapped.title,
+        data: items.slice(0, 20).map((name) => ({ name })),
+      });
     } else {
       extras.push({
         id: 1,
@@ -296,5 +382,13 @@ export const parseResumeText = (text) => {
     }
   }
 
-  return { pd, summary, experience, education, skills, extras, sections: order };
+  return {
+    pd,
+    summary,
+    experience,
+    education,
+    skills,
+    extras,
+    sections: order,
+  };
 };

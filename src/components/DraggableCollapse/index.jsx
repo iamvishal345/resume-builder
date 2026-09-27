@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import Sortable from "sortablejs";
 import { Card } from "@astryxdesign/core/Card";
 import { IconButton } from "@astryxdesign/core/IconButton";
@@ -78,7 +78,16 @@ export const DraggableList = ({ children, onDrag, gap = 2 }) => {
     return () => sortable.destroy();
   }, [onDrag]);
   return (
-    <div ref={containerRef} className="draggable-list" style={{ display: "flex", flexDirection: "column", gap: `var(--spacing-${gap})`, width: "100%" }}>
+    <div
+      ref={containerRef}
+      className="draggable-list"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: `var(--spacing-${gap})`,
+        width: "100%",
+      }}
+    >
       {children}
     </div>
   );

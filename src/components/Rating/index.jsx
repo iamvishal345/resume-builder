@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Icon } from "@astryxdesign/core/Icon";
 import { Star } from "lucide-react";
 

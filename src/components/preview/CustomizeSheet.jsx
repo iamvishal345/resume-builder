@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Resume } from "@features/resume/Resume";
 import { resumeViewModel } from "@features/resume/viewModel";
 import { defaultResumeData } from "@store";

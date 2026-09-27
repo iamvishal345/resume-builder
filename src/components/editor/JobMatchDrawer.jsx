@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@astryxdesign/core/Button";
 import { VStack, HStack } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
@@ -34,7 +34,7 @@ const JobMatchDrawer = ({ isOpen, onOpenChange, data }) => {
     if (!analysis.missing.length) return;
     try {
       await navigator.clipboard.writeText(
-        analysis.missing.map((k) => k.term).join(", ")
+        analysis.missing.map((k) => k.term).join(", "),
       );
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
@@ -64,7 +64,10 @@ const JobMatchDrawer = ({ isOpen, onOpenChange, data }) => {
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       title={t("jdMatch.title") || "Job match"}
-      subtitle={t("jdMatch.subtitle") || "Paste a job description to compare it with your resume."}
+      subtitle={
+        t("jdMatch.subtitle") ||
+        "Paste a job description to compare it with your resume."
+      }
     >
       <VStack gap={3} width="100%">
         <TextArea
@@ -73,7 +76,10 @@ const JobMatchDrawer = ({ isOpen, onOpenChange, data }) => {
           onChange={(v) => setJd(v)}
           rows={6}
           width="100%"
-          placeholder={t("jdMatch.jdPlaceholder") || "Paste the full job posting here — keywords are extracted automatically and never leave your browser."}
+          placeholder={
+            t("jdMatch.jdPlaceholder") ||
+            "Paste the full job posting here — keywords are extracted automatically and never leave your browser."
+          }
         />
 
         {analysis.total > 0 ? (
@@ -86,10 +92,15 @@ const JobMatchDrawer = ({ isOpen, onOpenChange, data }) => {
                   weight="semibold"
                   color="primary"
                 >
-                  {t("jdMatch.matchHeader", { pct: matchPct }) || `${matchPct}% keyword match`}
+                  {t("jdMatch.matchHeader", { pct: matchPct }) ||
+                    `${matchPct}% keyword match`}
                 </Text>
                 <Text type="inherit" size="sm" color="secondary">
-                  {t("jdMatch.matchedDesc", { matched: analysis.matched, total: analysis.total }) || `${analysis.matched} of ${analysis.total} JD keywords already on your resume`}
+                  {t("jdMatch.matchedDesc", {
+                    matched: analysis.matched,
+                    total: analysis.total,
+                  }) ||
+                    `${analysis.matched} of ${analysis.total} JD keywords already on your resume`}
                 </Text>
               </VStack>
               <FileText size={22} color="var(--color-accent)" />
@@ -97,7 +108,9 @@ const JobMatchDrawer = ({ isOpen, onOpenChange, data }) => {
 
             <VStack gap={1} width="100%">
               <Text type="inherit" size="sm" weight="semibold" color="primary">
-                {t("jdMatch.presentHeader", { count: analysis.present.length }) || `Present on your resume (${analysis.present.length})`}
+                {t("jdMatch.presentHeader", {
+                  count: analysis.present.length,
+                }) || `Present on your resume (${analysis.present.length})`}
               </Text>
               <div className="jdm-chip-row">
                 {analysis.present.map((k) => (
@@ -108,7 +121,8 @@ const JobMatchDrawer = ({ isOpen, onOpenChange, data }) => {
 
             <VStack gap={1} width="100%">
               <Text type="inherit" size="sm" weight="semibold" color="primary">
-                {t("jdMatch.missingHeader", { count: analysis.missingCount }) || `Missing — consider weaving these in (${analysis.missingCount})`}
+                {t("jdMatch.missingHeader", { count: analysis.missingCount }) ||
+                  `Missing — consider weaving these in (${analysis.missingCount})`}
               </Text>
               <div className="jdm-chip-row">
                 {analysis.missing.map((k) => (
@@ -122,7 +136,11 @@ const JobMatchDrawer = ({ isOpen, onOpenChange, data }) => {
                 variant="secondary"
                 size="sm"
                 icon={copied ? <Check size={14} /> : <Copy size={14} />}
-                label={copied ? (t("common.copied") || "Copied") : (t("jdMatch.copyMissing") || "Copy missing keywords")}
+                label={
+                  copied
+                    ? t("common.copied") || "Copied"
+                    : t("jdMatch.copyMissing") || "Copy missing keywords"
+                }
                 onClick={copyMissing}
               />
               <Button
@@ -135,12 +153,14 @@ const JobMatchDrawer = ({ isOpen, onOpenChange, data }) => {
             </HStack>
 
             <Text type="inherit" size="sm" color="secondary">
-              {t("jdMatch.suggestionsNote") || "These are suggestions — only keep the missing terms you genuinely know, so your resume stays truthful for interviews."}
+              {t("jdMatch.suggestionsNote") ||
+                "These are suggestions — only keep the missing terms you genuinely know, so your resume stays truthful for interviews."}
             </Text>
           </VStack>
         ) : (
           <Text type="inherit" size="sm" color="secondary">
-            {t("jdMatch.emptyAnalysis") || "Analysis appears here as you paste a job description."}
+            {t("jdMatch.emptyAnalysis") ||
+              "Analysis appears here as you paste a job description."}
           </Text>
         )}
       </VStack>

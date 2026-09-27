@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { Grid, GridSpan } from "@astryxdesign/core/Grid";
@@ -38,7 +38,7 @@ const References = ({ id }) => {
       items.map((form) => {
         if (form.key !== key) return form;
         return { ...form, [data.target.name]: data.target.value };
-      })
+      }),
     );
   };
 
@@ -49,7 +49,7 @@ const References = ({ id }) => {
   const handleRemove = (key) => {
     setSectionData(
       id,
-      items.filter((item) => item.key !== key)
+      items.filter((item) => item.key !== key),
     );
   };
 
@@ -61,7 +61,8 @@ const References = ({ id }) => {
             {t("extras.references") || "References"}
           </Text>
           <Text type="inherit" size="md" color="secondary">
-            {t("extras.referencesSubtitle") || "Provide professional references and their contact info"}
+            {t("extras.referencesSubtitle") ||
+              "Provide professional references and their contact info"}
           </Text>
         </VStack>
         {items?.map((formObj) => (
@@ -78,11 +79,13 @@ const References = ({ id }) => {
                 width="100%"
                 label={t("extras.fullName") || "Full Name"}
                 value={formObj.name}
-                placeholder={t("extras.referenceNamePlaceholder") || "Reference Name"}
+                placeholder={
+                  t("extras.referenceNamePlaceholder") || "Reference Name"
+                }
                 onChange={(value) =>
                   setFieldValue(
                     { target: { name: "name", value } },
-                    formObj.key
+                    formObj.key,
                   )
                 }
               />
@@ -94,11 +97,13 @@ const References = ({ id }) => {
                 width="100%"
                 label={t("extras.jobTitle") || "Job Title"}
                 value={formObj.role}
-                placeholder={t("extras.jobTitlePlaceholder") || "e.g., Engineering Manager"}
+                placeholder={
+                  t("extras.jobTitlePlaceholder") || "e.g., Engineering Manager"
+                }
                 onChange={(value) =>
                   setFieldValue(
                     { target: { name: "role", value } },
-                    formObj.key
+                    formObj.key,
                   )
                 }
               />
@@ -114,7 +119,7 @@ const References = ({ id }) => {
                 onChange={(value) =>
                   setFieldValue(
                     { target: { name: "organization", value } },
-                    formObj.key
+                    formObj.key,
                   )
                 }
               />
@@ -130,7 +135,7 @@ const References = ({ id }) => {
                 onChange={(value) =>
                   setFieldValue(
                     { target: { name: "phone", value } },
-                    formObj.key
+                    formObj.key,
                   )
                 }
               />
@@ -146,7 +151,7 @@ const References = ({ id }) => {
                 onChange={(value) =>
                   setFieldValue(
                     { target: { name: "email", value } },
-                    formObj.key
+                    formObj.key,
                   )
                 }
               />

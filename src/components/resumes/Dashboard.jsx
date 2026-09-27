@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Layout,
   LayoutContent,
@@ -29,10 +29,7 @@ import {
   migrateLegacyLocalStorage,
   clearAllResumes,
 } from "@features/resumes/db";
-import {
-  seedDemoResumes,
-  ensureDemoResumes,
-} from "@features/resumes/seedDemo";
+import { seedDemoResumes, ensureDemoResumes } from "@features/resumes/seedDemo";
 import { getDemoMode, setDemoMode } from "@features/resumes/prefs";
 import {
   readResumeBackupFile,
@@ -86,7 +83,11 @@ const ResumesDashboard = () => {
       setList(docs);
       setError("");
     } catch (e) {
-      setError(e?.message || t("errors.loadResumesFailed") || "Could not load your resumes.");
+      setError(
+        e?.message ||
+          t("errors.loadResumesFailed") ||
+          "Could not load your resumes.",
+      );
     } finally {
       setLoading(false);
     }
@@ -120,7 +121,8 @@ const ResumesDashboard = () => {
   };
 
   const remove = async (doc) => {
-    const { deleteVersionsForResume } = await import("@features/resumes/versions");
+    const { deleteVersionsForResume } =
+      await import("@features/resumes/versions");
     await deleteVersionsForResume(doc.id);
     await deleteResume(doc.id);
     setDeleteDoc(null);
@@ -146,15 +148,21 @@ const ResumesDashboard = () => {
         kind: "ok",
         text:
           result.kind === "pack"
-            ? (t("dash.restoredPack", { count: result.count }) || `Restored ${result.count} resume(s) from pack.`)
+            ? t("dash.restoredPack", { count: result.count }) ||
+              `Restored ${result.count} resume(s) from pack.`
             : result.kind === "json-resume"
-              ? (t("dash.importedJsonResume", { name: result.doc.name }) || `Imported JSON Resume as "${result.doc.name}".`)
-              : (t("dash.restoredBackupDoc", { name: result.doc.name }) || `Restored "${result.doc.name}" from backup.`),
+              ? t("dash.importedJsonResume", { name: result.doc.name }) ||
+                `Imported JSON Resume as "${result.doc.name}".`
+              : t("dash.restoredBackupDoc", { name: result.doc.name }) ||
+                `Restored "${result.doc.name}" from backup.`,
       });
     } catch (e) {
       setMessage({
         kind: "error",
-        text: e?.message || t("errors.restoreFileFailed") || "Could not restore that file.",
+        text:
+          e?.message ||
+          t("errors.restoreFileFailed") ||
+          "Could not restore that file.",
       });
     } finally {
       if (restoreInputRef.current) restoreInputRef.current.value = "";
@@ -216,148 +224,156 @@ const ResumesDashboard = () => {
     <Layout height="auto" padding={3} contentWidth={1080}>
       <LayoutContent role="main">
         <div className="rdash-shell">
-        <VStack gap={4} width="100%">
-          <div className="rdash-header">
-            <VStack gap={0}>
-              <Text type="inherit" size="xl" weight="semibold" color="primary">
-                {t("dash.title")}
-              </Text>
-              <Text type="inherit" size="sm" color="secondary">
-                {t("dash.blurb")}
-              </Text>
-            </VStack>
-            <div className="rdash-header-actions">
-              <LocaleSelect />
-              <Button
-                variant="ghost"
-                size="sm"
-                icon={<Shield size={15} />}
-                label={t("dash.dataPrivacy")}
-                onClick={() => setDataOpen(true)}
-              />
-              <Button
-                variant="secondary"
-                size="sm"
-                icon={<Upload size={15} />}
-                label={t("dash.restore")}
-                onClick={() => restoreInputRef.current?.click()}
-              />
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<Plus size={15} />}
-                label={t("dash.newResume")}
-                onClick={createNew}
-              />
+          <VStack gap={4} width="100%">
+            <div className="rdash-header">
+              <VStack gap={0}>
+                <Text
+                  type="inherit"
+                  size="xl"
+                  weight="semibold"
+                  color="primary"
+                >
+                  {t("dash.title")}
+                </Text>
+                <Text type="inherit" size="sm" color="secondary">
+                  {t("dash.blurb")}
+                </Text>
+              </VStack>
+              <div className="rdash-header-actions">
+                <LocaleSelect />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={<Shield size={15} />}
+                  label={t("dash.dataPrivacy")}
+                  onClick={() => setDataOpen(true)}
+                />
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  icon={<Upload size={15} />}
+                  label={t("dash.restore")}
+                  onClick={() => restoreInputRef.current?.click()}
+                />
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<Plus size={15} />}
+                  label={t("dash.newResume")}
+                  onClick={createNew}
+                />
+              </div>
             </div>
-          </div>
 
-          <input
-            ref={restoreInputRef}
-            type="file"
-            accept=".json,.r.json,.cavren.json,application/json"
-            multiple
-            style={{ display: "none" }}
-            onChange={(event) => {
-              const files = Array.from(event.target.files || []);
-              for (const file of files) restoreBackupFile(file);
-            }}
-          />
-
-          <OwnershipTip onOpenPrivacy={() => setDataOpen(true)} />
-
-          {message && (
-            <Card
-              variant={message.kind === "ok" ? "green" : "red"}
-              padding={3}
-              width="100%"
-              role="status"
-              aria-live="polite"
-            >
-              <HStack gap={2} align="center">
-                {message.kind === "ok" ? (
-                  <Upload size={15} />
-                ) : (
-                  <AlertTriangle size={15} />
-                )}
-                <Text type="inherit" size="sm">
-                  {message.text}
-                </Text>
-              </HStack>
-            </Card>
-          )}
-
-          {error && (
-            <Card variant="muted" padding={3} width="100%">
-              <HStack gap={2} align="center">
-                <AlertTriangle size={15} />
-                <Text type="inherit" size="sm">
-                  {error}
-                </Text>
-              </HStack>
-            </Card>
-          )}
-
-          {loading ? (
-            <Card padding={4} width="100%">
-              <Text type="inherit" size="sm" color="secondary">
-                {t("dash.loading") || "Loading resumes…"}
-              </Text>
-            </Card>
-          ) : list.length === 0 ? (
-            <EmptyState
-              icon={<FileText size={26} />}
-              title={t("dash.noResumesTitle") || "No resumes yet"}
-              description={t("dash.noResumesDesc") || "Create a resume, restore a backup, or load demo templates — all stay on this device."}
-              actions={
-                <HStack gap={2} wrap>
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    icon={<Plus size={15} />}
-                    label={t("dash.createResume") || "Create resume"}
-                    onClick={createNew}
-                  />
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    icon={<Sparkles size={15} />}
-                    label={t("dash.loadDemos") || "Load demos"}
-                    onClick={async () => {
-                      setDemoMode("on");
-                      await seedDemoResumes();
-                      await load();
-                    }}
-                  />
-                </HStack>
-              }
+            <input
+              ref={restoreInputRef}
+              type="file"
+              accept=".json,.r.json,.cavren.json,application/json"
+              multiple
+              style={{ display: "none" }}
+              onChange={(event) => {
+                const files = Array.from(event.target.files || []);
+                for (const file of files) restoreBackupFile(file);
+              }}
             />
-          ) : (
-            <Card padding={2} width="100%">
-              <List hasDividers density="spacious">
-                {list.map((doc) => (
-                  <ResumeListItem
-                    key={doc.id}
-                    doc={doc}
-                    description={rowMeta(doc)}
-                    onPreview={setPreviewDoc}
-                    onDownloadPdf={(item) => {
-                      setAutoPrintPreview(true);
-                      setPreviewDoc(item);
-                    }}
-                    onCoverLetter={setCoverDoc}
-                    onInterviewPacket={setPacketDoc}
-                    onChangeTemplate={setGalleryDoc}
-                    onChangeTheme={setCustomizeDoc}
-                    onDuplicate={duplicate}
-                    onTailor={setTailorDoc}
-                    onDelete={setDeleteDoc}
-                  />
-                ))}
-              </List>
-            </Card>
-          )}
-        </VStack>
+
+            <OwnershipTip onOpenPrivacy={() => setDataOpen(true)} />
+
+            {message && (
+              <Card
+                variant={message.kind === "ok" ? "green" : "red"}
+                padding={3}
+                width="100%"
+                role="status"
+                aria-live="polite"
+              >
+                <HStack gap={2} align="center">
+                  {message.kind === "ok" ? (
+                    <Upload size={15} />
+                  ) : (
+                    <AlertTriangle size={15} />
+                  )}
+                  <Text type="inherit" size="sm">
+                    {message.text}
+                  </Text>
+                </HStack>
+              </Card>
+            )}
+
+            {error && (
+              <Card variant="muted" padding={3} width="100%">
+                <HStack gap={2} align="center">
+                  <AlertTriangle size={15} />
+                  <Text type="inherit" size="sm">
+                    {error}
+                  </Text>
+                </HStack>
+              </Card>
+            )}
+
+            {loading ? (
+              <Card padding={4} width="100%">
+                <Text type="inherit" size="sm" color="secondary">
+                  {t("dash.loading") || "Loading resumes…"}
+                </Text>
+              </Card>
+            ) : list.length === 0 ? (
+              <EmptyState
+                icon={<FileText size={26} />}
+                title={t("dash.noResumesTitle") || "No resumes yet"}
+                description={
+                  t("dash.noResumesDesc") ||
+                  "Create a resume, restore a backup, or load demo templates — all stay on this device."
+                }
+                actions={
+                  <HStack gap={2} wrap>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={<Plus size={15} />}
+                      label={t("dash.createResume") || "Create resume"}
+                      onClick={createNew}
+                    />
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<Sparkles size={15} />}
+                      label={t("dash.loadDemos") || "Load demos"}
+                      onClick={async () => {
+                        setDemoMode("on");
+                        await seedDemoResumes();
+                        await load();
+                      }}
+                    />
+                  </HStack>
+                }
+              />
+            ) : (
+              <Card padding={2} width="100%">
+                <List hasDividers density="spacious">
+                  {list.map((doc) => (
+                    <ResumeListItem
+                      key={doc.id}
+                      doc={doc}
+                      description={rowMeta(doc)}
+                      onPreview={setPreviewDoc}
+                      onDownloadPdf={(item) => {
+                        setAutoPrintPreview(true);
+                        setPreviewDoc(item);
+                      }}
+                      onCoverLetter={setCoverDoc}
+                      onInterviewPacket={setPacketDoc}
+                      onChangeTemplate={setGalleryDoc}
+                      onChangeTheme={setCustomizeDoc}
+                      onDuplicate={duplicate}
+                      onTailor={setTailorDoc}
+                      onDelete={setDeleteDoc}
+                    />
+                  ))}
+                </List>
+              </Card>
+            )}
+          </VStack>
         </div>
       </LayoutContent>
 
@@ -427,7 +443,8 @@ const ResumesDashboard = () => {
           title={t("dash.deleteConfirmTitle") || "Delete this resume?"}
           subtitle={
             deleteDoc
-              ? (t("dash.deleteConfirmSubtitle", { name: nameOf(deleteDoc) }) || `"${nameOf(deleteDoc)}" will be removed from this browser. This cannot be undone.`)
+              ? t("dash.deleteConfirmSubtitle", { name: nameOf(deleteDoc) }) ||
+                `"${nameOf(deleteDoc)}" will be removed from this browser. This cannot be undone.`
               : ""
           }
           onOpenChange={(open) => !open && setDeleteDoc(null)}

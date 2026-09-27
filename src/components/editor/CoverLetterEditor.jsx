@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
 import { HStack, VStack } from "@astryxdesign/core/Layout";
@@ -91,7 +91,7 @@ const CoverLetterEditor = () => {
             <RichTextEditor
               value={coverLetter.body}
               onChange={(html) => setCoverLetter({ body: html })}
-              minHeight={260}
+              minHeight={280}
               placeholder={
                 t("coverLetter.bodyPlaceholder") || "Dear hiring manager, …"
               }
