@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const BUILD_REVISION = process.env.BUILD_ID || Date.now().toString();
+
 // https://astro.build/config
 export default defineConfig({
   integrations: [
@@ -89,11 +91,11 @@ export default defineConfig({
         globPatterns: [
           "**/*.{js,mjs,css,svg,png,ico,woff2,woff,ttf,json,webmanifest}",
         ],
-        // Precache the offline fallback shell and editor shell specifically
+        // Precache the offline fallback shell and editor shell specifically with a build-specific revision
         additionalManifestEntries: [
-          { url: "/offline/index.html", revision: "1" },
-          { url: "/editor/index.html", revision: "1" },
-          { url: "/resumes/index.html", revision: "1" },
+          { url: "/offline/index.html", revision: BUILD_REVISION },
+          { url: "/editor/index.html", revision: BUILD_REVISION },
+          { url: "/resumes/index.html", revision: BUILD_REVISION },
         ],
         // pdf.worker.min.mjs is ~1.2MB; keep headroom for future assets
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,

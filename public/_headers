@@ -6,8 +6,18 @@
   Cross-Origin-Opener-Policy: same-origin-allow-popups
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'https://accounts.google.com'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://api.openai.com https://*.openai.com https://accounts.google.com https://www.googleapis.com https://content.googleapis.com; worker-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; frame-src 'self' 'https://accounts.google.com';
 
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
 /sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/workbox-*.js
   Cache-Control: no-cache, no-store, must-revalidate
 
 /manifest.webmanifest
   Cache-Control: no-cache, no-store, must-revalidate
+
+/*.html
+  Cache-Control: no-cache, no-store, must-revalidate
+

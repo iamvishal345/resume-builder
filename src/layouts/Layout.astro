@@ -180,6 +180,31 @@ const fullTitle = `${title} · ${SITE.name}`;
         window.__deferredPrompt = e;
         window.dispatchEvent(new CustomEvent("pwa-install-ready"));
       });
+
+      // Auto-reload on stale deployment chunk/CSS loading errors
+      (function () {
+        function handleChunkError(msg) {
+          if (!msg || typeof msg !== "string") return;
+          if (
+            msg.indexOf("Failed to fetch dynamically imported module") !== -1 ||
+            msg.indexOf("Refused to apply style") !== -1 ||
+            msg.indexOf("Loading chunk") !== -1
+          ) {
+            var guardKey = "cavren-auto-reloaded";
+            if (!sessionStorage.getItem(guardKey)) {
+              sessionStorage.setItem(guardKey, "1");
+              window.location.reload();
+            }
+          }
+        }
+        window.addEventListener("error", function (e) {
+          handleChunkError(e.message);
+        }, true);
+        window.addEventListener("unhandledrejection", function (e) {
+          var reason = e.reason && (e.reason.message || String(e.reason));
+          handleChunkError(reason);
+        });
+      })();
     </script>
   </head>
   <body>
