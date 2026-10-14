@@ -4,6 +4,7 @@ import { Card } from "@astryxdesign/core/Card";
 import { HStack, VStack } from "@astryxdesign/core/Layout";
 import { Text } from "@astryxdesign/core/Text";
 import { TextInput } from "@astryxdesign/core/TextInput";
+import { downloadCoverLetterLatex } from "@features/export/latex";
 import { useStore } from "@store";
 import {
   LETTER_TEMPLATES,
@@ -40,14 +41,28 @@ const CoverLetterEditor = () => {
     <div className="editor-letter-grid">
       <Card padding={4} width="100%" className="editor-letter-card">
         <VStack gap={3} width="100%">
-          <VStack gap={0}>
-            <Text type="inherit" size="lg" weight="semibold" color="primary">
-              {t("coverLetter.title")}
-            </Text>
-            <Text type="inherit" size="sm" color="secondary">
-              {t("coverLetter.subtitle")}
-            </Text>
-          </VStack>
+          <HStack justify="between" align="end" gap={3} width="100%" wrap="wrap">
+            <VStack gap={0}>
+              <Text type="inherit" size="lg" weight="semibold" color="primary">
+                {t("coverLetter.title")}
+              </Text>
+              <Text type="inherit" size="sm" color="secondary">
+                {t("coverLetter.subtitle")}
+              </Text>
+            </VStack>
+            <Button
+              variant="secondary"
+              size="sm"
+              label={t("coverLetter.downloadTex")}
+              onClick={() =>
+                downloadCoverLetterLatex({
+                  personalDetails,
+                  socialLinks,
+                  coverLetter,
+                })
+              }
+            />
+          </HStack>
 
           <VStack gap={1} width="100%">
             <Text type="inherit" size="xs" weight="medium" color="secondary">

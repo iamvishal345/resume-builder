@@ -103,6 +103,15 @@
   max-width: 100%;
 }
 
+/* Compact tag beside the TeX label. Badge has no size smaller than the
+   segmented control's supporting type, and StyleX wins over a plain class. */
+.editor-topbar .editor-latex-beta:not(#\#):not(#\#):not(#\#) {
+  height: var(--spacing-4);
+  padding-inline: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  line-height: var(--text-heading-6-leading);
+}
+
 .editor-actions {
   padding: var(--spacing-1) var(--spacing-2);
   border: 1px solid var(--color-border);
@@ -329,6 +338,18 @@
       display: none;
     }
   }
+}
+
+.editor-latex {
+  width: 100%;
+  min-width: 0;
+}
+
+.editor-latex-page {
+  width: 100%;
+  height: auto;
+  background: var(--color-background);
+  border-radius: var(--radius-element);
 }
 
 /* Cover letter responsive layout */

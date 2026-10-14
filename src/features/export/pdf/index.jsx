@@ -46,25 +46,24 @@ export const buildResumePdf = async ({
 
 export const downloadResumePdf = async ({
   data,
-  templateId = "classic",
-  paletteId,
-  fontId = "sans",
   settings = {},
   fileName,
 }) => {
-  const blob = await buildResumePdf({
-    data,
-    templateId,
-    paletteId,
-    fontId,
-    settings,
+  const { downloadCompiledResumePdf } = await import(
+    "@features/export/latex/compile.js"
+  );
+  const resume = {
+    ...(data || {}),
+    resumeSettings: settings || data?.resumeSettings || {},
+  };
+  return downloadCompiledResumePdf({
+    data: resume,
+    fileName:
+      fileName ||
+      sanitizeFileName(
+        `${data?.pd?.firstName || data?.personalDetails?.firstName || ""}-${data?.pd?.lastName || data?.personalDetails?.lastName || ""}-Resume`,
+      ),
   });
-  const name =
-    fileName ||
-    sanitizeFileName(
-      `${data?.pd?.firstName || ""}-${data?.pd?.lastName || ""}-Resume`
-    );
-  triggerDownload(blob, `${name}.pdf`);
 };
 
 export const downloadCoverLetterPdf = async ({

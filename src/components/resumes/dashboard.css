@@ -25,3 +25,11 @@
 .rdash-shell .astryx-list-item {
   align-items: flex-start;
 }
+
+/* Compact "New" tag. Smaller than the button label; StyleX wins over a plain class. */
+.rdash-new-badge:not(#\#):not(#\#):not(#\#) {
+  height: var(--spacing-4);
+  padding-inline: var(--spacing-1);
+  font-size: var(--font-size-xs);
+  line-height: var(--text-heading-6-leading);
+}

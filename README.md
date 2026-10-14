@@ -1,7 +1,7 @@
 # Cavren
 
 **Free, private, offline-first resume builder.**  
-Guided editing · live preview · PDF / DOCX / Markdown · local AI (optional) · no accounts · no tracking.
+Guided editing · live preview · PDF / DOCX / Markdown / LaTeX · local AI (optional) · no accounts · no tracking.
 
 Your resumes live in **this browser’s IndexedDB**. Cavren does not run an app server for your content and does not embed analytics. Optional AI uses Chrome AI or **your** API key. Optional Google Drive backup is client-side OAuth to *your* Drive only.
 

@@ -1,4 +1,5 @@
 import { VStack, HStack } from "@astryxdesign/core/Layout";
+import { Badge } from "@astryxdesign/core/Badge";
 import { Button } from "@astryxdesign/core/Button";
 import { Text } from "@astryxdesign/core/Text";
 import { IconButton } from "@astryxdesign/core/IconButton";
@@ -65,6 +66,19 @@ const EditorTopbar = ({
           <SegmentedControlItem value="editor" label={t("editor.edit")} />
           <SegmentedControlItem value="preview" label={t("editor.preview")} />
           <SegmentedControlItem value="letter" label={t("editor.letter")} />
+          <SegmentedControlItem
+            value="latex"
+            label={
+              <HStack as="span" gap={1} align="center">
+                {t("editor.latex")}
+                <Badge
+                  variant="info"
+                  label={t("editor.latexBeta")}
+                  className="editor-latex-beta"
+                />
+              </HStack>
+            }
+          />
         </SegmentedControl>
         <HStack gap={2} align="center" wrap="wrap">
           <IconButton

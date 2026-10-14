@@ -6,6 +6,8 @@ import {
   HStack,
 } from "@astryxdesign/core/Layout";
 import { Button } from "@astryxdesign/core/Button";
+import { Badge } from "@astryxdesign/core/Badge";
+import { Popover } from "@astryxdesign/core/Popover";
 import { Card } from "@astryxdesign/core/Card";
 import { Text } from "@astryxdesign/core/Text";
 import { Dialog, DialogHeader } from "@astryxdesign/core/Dialog";
@@ -52,6 +54,63 @@ import { useI18n } from "@features/i18n/useI18n";
 import { nameOf, relativeTime } from "./resumeMeta";
 import "./dashboard.css";
 
+const NewResumePopover = ({
+  label,
+  variant = "primary",
+  icon,
+  alignment = "end",
+  creating,
+  onCreate,
+  t,
+}) => {
+  const [open, setOpen] = useState(false);
+  const choose = (fromExisting) => {
+    setOpen(false);
+    onCreate(fromExisting);
+  };
+  return (
+    <Popover
+      placement="below"
+      alignment={alignment}
+      width="max-content"
+      isOpen={open}
+      onOpenChange={setOpen}
+      isModal={false}
+      label={t("dash.newResume")}
+      content={
+        <VStack gap={2} align="start" padding={2}>
+          <Button
+            variant="primary"
+            size="sm"
+            label={t("dash.createEmpty")}
+            disabled={creating}
+            onClick={() => choose(false)}
+          />
+          <Button
+            variant="secondary"
+            size="sm"
+            label={t("dash.createFromExisting")}
+            disabled={creating}
+            endContent={
+              <Badge
+                variant="neutral"
+                label={t("dash.newBadge")}
+                className="rdash-new-badge"
+              />
+            }
+            onClick={() => choose(true)}
+          />
+          <Text type="inherit" size="sm" color="secondary">
+            {t("dash.createFromExistingDesc")}
+          </Text>
+        </VStack>
+      }
+    >
+      <Button variant={variant} size="sm" icon={icon} label={label} />
+    </Popover>
+  );
+};
+
 const ResumesDashboard = () => {
   const { t } = useI18n();
   const [list, setList] = useState([]);
@@ -65,6 +124,7 @@ const ResumesDashboard = () => {
   const [tailorDoc, setTailorDoc] = useState(null);
   const [packetDoc, setPacketDoc] = useState(null);
   const [deleteDoc, setDeleteDoc] = useState(null);
+  const [creating, setCreating] = useState(false);
   const [dataOpen, setDataOpen] = useState(false);
   const [message, setMessage] = useState(null);
   const restoreInputRef = useRef(null);
@@ -108,10 +168,24 @@ const ResumesDashboard = () => {
     };
   }, []);
 
-  const createNew = async () => {
-    const doc = newResume(t("dash.untitled") || "Untitled resume");
-    await putResume(doc);
-    window.location.href = `/editor?resume=${doc.id}`;
+  const createNew = async (fromExisting = false) => {
+    if (creating) return;
+    setCreating(true);
+    try {
+      const doc = newResume(t("dash.untitled") || "Untitled resume");
+      await putResume(doc);
+      const params = new URLSearchParams();
+      params.set("resume", doc.id);
+      if (fromExisting) params.set("import", "1");
+      window.location.href = `/editor?${params.toString()}`;
+    } catch (e) {
+      setCreating(false);
+      setError(
+        e?.message ||
+          t("errors.somethingWentWrong") ||
+          "Something went wrong.",
+      );
+    }
   };
 
   const duplicate = async (doc) => {
@@ -255,12 +329,12 @@ const ResumesDashboard = () => {
                   label={t("dash.restore")}
                   onClick={() => restoreInputRef.current?.click()}
                 />
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<Plus size={15} />}
+                <NewResumePopover
                   label={t("dash.newResume")}
-                  onClick={createNew}
+                  icon={<Plus size={15} />}
+                  creating={creating}
+                  onCreate={createNew}
+                  t={t}
                 />
               </div>
             </div>
@@ -327,12 +401,13 @@ const ResumesDashboard = () => {
                 }
                 actions={
                   <HStack gap={2} wrap>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      icon={<Plus size={15} />}
+                    <NewResumePopover
                       label={t("dash.createResume") || "Create resume"}
-                      onClick={createNew}
+                      icon={<Plus size={15} />}
+                      alignment="start"
+                      creating={creating}
+                      onCreate={createNew}
+                      t={t}
                     />
                     <Button
                       variant="secondary"

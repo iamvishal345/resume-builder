@@ -16,6 +16,7 @@ const CONTENT_KEYS = [
   "additionalSections",
   "resumeSettings",
   "coverLetter",
+  "latexSource",
 ];
 
 const snapshot = (state) => {
@@ -116,6 +117,7 @@ export const DEFAULT_RESUME_SETTINGS = {
   docxLayout: "ats",
   paperSize: "a4",
   letterTemplateId: "classic",
+  latexTemplateId: "classic",
   primaryColor: "",
   bgColor: "",
   textColor: "",
@@ -144,6 +146,7 @@ export const defaultResumeData = () => ({
   additionalSections: [],
   resumeSettings: { ...DEFAULT_RESUME_SETTINGS },
   coverLetter: { recipient: "", body: "" },
+  latexSource: null,
 });
 
 // Snapshot the current content the way it should be stored for a resume
@@ -314,6 +317,11 @@ export const useStore = create(
       coverLetter: { recipient: "", body: "" },
       setCoverLetter: (patch) =>
         set(() => ({ coverLetter: { ...get().coverLetter, ...patch } })),
+
+      // null follows the form. A string is the TeX tab's own source.
+      latexSource: null,
+      setLatexSource: (value) =>
+        set(() => ({ latexSource: typeof value === "string" ? value : null })),
 
       // Load a saved resume document into the editor. Merges onto defaults so
       // older saved data missing newer keys still renders. History is cleared

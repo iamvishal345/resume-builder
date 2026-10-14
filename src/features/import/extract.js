@@ -3,6 +3,7 @@
 // Everything runs in the browser — nothing is uploaded.
 
 import { unzipSync, strFromU8 } from "fflate";
+import { classifyPdfExtract, PDF_EXTRACT_MESSAGES } from "@features/import/pdfResume";
 
 export const isJsonBackupFile = (file) => {
   const name = (file.name || "").toLowerCase();
@@ -35,13 +36,26 @@ const loadPdfjs = () => {
   return pdfjsPromise;
 };
 
+const pdfFailure = (code) => {
+  const error = new Error(PDF_EXTRACT_MESSAGES[code] || PDF_EXTRACT_MESSAGES.unreadable);
+  error.code = code;
+  return error;
+};
+
+const isEncryptedPdfError = (error) => {
+  const name = String(error?.name || "");
+  const message = String(error?.message || "");
+  return name === "PasswordException" || /password|encrypted/i.test(message);
+};
+
 const extractPdfText = async (file) => {
   const pdfjs = await loadPdfjs();
   const buffer = await file.arrayBuffer();
-  const task = pdfjs.getDocument({ data: new Uint8Array(buffer) });
-  const pdf = await task.promise;
-  const parts = [];
+  let pdf;
   try {
+    const task = pdfjs.getDocument({ data: new Uint8Array(buffer) });
+    pdf = await task.promise;
+    const parts = [];
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
       const content = await page.getTextContent();
@@ -56,10 +70,23 @@ const extractPdfText = async (file) => {
       }
       if (line) parts.push(line);
     }
+    const assessed = classifyPdfExtract({
+      text: parts.join("\n"),
+      pageCount: pdf.numPages,
+    });
+    if (!assessed.ok) throw pdfFailure(assessed.code);
+    return assessed.text;
+  } catch (error) {
+    if (error?.code && PDF_EXTRACT_MESSAGES[error.code]) throw error;
+    if (isEncryptedPdfError(error)) throw pdfFailure("encrypted");
+    throw pdfFailure("unreadable");
   } finally {
-    try { await pdf.destroy(); } catch { /* already closed */ }
+    try {
+      await pdf?.destroy();
+    } catch {
+      /* already closed */
+    }
   }
-  return parts.join("\n").trim();
 };
 
 // ---------- DOCX ----------
@@ -87,14 +114,7 @@ const extractDocxText = async (file) => {
 export const extractTextFromFile = async (file) => {
   const name = (file.name || "").toLowerCase();
   if (name.endsWith(".pdf") || file.type === "application/pdf") {
-    try {
-      return await extractPdfText(file);
-    } catch (e) {
-      if (e && e.message && /Is it encrypted|password/i.test(e.message)) {
-        throw new Error("This PDF is password-protected. Remove the password and try again.");
-      }
-      throw new Error(`Could not read the PDF: ${e?.message || "unknown error"}`);
-    }
+    return extractPdfText(file);
   }
   if (name.endsWith(".docx") || /word/i.test(file.type)) {
     try {

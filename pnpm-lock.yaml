@@ -193,6 +193,9 @@ importers:
       '@react-pdf/renderer':
         specifier: ^4.9.0
         version: 4.9.0(react@19.3.0)
+      '@siglum/engine':
+        specifier: ^0.1.4
+        version: 0.1.4
       '@stylexjs/stylex':
         specifier: ^0.19.0
         version: 0.19.1
@@ -1893,6 +1896,12 @@ packages:
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
 
+  '@siglum/engine@0.1.4':
+    resolution: {integrity: sha512-m7RvhdTie64VWY727Yhz20PUMXTnRLiNkE2Z24hkXkNdX+k5m86krhB/LQXcqyH7C1plWl5vM1mxkiHPuCwXSQ==}
+
+  '@siglum/filesystem@0.2.1':
+    resolution: {integrity: sha512-c06BUHuURbYgUl71lJKeYXViofNDzxiGYeugGSna42NA5h40WAuBZK3j1ArGWzwhXHk8AJ6xsuk55uhE4biW3w==}
+
   '@stylexjs/stylex@0.19.1':
     resolution: {integrity: sha512-JwNFm0MOYPqi+M4Ax5Un4ZxfZp4HEAX2sAWetZ88KALFcv1eEiHNJs75oO3V3U7RVWnzfkiM8i9eBowC3hqgUw==}
 
@@ -2117,6 +2126,9 @@ packages:
 
   bidi-js@1.1.0:
     resolution: {integrity: sha512-fX1Onk0tdVPC7obPWB5EbJ1z7NVhLq4m2xZLq2YXBkxzMXIGRpNMU88n0EPgWseKl12J7zXs7qrDxPK4sRs2fg==}
+
+  blake3-wasm@2.1.5:
+    resolution: {integrity: sha512-F1+K8EbfOZE49dtoPtmxUQrpXaBIl3ICvasLh+nJta0xkz+9kF/7uet9fLnwKqhDrmj6g+6K3Tw9yQPUg2ka5g==}
 
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
@@ -4104,6 +4116,9 @@ packages:
   xxhash-wasm@1.1.0:
     resolution: {integrity: sha512-147y/6YNh+tlp6nd/2pWq38i9h6mz/EuQ6njIrmW8D1BS5nCqs0P6DG+m6zTGnNz5I+uhZ0SHxBs9BsPrwcKDA==}
 
+  xzwasm@0.1.2:
+    resolution: {integrity: sha512-AhkIQcyCRTKQAlI+ENhQBB52AUZF7puNmNleawbpyGAzEyflbMbwIKlU5yN99cgiv5XVlXt0mIeYgQrdQghdsA==}
+
   yallist@3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
 
@@ -5724,6 +5739,14 @@ snapshots:
 
   '@shikijs/vscode-textmate@10.0.2': {}
 
+  '@siglum/engine@0.1.4':
+    dependencies:
+      '@siglum/filesystem': 0.2.1
+      blake3-wasm: 2.1.5
+      xzwasm: 0.1.2
+
+  '@siglum/filesystem@0.2.1': {}
+
   '@stylexjs/stylex@0.19.1':
     dependencies:
       css-mediaquery: 0.1.2
@@ -6058,6 +6081,8 @@ snapshots:
   bidi-js@1.1.0:
     dependencies:
       require-from-string: 2.0.2
+
+  blake3-wasm@2.1.5: {}
 
   boolbase@1.0.0: {}
 
@@ -8218,6 +8243,8 @@ snapshots:
   xml@1.0.1: {}
 
   xxhash-wasm@1.1.0: {}
+
+  xzwasm@0.1.2: {}
 
   yallist@3.1.1: {}
 

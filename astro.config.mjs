@@ -177,6 +177,12 @@ export default defineConfig({
     },
     optimizeDeps: {
       include: ["pdfjs-dist"],
+      // @siglum/engine pulls blake3-wasm's browser build, which imports a
+      // blake3_js_bg.js file the package does not ship. Prebundling that
+      // graph crashes Vite. Leave both out of the optimizer; the TeX tab
+      // loads the engine with a dynamic import, and hashing falls back to
+      // a plain JS hash if blake3 itself cannot load.
+      exclude: ["@siglum/engine", "blake3-wasm"],
     },
   },
 });

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import {
   Layout,
   LayoutContent,
@@ -48,6 +48,8 @@ import {
   downloadResumeMarkdown,
   downloadResumePlainText,
 } from "@features/export/markdown";
+import { downloadResumeLatex } from "@features/export/latex";
+import LatexEditor from "./LatexEditor";
 import { downloadJsonResume } from "@features/import/jsonResume";
 import { downloadResumePdf } from "@features/export/pdf";
 import PersonalDetails from "./steps/PersonalDetails";
@@ -60,6 +62,7 @@ import { useI18n } from "@features/i18n/useI18n";
 import {
   MODE_TO_ACTIVE_TAB,
   parseActiveTabParam,
+  parseImportParam,
 } from "@features/editor/activeTab";
 
 const STEP_COMPONENTS = {
@@ -111,7 +114,23 @@ const EditorPage = () => {
   });
   const [resumeCheckOpen, setResumeCheckOpen] = useState(false);
   const [jobMatchOpen, setJobMatchOpen] = useState(false);
-  const [importOpen, setImportOpen] = useState(false);
+  const [importOpen, setImportOpenState] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return parseImportParam(new URLSearchParams(window.location.search));
+  });
+  const setImportOpen = useCallback((open) => {
+    setImportOpenState(open);
+    if (open || typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (!parseImportParam(url.searchParams)) return;
+    url.searchParams.delete("import");
+    const search = url.searchParams.toString();
+    window.history.replaceState(
+      null,
+      "",
+      search ? `${url.pathname}?${search}` : url.pathname,
+    );
+  }, []);
   const [resumeId, setResumeId] = useState(null);
   const createdAtRef = useRef(null);
   const docName = useRef("Untitled resume");
@@ -394,6 +413,10 @@ const EditorPage = () => {
 
   const handleDownloadPdf = async () => {
     setExportError("");
+    showToast({
+      body: t("editor.latexTypesetting"),
+      type: "info",
+    });
     try {
       await downloadResumePdf({
         data: resumeData,
@@ -478,6 +501,10 @@ const EditorPage = () => {
 
   const handleDownloadJsonResume = () => {
     downloadJsonResume(resumeDataOf(useStore.getState()), exportBaseName());
+  };
+
+  const handleDownloadLatex = () => {
+    downloadResumeLatex(resumeDataOf(useStore.getState()), exportBaseName());
   };
 
   const commandActions = useMemo(
@@ -566,6 +593,16 @@ const EditorPage = () => {
         run: handleDownloadJsonResume,
       },
       {
+        id: "latex",
+        label: "TeX PDF",
+        run: () => setMode("latex"),
+      },
+      {
+        id: "latex-download",
+        label: "Download LaTeX",
+        run: handleDownloadLatex,
+      },
+      {
         id: "snapshot",
         label: "Save snapshot now",
         run: async () => {
@@ -624,6 +661,8 @@ const EditorPage = () => {
           >
             {mode === "letter" ? (
               <CoverLetterEditor />
+            ) : mode === "latex" ? (
+              <LatexEditor />
             ) : mode === "editor" ? (
               <div className="editor-shell">
                 <div className="editor-tools-row">

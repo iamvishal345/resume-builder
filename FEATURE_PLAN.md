@@ -178,6 +178,19 @@ See [ROADMAP.md](./ROADMAP.md).
 | 9 | C6–C8 Sidebar presets, theme presets, MD/txt export | Done |
 | 10 | D1 Drive backup/restore + UX hardening | Done (client OAuth; needs your client ID) |
 | 12 | Phase F (community, i18n, a11y, JSON Resume, tests, polish) | Done (extend locales / a11y ongoing) |
+| 13 | LaTeX PDF + TeX tab | Done (pdfLaTeX in the browser; classic + compact; cover-letter .tex) |
+
+### LaTeX
+
+People edit the resume in the guided form. They do not write TeX. **Classic** (default) and **Compact** are LaTeX templates generated from that JSON. The choice is `resumeSettings.latexTemplateId`. Classic uses ruled section headings. Compact uses uppercase section labels, the organization above the role, and skills as a list.
+
+The TeX tab shows the **compiled PDF** (pdf.js), with a short note that the page was typeset with pdfLaTeX. Download PDF is the primary action and uses that compile. Download .tex is secondary, for Overleaf or a local install. There is no syntax editor. An older `latexSource` string, if a save still has one, is not shown and does not override the file.
+
+Compilation stays on the device. The engine is [@siglum/engine](https://www.npmjs.com/package/@siglum/engine) (MIT, BusyTeX / TeX Live 2025 pdfLaTeX in WebAssembly). It is lazy-loaded only when the TeX tab opens or a LaTeX PDF is downloaded, so the rest of the app does not wait on it. The first run downloads the wasm and the TeX Live bundles the resume needs from the Siglum CDN (engine files only — the resume is not uploaded). Those bytes are cached in the browser (IndexedDB) and later compiles can run offline. If the engine fails, the tab says so in plain language and Download .tex still works. The HTML editor preview is not presented as the LaTeX PDF. Cover-letter `.tex` is still a download; its PDF is unchanged. Visual templates that are not these LaTeX files still use `@react-pdf` for the on-screen preview raster.
+
+### PDF import + optional AI prefill
+
+Done. **Import resume** (editor import button or command palette) extracts PDF text in the browser with pdfjs. A local read fills obvious fields (name, contact, sections) immediately. When Chrome AI or the user's API key is available, that same import structures the text automatically with `aiGenerate` (contact details are redacted only for an external API key, then restored from the local read). The user still reviews the name, role, and counts and confirms with Import & replace before the open resume is replaced (snapshot first). If the provider errors or the model output is rejected, the local read stays and **Structure with AI** retries. Encrypted, empty, and image-only PDFs get a plain message — scans are not OCR'd and nothing is invented. No Cavren server.
 
 ---
 

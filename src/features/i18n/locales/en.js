@@ -180,6 +180,30 @@ export default {
     edit: "Edit",
     preview: "Preview",
     letter: "Letter",
+    latex: "TeX",
+    latexBeta: "Beta",
+    latexBetaTitle: "This LaTeX PDF path is in beta.",
+    latexBetaBody: "It is still under development.",
+    latexTitle: "LaTeX PDF",
+    latexSubtitle:
+      "pdfLaTeX typesets this resume on your device. The page below is that compiled PDF, not the editor preview.",
+    latexTemplate: "LaTeX template",
+    latexTemplateClassic: "Classic",
+    latexTemplateCompact: "Compact",
+    latexTemplateClassicDesc:
+      "Ruled section headings, with the role above the organization.",
+    latexTemplateCompactDesc:
+      "Uppercase section labels, the organization above the role, and skills as a list.",
+    latexDownloadPdf: "Download PDF",
+    latexDownload: "Download .tex",
+    latexNote:
+      "Download .tex for the same file in Overleaf or a local TeX install. The preview here is the compiled page.",
+    latexLoading:
+      "Downloading the TeX engine and typesetting this resume. The rest of Cavren keeps working. The engine is cached on this device after the first run.",
+    latexFailed: "LaTeX could not build that PDF.",
+    latexRetry: "Try again",
+    latexPage: "Compiled PDF page {page}",
+    latexTypesetting: "Typesetting your PDF with LaTeX…",
     command: "Command palette (Ctrl+K)",
     aiPrefs: "AI preferences",
     themeToLight: "Switch to light mode",
@@ -203,6 +227,7 @@ export default {
     addPhoto: "Add photo",
     removePhoto: "Remove photo",
     photoSizeAlert: "Use a JPG/PNG under 800KB (stored only on this device).",
+    validEmailAlert: "Enter a valid email address.",
     addSocialLinks: "Add social links",
     customize: "Customize",
     templates: "Templates",
@@ -273,20 +298,19 @@ export default {
   },
   import: {
     title: "Import a resume",
-    subtitle:
-      "Upload a PDF, DOCX, JSON Resume, or Cavren .r.json backup — or paste plain text. Everything runs locally; template and colors stay untouched unless you restore a backup.",
+    subtitle: "PDF, DOCX, or pasted text.",
     existingLabel: "Existing resume",
-    placeholder: "Drop a PDF, DOCX, text, JSON Resume, or .r.json backup",
-    dropzoneDesc:
-      "PDF and DOCX text is extracted locally. JSON Resume and .r.json restore structured content on this device.",
+    placeholder: "Drop a PDF or DOCX",
+    dropzoneDesc: "PDF or DOCX is read on this device.",
     pasteOption: "or paste the text of an existing resume below.",
-    pasteLabel: "…or paste resume text",
+    pasteLabel: "Paste resume text",
     pastePlaceholder:
       "Ada Lovelace\nEngineer\nada@example.com · +1 555 010 9999\n\nSUMMARY\n...\n\nEXPERIENCE\nEngineer at Acme — 2020 - Present\n- Shipped ...\n\nEDUCATION\nB.Sc. Computer Science — MIT, 2016\n\nSKILLS\nPython, SQL, React",
     importReplace: "Import & replace",
     noUploadsNote: "Nothing is uploaded — all parsing happens in your browser.",
     noSectionsNote:
-      "No recognizable sections yet — add headers like SUMMARY, EXPERIENCE, EDUCATION and SKILLS.",
+      "No clear sections yet. Add headings like SUMMARY or EXPERIENCE.",
+    statusConfirm: "Nothing is replaced until you confirm.",
     backupPackError:
       "This backup is a full library pack — restore it from My resumes → Data & privacy.",
     importJsonError: "Could not import that JSON backup.",
@@ -295,6 +319,31 @@ export default {
     extractingText: "Extracting text…",
     readCharSuccess:
       "Read {count} characters — review the preview below, then import.",
+    unnamed: "Name",
+    countJobs: "{count} jobs",
+    countEducation: "{count} education",
+    countSkills: "{count} skills",
+    structureWithAi: "Structure with AI",
+    parseWithAi: "Parse with AI",
+    structuring: "Structuring…",
+    localNote:
+      "AI isn't configured, so this is a best-effort local read of the name, contact, and sections. The text stays below if you want to fix headings. Add Chrome AI or your own API key to structure the file.",
+    needsAiNote:
+      "No obvious sections were found. AI can structure this file once Chrome AI or your API key is set up. The extracted text is below so you aren't stuck.",
+    aiReadyNote:
+      "AI is available, so this resume is structured automatically. You can import the local read before that finishes. Nothing replaces this resume until you confirm.",
+    aiStructuringNote:
+      "Structuring this resume with your AI. The local read stays available if that fails, and nothing is replaced until you import.",
+    aiDoneNote:
+      "Structured with your AI. Check the name, role, and counts, then import. Nothing replaces this resume until you confirm.",
+    aiFailed:
+      "AI couldn't structure that file. The local read is still here — review it and import, or try again.",
+    emptyPdf: "This PDF has no pages.",
+    imageOnly:
+      "This PDF has no readable text. If it is a scan or picture, Cavren cannot OCR it, so nothing was filled in.",
+    encryptedPdf:
+      "This PDF is password-protected. Remove the password and try again.",
+    unreadablePdf: "Could not read that PDF.",
   },
   versions: {
     title: "Versions",
@@ -428,6 +477,10 @@ export default {
     dataPrivacy: "Data & privacy",
     restore: "Restore",
     newResume: "New resume",
+    createEmpty: "Create empty",
+    createFromExisting: "Create from existing resume",
+    createFromExistingDesc: "PDF or DOCX, read on this device.",
+    newBadge: "New",
     loading: "Loading resumes…",
     noResumesTitle: "No resumes yet",
     noResumesDesc:
@@ -764,7 +817,7 @@ export default {
       lede: "Short version: Cavren is a community, local-first tool. Your resumes stay on your device. We don't run an app server for your content, we don't require accounts, and we don't embed analytics or advertising trackers.",
       dataTitle: "Where your data lives",
       dataBody:
-        "Resumes are stored in this browser's IndexedDB. Backups you download (.r.json, PDF, DOCX, or an optional passphrase-encrypted pack) are ordinary files on your computer. Encryption for that pack runs only in your browser — Cavren cannot recover the passphrase. Optional version snapshots also stay in IndexedDB on this device.",
+        "Resumes are stored in this browser's IndexedDB, including a LaTeX source if you edit the TeX tab. Backups you download (.r.json, PDF, DOCX, Markdown, LaTeX .tex, or an optional passphrase-encrypted pack) are ordinary files on your computer. Encryption for that pack runs only in your browser — Cavren cannot recover the passphrase. Optional version snapshots also stay in IndexedDB on this device.",
       collectTitle: "What we collect",
       collectAccount:
         "No account, no name, no email required to build or export.",
@@ -782,7 +835,7 @@ export default {
         " Drive. Cavren does not operate a sync server. Tokens stay in this browser.",
       exportsTitle: "Exports & offline",
       exportsBeforeLink:
-        "PDF and DOCX are generated locally. You can also export Markdown, plain text, or a ",
+        "PDF and DOCX are generated locally. You can also export Markdown, plain text, LaTeX (.tex), or a ",
       jsonResume: "JSON Resume",
       exportsAfterLink:
         " file for use in other tools. Once installed as a PWA (or after a visit), the app shell can work offline for editing and export. Network is only needed for optional AI APIs and Drive.",
@@ -897,6 +950,7 @@ export default {
     body: "Body",
     bodyPlaceholder: "Dear hiring manager, …",
     downloadPdf: "Download PDF",
+    downloadTex: "Download .tex",
   },
   preview: {
     zoomOut: "Zoom out",
