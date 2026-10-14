@@ -3,9 +3,18 @@
 
 import { downloadBlob, safeFilename } from "@lib/download";
 import { latexDocumentOf, latexTemplateIdOf } from "./index.js";
-import { displayName } from "./model.js";
+import { displayName, latexIsBlank } from "./model.js";
 
 export const LATEX_ENGINE = "pdflatex";
+
+/** Thrown when the form has nothing for pdfLaTeX to place on the page. */
+export const latexBlankError = () => {
+  const error = new Error("Add a name and a job on Edit to fill this page");
+  error.code = "latex-blank";
+  return error;
+};
+
+export const isLatexBlankError = (error) => error?.code === "latex-blank";
 
 /** Job the compiler receives. Always generated from the form. */
 export const latexJobOf = (data = {}) => {
@@ -59,6 +68,7 @@ const pdfBytesOf = (result) => {
  * Pass `compile` to stub the engine. The default engine is loaded only when omitted.
  */
 export const compileResumeLatex = async (data, { compile, onProgress } = {}) => {
+  if (latexIsBlank(data)) throw latexBlankError();
   const job = latexJobOf(data);
   const run =
     compile ||

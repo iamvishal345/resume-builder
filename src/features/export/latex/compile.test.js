@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { latexDocumentOf } from "./index.js";
 import {
   compileResumeLatex,
+  isLatexBlankError,
   latexJobOf,
   plainLatexFailure,
 } from "./compile.js";
@@ -76,6 +77,29 @@ describe("latex compile input", () => {
     expect(failed).toBeInstanceOf(Error);
     expect(failed.message).toMatch(/enumitem\.sty/);
     expect(failed.message).not.toMatch(/%PDF/);
+  });
+
+  it("stops before the engine when the resume has nothing to print", async () => {
+    const compile = vi.fn();
+    const error = await compileResumeLatex(
+      {
+        personalDetails: {},
+        socialLinks: [],
+        resumeSummary: "",
+        workHistory: [{ positionTitle: "", companyName: "", workSummary: "" }],
+        education: [],
+        skills: [],
+        additionalSections: [],
+        resumeSettings: { latexTemplateId: "classic" },
+      },
+      { compile },
+    ).then(
+      () => null,
+      (err) => err,
+    );
+    expect(compile).not.toHaveBeenCalled();
+    expect(isLatexBlankError(error)).toBe(true);
+    expect(error.message).toMatch(/name and a job/i);
   });
 
   it("turns an engine crash into a plain message", () => {

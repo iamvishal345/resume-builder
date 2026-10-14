@@ -45,7 +45,12 @@ const PdfPageCanvas = ({ source, zoom, widthMm, heightMm }) => {
   );
 };
 
-const FullPagePreview = ({ onDownloadPdf, onDownloadDocx, onCustomize }) => {
+const FullPagePreview = ({
+  onDownloadPdf,
+  pdfBusy = false,
+  onDownloadDocx,
+  onCustomize,
+}) => {
   const { t } = useI18n();
   const [zoom, setZoom] = useState(0.55);
   const [pages, setPages] = useState([]);
@@ -215,6 +220,7 @@ const FullPagePreview = ({ onDownloadPdf, onDownloadDocx, onCustomize }) => {
             size="sm"
             icon={<Printer size={14} />}
             label={t("common.pdf") || "PDF"}
+            isLoading={pdfBusy}
             onClick={onDownloadPdf}
           />
         </HStack>

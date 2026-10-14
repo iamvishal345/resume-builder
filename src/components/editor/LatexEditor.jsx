@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { Banner } from "@astryxdesign/core/Banner";
 import { Button } from "@astryxdesign/core/Button";
 import { Card } from "@astryxdesign/core/Card";
@@ -7,11 +7,12 @@ import {
   SegmentedControl,
   SegmentedControlItem,
 } from "@astryxdesign/core/SegmentedControl";
+import { Spinner } from "@astryxdesign/core/Spinner";
 import { Text } from "@astryxdesign/core/Text";
 import { downloadResumeLatex, latexTemplateIdOf } from "@features/export/latex";
 import { compileResumeLatex } from "@features/export/latex/compile.js";
+import { displayName, latexIsBlank } from "@features/export/latex/model.js";
 import { downloadBlob, safeFilename } from "@lib/download";
-import { displayName } from "@features/export/latex/model.js";
 import { useI18n } from "@features/i18n/useI18n";
 import { useStore } from "@store";
 
@@ -29,12 +30,12 @@ const loadPdfjs = () => {
   return pdfjsPromise;
 };
 
-const LatexPdfSheet = ({ bytes, pageLabel }) => {
+const LatexPdfSheet = ({ bytes, pageLabel, loadingLabel }) => {
   const [pageCount, setPageCount] = useState(0);
   const canvases = useRef([]);
   const docRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     let cancelled = false;
     setPageCount(0);
     (async () => {
@@ -59,30 +60,52 @@ const LatexPdfSheet = ({ bytes, pageLabel }) => {
     const doc = docRef.current;
     if (!doc || pageCount < 1) return undefined;
     let cancelled = false;
+    const tasks = [];
     (async () => {
       for (let index = 1; index <= pageCount; index += 1) {
         if (cancelled) return;
         const canvas = canvases.current[index - 1];
         if (!canvas) continue;
         const page = await doc.getPage(index);
+        if (cancelled) {
+          page.cleanup();
+          return;
+        }
         const viewport = page.getViewport({ scale: 1.5 });
         canvas.width = Math.ceil(viewport.width);
         canvas.height = Math.ceil(viewport.height);
         const ctx = canvas.getContext("2d");
-        if (ctx) await page.render({ canvasContext: ctx, viewport }).promise;
+        if (!ctx) {
+          page.cleanup();
+          continue;
+        }
+        const task = page.render({ canvasContext: ctx, viewport });
+        tasks.push(task);
+        try {
+          await task.promise;
+        } catch {
+          if (cancelled) return;
+        }
         page.cleanup();
       }
     })();
     return () => {
       cancelled = true;
+      for (const task of tasks) task.cancel?.();
     };
   }, [bytes, pageCount]);
 
-  if (!pageCount) return null;
+  if (!pageCount) {
+    return (
+      <VStack align="center" width="100%" padding={6}>
+        <Spinner size="lg" label={loadingLabel} />
+      </VStack>
+    );
+  }
 
   return (
     <Card padding={0} variant="transparent">
-      <VStack gap={3} width="100%" className="preview-sheet-wrap">
+      <VStack gap={3} width="100%" className="editor-latex-sheet">
         {Array.from({ length: pageCount }, (_, index) => (
           <canvas
             key={index}
@@ -120,30 +143,35 @@ const LatexEditor = () => {
     resumeSettings,
   };
   const templateId = latexTemplateIdOf(data);
-  const [status, setStatus] = useState("loading");
-  const [progress, setProgress] = useState("");
+  const blank = latexIsBlank(data);
+  const [status, setStatus] = useState(blank ? "empty" : "loading");
   const [error, setError] = useState("");
   const [pdfBytes, setPdfBytes] = useState(null);
+  const [previewKey, setPreviewKey] = useState(0);
   const [attempt, setAttempt] = useState(0);
   const requestRef = useRef(0);
+  const templateRef = useRef(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const requestId = ++requestRef.current;
-    const handle = setTimeout(() => {
-      setStatus("loading");
+    if (blank) {
+      setStatus("empty");
       setPdfBytes(null);
       setError("");
-      setProgress("");
-      compileResumeLatex(data, {
-        onProgress: (stage, detail) => {
-          if (requestId !== requestRef.current) return;
-          const next = [detail, stage].filter(Boolean).join(" · ");
-          if (next) setProgress(next);
-        },
-      })
+      return undefined;
+    }
+    const templateChanged = templateRef.current !== templateId;
+    templateRef.current = templateId;
+    setStatus("loading");
+    setPdfBytes(null);
+    setError("");
+    const handle = setTimeout(() => {
+      compileResumeLatex(data)
         .then((result) => {
           if (requestId !== requestRef.current) return;
-          setPdfBytes(result.pdf);
+          const pdf = result.pdf?.slice ? result.pdf.slice() : result.pdf;
+          setPdfBytes(pdf);
+          setPreviewKey((value) => value + 1);
           setStatus("ready");
         })
         .catch((err) => {
@@ -152,7 +180,7 @@ const LatexEditor = () => {
           setStatus("error");
           setError(err?.message || t("editor.latexFailed"));
         });
-    }, 400);
+    }, templateChanged ? 0 : 400);
     return () => {
       clearTimeout(handle);
       requestRef.current += 1;
@@ -161,6 +189,7 @@ const LatexEditor = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     attempt,
+    blank,
     templateId,
     personalDetails,
     socialLinks,
@@ -170,6 +199,7 @@ const LatexEditor = () => {
     skills,
     additionalSections,
     resumeSettings,
+    t,
   ]);
 
   const downloadPdf = () => {
@@ -192,35 +222,7 @@ const LatexEditor = () => {
         title={t("editor.latexBetaTitle")}
         description={t("editor.latexBetaBody")}
       />
-      <HStack justify="between" align="end" gap={3} width="100%" wrap="wrap">
-        <VStack gap={1}>
-          <Text type="inherit" size="lg" weight="semibold" color="primary">
-            {t("editor.latexTitle")}
-          </Text>
-          <Text type="inherit" size="sm" color="secondary">
-            {t("editor.latexSubtitle")}
-          </Text>
-        </VStack>
-        <HStack gap={2} wrap="wrap">
-          <Button
-            variant="primary"
-            size="sm"
-            label={t("editor.latexDownloadPdf")}
-            isDisabled={!pdfBytes || status === "loading"}
-            onClick={downloadPdf}
-          />
-          <Button
-            variant="secondary"
-            size="sm"
-            label={t("editor.latexDownload")}
-            onClick={downloadTex}
-          />
-        </HStack>
-      </HStack>
-      <VStack gap={2} width="100%">
-        <Text type="inherit" size="xs" weight="medium" color="secondary">
-          {t("editor.latexTemplate")}
-        </Text>
+      <HStack justify="between" align="center" gap={3} width="100%" wrap="wrap">
         <SegmentedControl
           value={templateId}
           onChange={(id) => setResumeSettings({ latexTemplateId: id })}
@@ -236,23 +238,33 @@ const LatexEditor = () => {
             label={t("editor.latexTemplateCompact")}
           />
         </SegmentedControl>
-        <Text type="inherit" size="sm" color="secondary">
-          {t("editor.latexTemplateClassic")}: {t("editor.latexTemplateClassicDesc")}
-        </Text>
-        <Text type="inherit" size="sm" color="secondary">
-          {t("editor.latexTemplateCompact")}: {t("editor.latexTemplateCompactDesc")}
-        </Text>
-      </VStack>
-      <Text type="inherit" size="sm" color="secondary">
-        {t("editor.latexNote")}
-      </Text>
-      {status === "loading" ? (
+        <HStack gap={2} wrap="wrap">
+          <Button
+            variant="primary"
+            size="sm"
+            label={t("editor.latexDownloadPdf")}
+            isDisabled={!pdfBytes || status !== "ready"}
+            onClick={downloadPdf}
+          />
+          <Button
+            variant="secondary"
+            size="sm"
+            label={t("editor.latexDownload")}
+            onClick={downloadTex}
+          />
+        </HStack>
+      </HStack>
+      {blank ? (
         <Text type="inherit" size="sm" color="secondary" role="status">
-          {t("editor.latexLoading")}
-          {progress ? ` ${progress}` : ""}
+          {t("editor.latexEmpty")}
         </Text>
       ) : null}
-      {status === "error" ? (
+      {!blank && status === "loading" ? (
+        <VStack align="center" width="100%" padding={6}>
+          <Spinner size="lg" label={t("editor.latexTypesetting")} />
+        </VStack>
+      ) : null}
+      {!blank && status === "error" ? (
         <VStack gap={2} width="100%">
           <Text type="inherit" size="sm" color="accent" role="alert">
             {error}
@@ -267,9 +279,11 @@ const LatexEditor = () => {
           </HStack>
         </VStack>
       ) : null}
-      {pdfBytes ? (
+      {!blank && status === "ready" && pdfBytes ? (
         <LatexPdfSheet
+          key={`${templateId}-${previewKey}`}
           bytes={pdfBytes}
+          loadingLabel={t("editor.latexTypesetting")}
           pageLabel={(page) => t("editor.latexPage", { page })}
         />
       ) : null}

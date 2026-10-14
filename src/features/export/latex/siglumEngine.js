@@ -1,3 +1,5 @@
+import { createCompileQueue } from "./compileQueue.js";
+
 // Lazy pdfLaTeX via @siglum/engine (MIT, BusyTeX / TeX Live in wasm).
 // Engine bytes come from the Siglum CDN the first time and are cached in
 // IndexedDB by the compiler. The resume source is compiled locally and is
@@ -12,6 +14,7 @@ const WORKER_URL = "/latex/siglum-worker.js";
 const ENGINE_BASE = "https://cdn.siglum.org/tl2025";
 
 let compilerPromise = null;
+const compileQueue = createCompileQueue();
 
 const loadCompiler = async (onProgress) => {
   if (!compilerPromise) {
@@ -48,7 +51,7 @@ const loadCompiler = async (onProgress) => {
   return compilerPromise;
 };
 
-export const compileWithSiglum = async (job, { onProgress } = {}) => {
+const compileJob = async (job, onProgress) => {
   const compiler = await loadCompiler(onProgress);
   if (onProgress) compiler.onProgress = onProgress;
   const engine = job.engine || "pdflatex";
@@ -59,3 +62,6 @@ export const compileWithSiglum = async (job, { onProgress } = {}) => {
   }
   return result;
 };
+
+export const compileWithSiglum = (job, { onProgress } = {}) =>
+  compileQueue(() => compileJob(job, onProgress));

@@ -12,7 +12,11 @@ import {
   extractTextFromFile,
   isJsonBackupFile,
 } from "@features/import/extract";
-import { mapLocalResumeText, parseResumeImport } from "@features/import/pdfResume";
+import {
+  mapLocalResumeText,
+  parseResumeImport,
+  previewOf,
+} from "@features/import/pdfResume";
 import { isAiAvailable } from "@features/ai/provider";
 import { parseResumeBackup } from "@features/resumes/backup";
 import { snapshotBefore } from "@features/resumes/snapshot";
@@ -39,6 +43,20 @@ const snapshotBeforeImport = async () => {
 
 const MIN_AUTO_AI = 20;
 
+const countPhrase = (t, count, oneKey, manyKey) =>
+  t(count === 1 ? oneKey : manyKey, { count });
+
+const importSummary = (t, preview) => {
+  const name = preview.name || t("import.noName");
+  const who = preview.role ? `${name} · ${preview.role}` : name;
+  const counts = [
+    countPhrase(t, preview.jobs, "import.countJob", "import.countJobs"),
+    t("import.countEducation", { count: preview.education }),
+    countPhrase(t, preview.skills, "import.countSkill", "import.countSkills"),
+  ].join(" · ");
+  return { who, counts };
+};
+
 const aiFailureMessage = (t, reason) => {
   if (
     reason &&
@@ -49,7 +67,8 @@ const aiFailureMessage = (t, reason) => {
     reason !== "not-object" &&
     reason !== "no-resume-content" &&
     reason !== "too-large" &&
-    !/Failed to fetch/i.test(reason)
+    !/Failed to fetch/i.test(reason) &&
+    !/user gesture|downloadable|downloading/i.test(reason)
   ) {
     return reason;
   }
@@ -94,6 +113,8 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
   const local = useMemo(() => mapLocalResumeText(text), [text]);
   const usingAi = Boolean(aiResult?.ok && aiResult.sourceText === text);
   const active = usingAi ? aiResult : local;
+  const preview = active.preview || previewOf(active.data || {});
+  const summary = text.trim() ? importSummary(t, preview) : null;
 
   const reset = () => {
     requestRef.current += 1;
@@ -195,7 +216,7 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
     }
   };
 
-  structureRef.current = async (sourceText) => {
+  structureRef.current = async (sourceText, { manual = false } = {}) => {
     const trimmed = String(sourceText || "").trim();
     if (!trimmed) return;
     const requestId = ++requestRef.current;
@@ -211,12 +232,19 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
         return;
       }
       setAiResult(null);
-      if (result.attemptedAi) setAiError(aiFailureMessage(t, result.aiReason));
+      const quiet =
+        !manual &&
+        /user gesture|downloadable|downloading/i.test(result.aiReason || "");
+      if (result.attemptedAi && !quiet) {
+        setAiError(aiFailureMessage(t, result.aiReason));
+      }
     } catch (e) {
       if (requestId !== requestRef.current || !openRef.current) return;
       if (sourceText !== textRef.current) return;
       setAiResult(null);
-      setAiError(aiFailureMessage(t, e?.message || ""));
+      const quiet =
+        !manual && /user gesture|downloadable|downloading/i.test(e?.message || "");
+      if (!quiet) setAiError(aiFailureMessage(t, e?.message || ""));
     } finally {
       if (requestId === requestRef.current) setAiBusy(false);
     }
@@ -248,12 +276,9 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
     ? aiError
     : aiBusy
       ? t("import.structuring") || "Structuring…"
-      : fileStatus?.message
-        ? ""
-        : text.trim() && !active.ok
-          ? t("import.noSectionsNote") ||
-            "No clear sections yet. Add headings like SUMMARY or EXPERIENCE."
-          : t("import.statusConfirm") || "Nothing is replaced until you confirm.";
+      : usingAi
+        ? t("import.parsedWithAi")
+        : "";
 
   return (
     <>
@@ -298,6 +323,27 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
               placeholder={t("import.pastePlaceholder") || "Ada Lovelace\nEngineer\nada@example.com · +1 555 010 9999\n\nSUMMARY\n...\n\nEXPERIENCE\nEngineer at Acme — 2020 - Present\n- Shipped ...\n\nEDUCATION\nB.Sc. Computer Science — MIT, 2016\n\nSKILLS\nPython, SQL, React"}
             />
 
+            {summary ? (
+              <VStack gap={1} width="100%">
+                <Text type="inherit" size="sm" weight="semibold" color="primary">
+                  {summary.who}
+                </Text>
+                <Text type="inherit" size="sm" color="secondary">
+                  {summary.counts}
+                </Text>
+                {statusLine ? (
+                  <Text
+                    type="inherit"
+                    size="sm"
+                    color={aiError ? "accent" : "secondary"}
+                    role={aiError ? "alert" : "status"}
+                  >
+                    {statusLine}
+                  </Text>
+                ) : null}
+              </VStack>
+            ) : null}
+
             <HStack gap={2} align="center">
               <Button
                 variant="secondary"
@@ -311,7 +357,7 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
                     setAiSettingsOpen(true);
                     return;
                   }
-                  void structureRef.current(text);
+                  void structureRef.current(text, { manual: true });
                 }}
               />
               {text.trim() ? (
@@ -325,16 +371,6 @@ const ImportResumeDialog = ({ isOpen, onOpenChange }) => {
                 />
               ) : null}
             </HStack>
-            {statusLine ? (
-              <Text
-                type="inherit"
-                size="sm"
-                color={aiError ? "accent" : "secondary"}
-                role={aiError ? "alert" : "status"}
-              >
-                {statusLine}
-              </Text>
-            ) : null}
           </VStack>
         </div>
       </Dialog>

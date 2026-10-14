@@ -44,6 +44,7 @@ const EditorTopbar = ({
   onJobMatch,
   onDownloadDocx,
   onDownloadPdf,
+  pdfBusy = false,
   onVersions,
   onFitPage,
   onCommandPalette,
@@ -235,6 +236,7 @@ const EditorTopbar = ({
               size="sm"
               icon={<Download size={14} />}
               label={t("common.pdf") || "PDF"}
+              isLoading={pdfBusy}
               onClick={onDownloadPdf}
             />
           </span>

@@ -231,3 +231,14 @@ export const collectResumeLatex = (data = {}) => {
     sections,
   };
 };
+
+/** True when the generated TeX body would be an empty page. */
+export const latexIsBlank = (data = {}) => {
+  const model = collectResumeLatex(data);
+  return (
+    !model.name &&
+    !model.designation &&
+    model.contactParts.length === 0 &&
+    model.sections.length === 0
+  );
+};

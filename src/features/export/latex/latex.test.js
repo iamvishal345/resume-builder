@@ -4,6 +4,7 @@ import { buildResumeLatex } from "./classic.js";
 import { buildCompactLatex } from "./compact.js";
 import { buildCoverLetterLatex } from "./letter.js";
 import { latexDocumentOf } from "./index.js";
+import { latexIsBlank } from "./model.js";
 
 const resume = (patch = {}) => ({
   personalDetails: {
@@ -177,6 +178,34 @@ describe("latexDocumentOf", () => {
     expect(tex).toBe(buildCompactLatex(data));
     expect(tex).not.toContain("Custom");
     expect(tex).toContain("\\cvsec{");
+  });
+});
+
+describe("latexIsBlank", () => {
+  it("is blank only when the page would have nothing to print", () => {
+    const empty = {
+      personalDetails: {},
+      socialLinks: [],
+      resumeSummary: "",
+      workHistory: [],
+      education: [],
+      skills: [],
+      additionalSections: [],
+    };
+    expect(latexIsBlank(empty)).toBe(true);
+    expect(
+      latexIsBlank({
+        ...empty,
+        workHistory: [{ positionTitle: "", companyName: "", workSummary: "" }],
+      }),
+    ).toBe(true);
+    expect(latexIsBlank(resume())).toBe(false);
+    expect(
+      latexIsBlank({
+        ...empty,
+        workHistory: [{ positionTitle: "Engineer", companyName: "Acme" }],
+      }),
+    ).toBe(false);
   });
 });
 

@@ -8,29 +8,40 @@ import { defaultResumeData } from "@store";
 import { Resume } from "@features/resume/Resume";
 import { resumeViewModel } from "@features/resume/viewModel";
 import { downloadResumePdf } from "@features/export/pdf";
+import { isLatexBlankError } from "@features/export/latex/compile.js";
+import { latexIsBlank } from "@features/export/latex/model.js";
 import { nameOf } from "./resumeMeta";
 import { useI18n } from "@features/i18n/useI18n";
+
+const pdfFailureText = (err, t) =>
+  isLatexBlankError(err)
+    ? t("editor.latexEmpty")
+    : err?.message || t("errors.pdfDownloadFailed");
 
 const PreviewDialog = ({ doc, autoPrint, onOpenChange }) => {
   const { t } = useI18n();
   const sheetRef = useRef(null);
   const [error, setError] = useState("");
+  const [pdfBusy, setPdfBusy] = useState(false);
 
   useEffect(() => {
     if (autoPrint && doc) {
       const id = window.setTimeout(() => {
         const current = { ...defaultResumeData(), ...(doc.data || {}) };
+        if (latexIsBlank(current)) {
+          setError(t("editor.latexEmpty"));
+          return;
+        }
+        setPdfBusy(true);
         downloadResumePdf({
-          data: resumeViewModel(current),
-          templateId: current.resumeSettings.templateId,
-          paletteId: current.resumeSettings.paletteId,
-          fontId: current.resumeSettings.fontId,
+          data: current,
           settings: current.resumeSettings,
         })
           .then(() => onOpenChange(null))
           .catch((err) => {
-            setError(err?.message || t("errors.pdfDownloadFailed"));
-          });
+            setError(pdfFailureText(err, t));
+          })
+          .finally(() => setPdfBusy(false));
       }, 250);
       return () => window.clearTimeout(id);
     }
@@ -41,16 +52,20 @@ const PreviewDialog = ({ doc, autoPrint, onOpenChange }) => {
   const data = resumeViewModel(raw);
   const download = async () => {
     setError("");
+    if (latexIsBlank(raw)) {
+      setError(t("editor.latexEmpty"));
+      return;
+    }
+    setPdfBusy(true);
     try {
       await downloadResumePdf({
-        data,
-        templateId: raw.resumeSettings.templateId,
-        paletteId: raw.resumeSettings.paletteId,
-        fontId: raw.resumeSettings.fontId,
+        data: raw,
         settings: raw.resumeSettings,
       });
     } catch (err) {
-      setError(err?.message || t("errors.pdfDownloadFailed"));
+      setError(pdfFailureText(err, t));
+    } finally {
+      setPdfBusy(false);
     }
   };
 
@@ -93,6 +108,7 @@ const PreviewDialog = ({ doc, autoPrint, onOpenChange }) => {
                   size="sm"
                   icon={<Download size={14} />}
                   label={t("previewDialog.downloadPdf") || "Download PDF"}
+                  isLoading={pdfBusy}
                   onClick={() => download()}
                 />
                 <Button

@@ -49,6 +49,8 @@ import {
   downloadResumePlainText,
 } from "@features/export/markdown";
 import { downloadResumeLatex } from "@features/export/latex";
+import { isLatexBlankError } from "@features/export/latex/compile.js";
+import { latexIsBlank } from "@features/export/latex/model.js";
 import LatexEditor from "./LatexEditor";
 import { downloadJsonResume } from "@features/import/jsonResume";
 import { downloadResumePdf } from "@features/export/pdf";
@@ -354,6 +356,8 @@ const EditorPage = () => {
   const [versionsOpen, setVersionsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [exportError, setExportError] = useState("");
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const pdfBusyRef = useRef(false);
   const showToast = useToast();
 
   const personalDetails = useStore((state) => state.personalDetails);
@@ -412,23 +416,33 @@ const EditorPage = () => {
   };
 
   const handleDownloadPdf = async () => {
+    if (pdfBusyRef.current) return;
     setExportError("");
+    const data = resumeDataOf(useStore.getState());
+    if (latexIsBlank(data)) {
+      setExportError(t("editor.latexEmpty"));
+      return;
+    }
+    pdfBusyRef.current = true;
+    setPdfBusy(true);
     showToast({
       body: t("editor.latexTypesetting"),
       type: "info",
     });
     try {
       await downloadResumePdf({
-        data: resumeData,
-        templateId: resumeSettings.templateId,
-        paletteId: resumeSettings.paletteId,
-        fontId: resumeSettings.fontId,
-        settings: resumeSettings,
+        data,
+        settings: data.resumeSettings,
       });
     } catch (error) {
       setExportError(
-        error?.message || t("errors.pdfExportFailed") || "PDF export failed.",
+        isLatexBlankError(error)
+          ? t("editor.latexEmpty")
+          : error?.message || t("errors.pdfExportFailed") || "PDF export failed.",
       );
+    } finally {
+      pdfBusyRef.current = false;
+      setPdfBusy(false);
     }
   };
 
@@ -647,6 +661,7 @@ const EditorPage = () => {
             onJobMatch={() => setJobMatchOpen(true)}
             onDownloadDocx={handleDownloadDocx}
             onDownloadPdf={handleDownloadPdf}
+            pdfBusy={pdfBusy}
             onVersions={() => setVersionsOpen(true)}
             onFitPage={handleFitPage}
             onCommandPalette={() => setPaletteOpen(true)}
@@ -754,6 +769,7 @@ const EditorPage = () => {
             ) : (
               <FullPagePreview
                 onDownloadPdf={handleDownloadPdf}
+                pdfBusy={pdfBusy}
                 onDownloadDocx={handleDownloadDocx}
                 onCustomize={() => {
                   setMode("editor");

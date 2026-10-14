@@ -198,6 +198,7 @@ export default {
     latexDownload: "Download .tex",
     latexNote:
       "Download .tex for the same file in Overleaf or a local TeX install. The preview here is the compiled page.",
+    latexEmpty: "Add a name and a job on Edit to fill this page",
     latexLoading:
       "Downloading the TeX engine and typesetting this resume. The rest of Cavren keeps working. The engine is cached on this device after the first run.",
     latexFailed: "LaTeX could not build that PDF.",
@@ -320,9 +321,13 @@ export default {
     readCharSuccess:
       "Read {count} characters — review the preview below, then import.",
     unnamed: "Name",
+    noName: "No name",
+    countJob: "{count} job",
     countJobs: "{count} jobs",
     countEducation: "{count} education",
+    countSkill: "{count} skill",
     countSkills: "{count} skills",
+    parsedWithAi: "Parsed with AI.",
     structureWithAi: "Structure with AI",
     parseWithAi: "Parse with AI",
     structuring: "Structuring…",

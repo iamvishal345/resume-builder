@@ -11,7 +11,7 @@ import {
 } from "@features/resumes/interviewPacket";
 import { triggerDownload } from "@features/resumes/backup";
 import { downloadResumePdf, downloadCoverLetterPdf } from "@features/export/pdf";
-import { resumeViewModel } from "@features/resume/viewModel";
+import { isLatexBlankError } from "@features/export/latex/compile.js";
 import { useI18n } from "@features/i18n/useI18n";
 import { nameOf } from "./resumeMeta";
 
@@ -49,12 +49,8 @@ const InterviewPacketDialog = ({ doc, onOpenChange }) => {
       );
       if (withPdfs) {
         const raw = doc.data || {};
-        const data = resumeViewModel(raw);
         await downloadResumePdf({
-          data,
-          templateId: raw.resumeSettings?.templateId,
-          paletteId: raw.resumeSettings?.paletteId,
-          fontId: raw.resumeSettings?.fontId,
+          data: raw,
           settings: raw.resumeSettings || {},
         });
         if (doc.data?.coverLetter?.body) {
@@ -68,7 +64,11 @@ const InterviewPacketDialog = ({ doc, onOpenChange }) => {
       }
       onOpenChange(null);
     } catch (e) {
-      setError(e?.message || t("errors.packetFailed") || "Could not build packet.");
+      setError(
+        isLatexBlankError(e)
+          ? t("editor.latexEmpty")
+          : e?.message || t("errors.packetFailed") || "Could not build packet.",
+      );
     } finally {
       setBusy(false);
     }
